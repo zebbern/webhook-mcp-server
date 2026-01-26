@@ -32,6 +32,56 @@ class WebhookService:
         """
         self._client = client
     
+    def _build_webhook_urls(self, token: str, alias: str | None = None) -> dict[str, str]:
+        """Build all URL variants for a webhook token.
+        
+        Args:
+            token: The webhook UUID
+            alias: Optional custom alias
+            
+        Returns:
+            Dict with url, subdomain_url, api_url, email, and dns keys
+        """
+        identifier = alias if alias else token
+        return {
+            "url": f"{WEBHOOK_SITE_API}/{identifier}",
+            "subdomain_url": f"https://{token}.webhook.site",
+            "api_url": f"{WEBHOOK_SITE_API}/token/{token}",
+            "email": f"{token}@email.webhook.site",
+            "dns": f"{token}.dnshook.site",
+        }
+    
+    async def _validate_token_exists(self, webhook_token: str) -> ToolResult | None:
+        """Validate that a webhook token exists.
+        
+        Args:
+            webhook_token: The webhook UUID to validate
+            
+        Returns:
+            None if token is valid, ToolResult with error if invalid
+        """
+        try:
+            await self._client.get(f"/token/{webhook_token}")
+            return None  # Token is valid
+        except WebhookApiError as e:
+            if e.status_code == 404:
+                return ToolResult(
+                    success=False,
+                    message=f"Token '{webhook_token}' not found or expired",
+                    data=None
+                )
+            return ToolResult(
+                success=False,
+                message=f"Failed to validate token: {str(e)}",
+                data=None
+            )
+        except Exception as e:
+            return ToolResult(
+                success=False,
+                message=f"Failed to validate token: {str(e)}",
+                data=None
+            )
+    
     async def create(self) -> ToolResult:
         """Create a new webhook with default settings.
         
@@ -44,23 +94,15 @@ class WebhookService:
         
         token = data.get("uuid")
         alias = data.get("alias")
-        url = f"{WEBHOOK_SITE_API}/{alias if alias else token}"
-        subdomain_url = f"https://{token}.webhook.site"
-        email = f"{token}@email.webhook.site"
-        api_url = f"{WEBHOOK_SITE_API}/token/{token}"
-        dns = f"{token}.dnshook.site"
+        urls = self._build_webhook_urls(token, alias)
         
         return ToolResult(
             success=True,
-            message=f"Webhook created! Send requests to: {url}",
+            message=f"Webhook created! Send requests to: {urls['url']}",
             data={
                 "token": token,
                 "alias": alias,
-                "url": url,
-                "subdomain_url": subdomain_url,
-                "api_url": api_url,
-                "email": email,
-                "dns": dns,
+                **urls,
                 "expires_at": data.get("expires_at"),
                 "default_status": data.get("default_status"),
                 "default_content": data.get("default_content"),
@@ -87,23 +129,15 @@ class WebhookService:
         
         token = data.get("uuid")
         alias = data.get("alias")
-        url = f"{WEBHOOK_SITE_API}/{alias if alias else token}"
-        subdomain_url = f"https://{token}.webhook.site"
-        email = f"{token}@email.webhook.site"
-        api_url = f"{WEBHOOK_SITE_API}/token/{token}"
-        dns = f"{token}.dnshook.site"
+        urls = self._build_webhook_urls(token, alias)
         
         return ToolResult(
             success=True,
-            message=f"Webhook created with custom config! URL: {url}",
+            message=f"Webhook created with custom config! URL: {urls['url']}",
             data={
                 "token": token,
                 "alias": alias,
-                "url": url,
-                "subdomain_url": subdomain_url,
-                "api_url": api_url,
-                "email": email,
-                "dns": dns,
+                **urls,
                 "default_status": data.get("default_status"),
                 "default_content": data.get("default_content"),
                 "default_content_type": data.get("default_content_type"),
@@ -241,27 +275,9 @@ class WebhookService:
             ToolResult with token and full URL
         """
         if validate:
-            try:
-                await self._client.get(f"/token/{webhook_token}")
-                # If we get here, token is valid
-            except WebhookApiError as e:
-                if e.status_code == 404:
-                    return ToolResult(
-                        success=False,
-                        message=f"Token '{webhook_token}' not found or expired",
-                        data=None
-                    )
-                return ToolResult(
-                    success=False,
-                    message=f"Failed to validate token: {str(e)}",
-                    data=None
-                )
-            except Exception as e:
-                return ToolResult(
-                    success=False,
-                    message=f"Failed to validate token: {str(e)}",
-                    data=None
-                )
+            validation_error = await self._validate_token_exists(webhook_token)
+            if validation_error:
+                return validation_error
         
         url = f"{WEBHOOK_SITE_API}/{webhook_token}"
         
@@ -287,27 +303,9 @@ class WebhookService:
             ToolResult with token, email address, and URL
         """
         if validate:
-            try:
-                await self._client.get(f"/token/{webhook_token}")
-                # If we get here, token is valid
-            except WebhookApiError as e:
-                if e.status_code == 404:
-                    return ToolResult(
-                        success=False,
-                        message=f"Token '{webhook_token}' not found or expired",
-                        data=None
-                    )
-                return ToolResult(
-                    success=False,
-                    message=f"Failed to validate token: {str(e)}",
-                    data=None
-                )
-            except Exception as e:
-                return ToolResult(
-                    success=False,
-                    message=f"Failed to validate token: {str(e)}",
-                    data=None
-                )
+            validation_error = await self._validate_token_exists(webhook_token)
+            if validation_error:
+                return validation_error
         
         email = f"{webhook_token}@email.webhook.site"
         url = f"{WEBHOOK_SITE_API}/{webhook_token}"
@@ -336,27 +334,9 @@ class WebhookService:
             ToolResult with token, DNS domain, example subdomain usage, and URL
         """
         if validate:
-            try:
-                await self._client.get(f"/token/{webhook_token}")
-                # If we get here, token is valid
-            except WebhookApiError as e:
-                if e.status_code == 404:
-                    return ToolResult(
-                        success=False,
-                        message=f"Token '{webhook_token}' not found or expired",
-                        data=None
-                    )
-                return ToolResult(
-                    success=False,
-                    message=f"Failed to validate token: {str(e)}",
-                    data=None
-                )
-            except Exception as e:
-                return ToolResult(
-                    success=False,
-                    message=f"Failed to validate token: {str(e)}",
-                    data=None
-                )
+            validation_error = await self._validate_token_exists(webhook_token)
+            if validation_error:
+                return validation_error
         
         dns_domain = f"{webhook_token}.dnshook.site"
         url = f"{WEBHOOK_SITE_API}/{webhook_token}"

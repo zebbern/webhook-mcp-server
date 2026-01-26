@@ -8,11 +8,11 @@ service layer, handling argument parsing and response formatting.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Callable, Coroutine
 
 from mcp.types import TextContent
 
-from models.schemas import WebhookConfig, SearchFilters, DeleteFilters
+from models.schemas import WebhookConfig, SearchFilters, DeleteFilters, ToolResult
 from services.webhook_service import WebhookService
 from services.request_service import RequestService
 from services.bugbounty_service import BugBountyService
@@ -84,7 +84,9 @@ class ToolHandler:
                 "An unexpected error occurred. Please report this issue."
             )
     
-    def _get_handler(self, name: str):
+    def _get_handler(
+        self, name: str
+    ) -> Callable[[dict[str, Any]], Coroutine[Any, Any, ToolResult]] | None:
         """Get the handler method for a tool name.
         
         Args:
@@ -93,7 +95,7 @@ class ToolHandler:
         Returns:
             Handler coroutine or None if not found
         """
-        handlers = {
+        handlers: dict[str, Callable[[dict[str, Any]], Coroutine[Any, Any, ToolResult]]] = {
             "create_webhook": self._handle_create_webhook,
             "create_webhook_with_config": self._handle_create_webhook_with_config,
             "send_to_webhook": self._handle_send_to_webhook,

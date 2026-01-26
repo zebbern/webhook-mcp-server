@@ -14,6 +14,11 @@ from typing import Any
 from models.schemas import SearchFilters, DeleteFilters, ToolResult
 from utils.http_client import WebhookHttpClient
 
+# Constants for request handling
+DEFAULT_REQUEST_LIMIT = 10
+DEFAULT_TIMEOUT_SECONDS = 60
+POLL_INTERVAL_SECONDS = 2.0
+
 
 class RequestService:
     """Service for webhook request operations.
@@ -37,7 +42,7 @@ class RequestService:
     async def get_all(
         self,
         webhook_token: str,
-        limit: int = 10,
+        limit: int = DEFAULT_REQUEST_LIMIT,
         request_type: str | None = None,
     ) -> ToolResult:
         """Get all requests sent to a webhook.
@@ -232,7 +237,7 @@ class RequestService:
     async def wait_for_request(
         self,
         webhook_token: str,
-        timeout_seconds: int = 60,
+        timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
         request_type: str | None = None,
     ) -> ToolResult:
         """Wait for a new HTTP request to be received by the webhook.
@@ -251,7 +256,7 @@ class RequestService:
         from utils.http_client import WebhookApiError
         
         start_time = time.time()
-        poll_interval = 2.0  # Poll every 2 seconds
+        poll_interval = POLL_INTERVAL_SECONDS
         max_retries = 3
         retry_count = 0
         
@@ -321,7 +326,7 @@ class RequestService:
     async def wait_for_email(
         self,
         webhook_token: str,
-        timeout_seconds: int = 60,
+        timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
         extract_links: bool = True,
     ) -> ToolResult:
         """Wait for an email to be received at the webhook's email address.
@@ -342,7 +347,7 @@ class RequestService:
         from utils.http_client import WebhookApiError
         
         start_time = time.time()
-        poll_interval = 2.0  # Poll every 2 seconds
+        poll_interval = POLL_INTERVAL_SECONDS
         max_retries = 3
         retry_count = 0
         
