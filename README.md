@@ -3,7 +3,7 @@
 <!-- mcp-name: io.github.zebbern/webhook-mcp-server -->
 
 [![Production Ready](https://img.shields.io/badge/status-production--ready-green.svg)](https://github.com/zebbern/webhook-mcp-server)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/zebbern/webhook-mcp-server)
+[![PyPI Version](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![MCP Tools](https://img.shields.io/badge/mcp--tools-16-brightgreen.svg)](https://github.com/zebbern/webhook-mcp-server)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
