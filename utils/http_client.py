@@ -7,8 +7,7 @@ timeout configuration, and consistent header management.
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator
+from typing import Any
 
 import httpx
 
@@ -227,23 +226,3 @@ class WebhookHttpClient:
             return response.status_code
         except httpx.RequestError as e:
             raise WebhookApiError(f"DELETE request failed: {str(e)}") from e
-
-
-@asynccontextmanager
-async def get_http_client(
-    api_key: str | None = None,
-) -> AsyncGenerator[WebhookHttpClient, None]:
-    """Context manager factory for HTTP client.
-    
-    Usage:
-        async with get_http_client() as client:
-            data = await client.get("/token/abc123")
-    
-    Args:
-        api_key: Optional API key for authenticated requests
-        
-    Yields:
-        Configured WebhookHttpClient instance
-    """
-    async with WebhookHttpClient(api_key=api_key) as client:
-        yield client

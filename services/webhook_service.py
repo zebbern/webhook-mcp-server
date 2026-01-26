@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from models.schemas import WebhookConfig, WebhookInfo, ToolResult
+from models.schemas import WebhookConfig, ToolResult
 from utils.http_client import WebhookHttpClient, WebhookApiError, WEBHOOK_SITE_API
 
 

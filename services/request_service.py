@@ -11,7 +11,7 @@ import asyncio
 import re
 from typing import Any
 
-from models.schemas import WebhookRequest, SearchFilters, DeleteFilters, ToolResult
+from models.schemas import SearchFilters, DeleteFilters, ToolResult
 from utils.http_client import WebhookHttpClient
 
 

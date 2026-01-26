@@ -8,7 +8,6 @@ from utils.validation import (
     validate_http_status_code,
     validate_alias,
     validate_expiry,
-    sanitize_identifier,
     ValidationError,
 )
 
@@ -22,6 +21,5 @@ __all__ = [
     "validate_http_status_code",
     "validate_alias",
     "validate_expiry",
-    "sanitize_identifier",
     "ValidationError",
 ]

@@ -2,8 +2,6 @@
 
 from models.schemas import (
     WebhookConfig,
-    WebhookInfo,
-    WebhookRequest,
     SearchFilters,
     DeleteFilters,
     ToolResult,
@@ -12,8 +10,6 @@ from models.schemas import (
 
 __all__ = [
     "WebhookConfig",
-    "WebhookInfo", 
-    "WebhookRequest",
     "SearchFilters",
     "DeleteFilters",
     "ToolResult",

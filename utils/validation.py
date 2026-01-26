@@ -133,22 +133,3 @@ def validate_expiry(expiry: int) -> None:
         - Minimum: 0 (no expiry)
     """
     validate_positive_int(expiry, "expiry", min_val=0, max_val=604800)
-
-
-def sanitize_identifier(identifier: str) -> str:
-    """Sanitize user-provided identifier for safe use.
-    
-    Args:
-        identifier: User-provided identifier
-        
-    Returns:
-        Sanitized identifier (alphanumeric and underscores only)
-        
-    Example:
-        >>> sanitize_identifier("my-test_123")
-        'my-test_123'
-        >>> sanitize_identifier("<script>alert(1)</script>")
-        'scriptalert1script'
-    """
-    # Remove all non-alphanumeric characters except underscore and hyphen
-    return re.sub(r'[^a-zA-Z0-9_-]', '', identifier)

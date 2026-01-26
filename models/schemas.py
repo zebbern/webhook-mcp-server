@@ -2,7 +2,7 @@
 Data models and MCP tool schemas for the webhook.site MCP server.
 
 This module contains:
-- Dataclasses for structured data (WebhookConfig, WebhookInfo, etc.)
+- Dataclasses for structured data (WebhookConfig, SearchFilters, etc.)
 - MCP Tool definitions with input schemas
 - Response models for consistent API responses
 """
@@ -43,82 +43,6 @@ class WebhookConfig:
     def to_payload(self) -> dict[str, Any]:
         """Convert to API payload, excluding None values."""
         return {k: v for k, v in asdict(self).items() if v is not None}
-
-
-@dataclass
-class WebhookInfo:
-    """Detailed information about a webhook.
-    
-    Args:
-        token: The webhook UUID
-        alias: Custom alias if set
-        url: Full webhook URL
-        default_status: Response status code
-        default_content: Response content
-        default_content_type: Content-Type header
-        timeout: Response delay in seconds
-        cors: CORS enabled flag
-        premium: Premium status
-        actions: Custom actions enabled
-        created_at: Creation timestamp
-        updated_at: Last update timestamp
-        expires_at: Expiration timestamp
-        requests_count: Total requests received
-    """
-    token: str
-    alias: str | None
-    url: str
-    default_status: int
-    default_content: str
-    default_content_type: str
-    timeout: int
-    cors: bool
-    premium: bool
-    actions: bool
-    created_at: str
-    updated_at: str
-    expires_at: str | None
-    premium_expires_at: str | None = None
-    latest_request_at: str | None = None
-    requests_count: int | None = None
-
-
-@dataclass
-class WebhookRequest:
-    """A captured request to a webhook.
-    
-    Args:
-        uuid: Request unique identifier
-        method: HTTP method (GET, POST, etc.)
-        content: Request body content
-        headers: Request headers
-        query: Query string parameters
-        url: Full request URL
-        ip: Client IP address
-        created_at: Request timestamp
-    """
-    uuid: str
-    method: str
-    content: str | None
-    headers: dict[str, list[str]] | None
-    query: dict[str, str] | None = None
-    url: str | None = None
-    ip: str | None = None
-    created_at: str | None = None
-    
-    @classmethod
-    def from_api_response(cls, data: dict[str, Any]) -> WebhookRequest:
-        """Create from API response data."""
-        return cls(
-            uuid=data.get("uuid", ""),
-            method=data.get("method", ""),
-            content=data.get("content"),
-            headers=data.get("headers"),
-            query=data.get("query"),
-            url=data.get("url"),
-            ip=data.get("ip"),
-            created_at=data.get("created_at"),
-        )
 
 
 @dataclass
