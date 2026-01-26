@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.zebbern/webhook-mcp-server",
+  "title": "Webhook.site MCP Server",
+  "description": "MCP Server for webhook.site API integration with 16 tools for webhook testing, email capture, and request monitoring",
+  "version": "2.0.0",
+  "repository": {
+    "url": "https://github.com/zebbern/webhook-mcp-server",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "webhook-mcp-server",
+      "version": "2.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
