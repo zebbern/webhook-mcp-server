@@ -1,7 +1,24 @@
 [project]
 name = "webhook-mcp-server"
-version = "2.0.5"
+version = "2.0.6"
 description = "MCP Server for webhook.site API integration with layered architecture"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "zebbern", email = "zebbern@users.noreply.github.com"}]
+keywords = ["mcp", "webhook", "testing", "model-context-protocol", "bugbounty", "api-testing"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Internet :: WWW/HTTP",
+]
 requires-python = ">=3.10"
 dependencies = [
     "mcp>=1.0.0",
