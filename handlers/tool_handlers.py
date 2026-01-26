@@ -118,6 +118,10 @@ class ToolHandler:
             "generate_xss_callback": self._handle_generate_xss_callback,
             "generate_canary_token": self._handle_generate_canary_token,
             "extract_links_from_request": self._handle_extract_links_from_request,
+            # Batch & utility tools
+            "send_multiple_requests": self._handle_send_multiple_requests,
+            "clone_webhook": self._handle_clone_webhook,
+            "export_webhook_data": self._handle_export_webhook_data,
         }
         return handlers.get(name)
     
@@ -369,4 +373,32 @@ class ToolHandler:
             webhook_token=arguments["webhook_token"],
             request_id=arguments.get("request_id"),
             filter_domain=arguments.get("filter_domain"),
+        )
+    
+    # =========================================================================
+    # Batch & Utility Tool Handlers
+    # =========================================================================
+    
+    async def _handle_send_multiple_requests(self, arguments: dict[str, Any]) -> ToolResult:
+        """Handle send_multiple_requests tool."""
+        self._validate_webhook_token(arguments["webhook_token"])
+        return await self._request_service.send_multiple(
+            webhook_token=arguments["webhook_token"],
+            payloads=arguments["payloads"],
+            delay_ms=arguments.get("delay_ms", 0),
+        )
+    
+    async def _handle_clone_webhook(self, arguments: dict[str, Any]) -> ToolResult:
+        """Handle clone_webhook tool."""
+        self._validate_webhook_token(arguments["source_token"])
+        return await self._webhook_service.clone_webhook(
+            source_token=arguments["source_token"],
+        )
+    
+    async def _handle_export_webhook_data(self, arguments: dict[str, Any]) -> ToolResult:
+        """Handle export_webhook_data tool."""
+        self._validate_webhook_token(arguments["webhook_token"])
+        return await self._request_service.export_requests(
+            webhook_token=arguments["webhook_token"],
+            limit=arguments.get("limit", 100),
         )

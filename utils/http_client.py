@@ -226,3 +226,34 @@ class WebhookHttpClient:
             return response.status_code
         except httpx.RequestError as e:
             raise WebhookApiError(f"DELETE request failed: {str(e)}") from e
+    
+    async def post_raw(
+        self,
+        url: str,
+        json: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        """Perform POST request to an absolute URL (not using base_url).
+        
+        Useful for posting to webhook endpoints directly.
+        
+        Args:
+            url: Full URL to POST to
+            json: JSON body data
+            headers: Additional headers
+            
+        Returns:
+            Full httpx Response object
+            
+        Raises:
+            WebhookApiError: On HTTP or API errors
+        """
+        try:
+            response = await self.client.post(
+                url,
+                json=json,
+                headers=headers,
+            )
+            return response
+        except httpx.RequestError as e:
+            raise WebhookApiError(f"POST request failed: {str(e)}") from e

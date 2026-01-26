@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-21%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![MCP](https://img.shields.io/badge/MCP-24%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
@@ -133,6 +133,14 @@ Add to `claude_desktop_config.json`:
 | `generate_canary_token`      | Create trackable URLs, DNS, or email canaries        |
 | `check_for_callbacks`        | Quick check for OOB callbacks                        |
 | `extract_links_from_request` | Extract URLs from captured requests                  |
+
+### Batch & Utility
+
+| Tool                     | Description                                    |
+| ------------------------ | ---------------------------------------------- |
+| `send_multiple_requests` | Send batch of requests for load testing        |
+| `clone_webhook`          | Copy webhook with all settings                 |
+| `export_webhook_data`    | Export all requests to JSON                    |
 
 ---
 

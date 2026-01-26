@@ -441,6 +441,118 @@ class RequestService:
             }
         )
     
+    async def send_multiple(
+        self,
+        webhook_token: str,
+        payloads: list[dict[str, Any]],
+        delay_ms: int = 0,
+    ) -> ToolResult:
+        """Send multiple requests to a webhook in batch.
+        
+        Useful for load testing or sending test payloads.
+        
+        Args:
+            webhook_token: The webhook UUID
+            payloads: List of JSON payloads to send
+            delay_ms: Delay between requests in milliseconds (default: 0)
+            
+        Returns:
+            ToolResult with success/failure counts
+        """
+        from utils.http_client import WEBHOOK_SITE_API
+        
+        results = []
+        success_count = 0
+        fail_count = 0
+        
+        for i, payload in enumerate(payloads):
+            try:
+                response = await self._client.post_raw(
+                    f"{WEBHOOK_SITE_API}/{webhook_token}",
+                    json=payload
+                )
+                results.append({
+                    "index": i,
+                    "success": True,
+                    "status_code": response.status_code
+                })
+                success_count += 1
+            except Exception as e:
+                results.append({
+                    "index": i,
+                    "success": False,
+                    "error": str(e)
+                })
+                fail_count += 1
+            
+            # Add delay between requests if specified
+            if delay_ms > 0 and i < len(payloads) - 1:
+                await asyncio.sleep(delay_ms / 1000.0)
+        
+        return ToolResult(
+            success=fail_count == 0,
+            message=f"Sent {success_count}/{len(payloads)} requests successfully",
+            data={
+                "total": len(payloads),
+                "success_count": success_count,
+                "fail_count": fail_count,
+                "results": results
+            }
+        )
+    
+    async def export_requests(
+        self,
+        webhook_token: str,
+        limit: int = 100,
+        format: str = "json",
+    ) -> ToolResult:
+        """Export all requests from a webhook to JSON.
+        
+        Args:
+            webhook_token: The webhook UUID
+            limit: Maximum number of requests to export (default: 100)
+            format: Export format (currently only 'json' supported)
+            
+        Returns:
+            ToolResult with exported data
+        """
+        data = await self._client.get(
+            f"/token/{webhook_token}/requests",
+            params={"per_page": limit},
+        )
+        
+        requests_data = data.get("data", [])
+        
+        # Format each request with full details
+        export_data = []
+        for req in requests_data:
+            export_data.append({
+                "uuid": req.get("uuid"),
+                "type": req.get("type"),
+                "method": req.get("method"),
+                "url": req.get("url"),
+                "ip": req.get("ip"),
+                "hostname": req.get("hostname"),
+                "headers": req.get("headers", {}),
+                "query": req.get("query", {}),
+                "content": req.get("content"),
+                "text_content": req.get("text_content"),
+                "created_at": req.get("created_at"),
+                "user_agent": self._extract_header(req, "User-Agent"),
+                "content_type": self._extract_header(req, "Content-Type"),
+            })
+        
+        return ToolResult(
+            success=True,
+            message=f"Exported {len(export_data)} requests",
+            data={
+                "webhook_token": webhook_token,
+                "export_format": format,
+                "request_count": len(export_data),
+                "requests": export_data
+            }
+        )
+    
     @staticmethod
     def _extract_header(req: dict[str, Any], header_name: str) -> str:
         """Extract a header value from a request."""

@@ -351,3 +351,72 @@ class WebhookService:
                 "url": url,
             }
         )
+
+    async def clone_webhook(self, source_token: str) -> ToolResult:
+        """Clone an existing webhook with all its settings.
+        
+        Creates a new webhook with the same configuration as the source.
+        
+        Args:
+            source_token: The webhook UUID to clone
+            
+        Returns:
+            ToolResult with new webhook token and copied settings
+        """
+        try:
+            # Get source webhook info
+            response = await self._client.get(f"/token/{source_token}")
+            response.raise_for_status()
+            source_data = response.json()
+            
+            # Create new webhook with same config
+            config = WebhookConfig(
+                default_status=source_data.get("default_status"),
+                default_content=source_data.get("default_content"),
+                default_content_type=source_data.get("default_content_type"),
+                timeout=source_data.get("timeout"),
+                cors=source_data.get("cors"),
+            )
+            
+            # Create the cloned webhook
+            create_response = await self._client.post("/token", json=config.to_payload())
+            create_response.raise_for_status()
+            new_data = create_response.json()
+            
+            new_token = new_data.get("uuid")
+            urls = self._build_webhook_urls(new_token)
+            
+            return ToolResult(
+                success=True,
+                message=f"Webhook cloned! New URL: {urls['url']}",
+                data={
+                    "source_token": source_token,
+                    "new_token": new_token,
+                    **urls,
+                    "cloned_settings": {
+                        "default_status": source_data.get("default_status"),
+                        "default_content": source_data.get("default_content"),
+                        "default_content_type": source_data.get("default_content_type"),
+                        "timeout": source_data.get("timeout"),
+                        "cors": source_data.get("cors"),
+                    }
+                }
+            )
+        except WebhookApiError as e:
+            if e.status_code == 404:
+                return ToolResult(
+                    success=False,
+                    message=f"Source token '{source_token}' not found or expired",
+                    data=None
+                )
+            return ToolResult(
+                success=False,
+                message=f"Failed to clone webhook: {str(e)}",
+                data=None
+            )
+        except Exception as e:
+            return ToolResult(
+                success=False,
+                message=f"Failed to clone webhook: {str(e)}",
+                data=None
+            )

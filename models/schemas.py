@@ -627,4 +627,64 @@ TOOL_DEFINITIONS: list[Tool] = [
             "required": ["webhook_token"]
         }
     ),
+    # =========================================================================
+    # BATCH & UTILITY TOOLS
+    # =========================================================================
+    Tool(
+        name="send_multiple_requests",
+        description="Send multiple requests to a webhook in batch. Useful for load testing or sending multiple test payloads at once.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "webhook_token": {
+                    "type": "string",
+                    "description": "The webhook token (UUID) from webhook.site"
+                },
+                "payloads": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Array of JSON payloads to send to the webhook"
+                },
+                "delay_ms": {
+                    "type": "integer",
+                    "description": "Delay between requests in milliseconds (default: 0)",
+                    "default": 0
+                }
+            },
+            "required": ["webhook_token", "payloads"]
+        }
+    ),
+    Tool(
+        name="clone_webhook",
+        description="Clone an existing webhook with all its settings. Creates a new webhook with the same configuration (status, content, CORS, timeout) as the source.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "source_token": {
+                    "type": "string",
+                    "description": "The webhook token (UUID) to clone"
+                }
+            },
+            "required": ["source_token"]
+        }
+    ),
+    Tool(
+        name="export_webhook_data",
+        description="Export all captured requests from a webhook to JSON format. Includes full request details: headers, body, IP, timestamp, user agent.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "webhook_token": {
+                    "type": "string",
+                    "description": "The webhook token (UUID) from webhook.site"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of requests to export (default: 100)",
+                    "default": 100
+                }
+            },
+            "required": ["webhook_token"]
+        }
+    ),
 ]
