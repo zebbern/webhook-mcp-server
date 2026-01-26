@@ -90,5 +90,10 @@ async def main() -> None:
         )
 
 
-if __name__ == "__main__":
+def run_server() -> None:
+    """Synchronous entry point for console script."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run_server()
