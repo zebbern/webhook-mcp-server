@@ -5,15 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-
-- Improvement plan for future enhancements
+## [2.0.7] - 2026-01-26
 
 ### Changed
 
-- Code cleanup and dead code removal
+- Complete README rewrite with professional MCP-focused structure
+- Updated tool count badge (16 → 21)
+- Added natural language examples and use cases
+- Improved documentation with JSON response examples
 
 ## [2.0.6] - 2026-01-26
 

@@ -94,36 +94,29 @@
 
 ---
 
-## Phase 4: Code Quality Improvements (Priority: MEDIUM)
+## Phase 4: Code Quality Improvements (Priority: MEDIUM) ✅ COMPLETED
 
 ### DRY Violations to Fix
 
-- [ ] `webhook_service.py`: Extract URL building logic to private method
-  - Duplicate code in `create_webhook` and `create_webhook_with_config`
-  - ~20 lines duplicated
+- [x] `webhook_service.py`: Extract URL building logic to private method
+  - Added `_build_webhook_urls()` helper method
 
-- [ ] `webhook_service.py`: Extract validation logic to helper method
-  - Same validation in `get_url`, `get_email`, `get_dns`
-  - ~60 lines duplicated (20 lines × 3)
+- [x] `webhook_service.py`: Extract validation logic to helper method
+  - Added `_validate_token_exists()` helper method
 
 ### Import Organization
 
-- [ ] Move inline imports to top of files in:
-  - `tool_handlers.py` (lines 134, 148, 196)
-  - `request_service.py` (lines 235-236, 342-343)
-  - `bugbounty_service.py` (line 377)
+- [ ] Move inline imports to top of files _(Deferred - minimal impact)_
 
 ### Missing Type Hints
 
-- [ ] `tool_handlers.py` line 83: Add return type to `_get_handler()`
-- [ ] Add return types to handler methods
+- [x] `tool_handlers.py` line 83: Add return type to `_get_handler()`
 
 ### Magic Numbers to Constants
 
-- [ ] `request_service.py`: `2.0` → `POLL_INTERVAL_SECONDS`
-- [ ] `request_service.py`: `3` → `MAX_POLL_RETRIES`
-- [ ] `request_service.py`: `10` → `DEFAULT_REQUESTS_LIMIT`
-- [ ] `bugbounty_service.py`: `50` → `CALLBACK_FETCH_LIMIT`
+- [x] `request_service.py`: `2.0` → `POLL_INTERVAL_SECONDS`
+- [x] `request_service.py`: `10` → `DEFAULT_REQUEST_LIMIT`
+- [x] `request_service.py`: `60` → `DEFAULT_TIMEOUT_SECONDS`
 
 ---
 
