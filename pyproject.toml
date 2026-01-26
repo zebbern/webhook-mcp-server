@@ -1,6 +1,6 @@
 [project]
 name = "webhook-mcp-server"
-version = "2.0.3"
+version = "2.0.4"
 description = "MCP Server for webhook.site API integration with layered architecture"
 requires-python = ">=3.10"
 dependencies = [
