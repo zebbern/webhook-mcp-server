@@ -136,11 +136,11 @@ Add to `claude_desktop_config.json`:
 
 ### Batch & Utility
 
-| Tool                     | Description                                    |
-| ------------------------ | ---------------------------------------------- |
-| `send_multiple_requests` | Send batch of requests for load testing        |
-| `clone_webhook`          | Copy webhook with all settings                 |
-| `export_webhook_data`    | Export all requests to JSON                    |
+| Tool                     | Description                             |
+| ------------------------ | --------------------------------------- |
+| `send_multiple_requests` | Send batch of requests for load testing |
+| `clone_webhook`          | Copy webhook with all settings          |
+| `export_webhook_data`    | Export all requests to JSON             |
 
 ---
 

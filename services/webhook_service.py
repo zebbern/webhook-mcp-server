@@ -364,10 +364,8 @@ class WebhookService:
             ToolResult with new webhook token and copied settings
         """
         try:
-            # Get source webhook info
-            response = await self._client.get(f"/token/{source_token}")
-            response.raise_for_status()
-            source_data = response.json()
+            # Get source webhook info (returns dict, not response)
+            source_data = await self._client.get(f"/token/{source_token}")
             
             # Create new webhook with same config
             config = WebhookConfig(
@@ -378,8 +376,8 @@ class WebhookService:
                 cors=source_data.get("cors"),
             )
             
-            # Create the cloned webhook
-            create_response = await self._client.post("/token", json=config.to_payload())
+            # Create the cloned webhook (returns Response object)
+            create_response = await self._client.post("/token", json_data=config.to_payload())
             create_response.raise_for_status()
             new_data = create_response.json()
             
