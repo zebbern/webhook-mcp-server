@@ -3,9 +3,26 @@
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-23%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [What Can You Do?](#what-can-you-do)
+- [Tools Reference](#tools-reference)
+- [Examples](#examples)
+- [Each Webhook Token Provides](#each-webhook-token-provides)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Contributing](#contributing)
+- [Requirements](#requirements)
+- [Changelog](#changelog)
+- [Links](#links)
+
+---
 
 ## Quick Start
 
@@ -62,21 +79,67 @@ Add to `claude_desktop_config.json`:
 "Wait for a request to come in"
 ```
 
-### Receive Emails
+<img width="555" height="555" alt="Webhooks" src="https://github.com/user-attachments/assets/75558234-9d93-4b79-817e-373a5ce75382" />
+
+### Security/Bug Bounty:
 
 ```
-"Give me a temporary email address"
-"Wait for a password reset email and extract the link"
-"Check if any emails arrived"
+"Generate an SSRF payload to test for blind vulnerabilities"
+"Create XSS callback payloads to detect blind XSS attacks"
+"Make me a canary token to detect if someone accesses a URL"
 ```
 
-### Bug Bounty Testing
+<img width="555" height="555" alt="Security" src="https://github.com/user-attachments/assets/12150308-932a-4872-acd9-5473c7dde6ff" />
+
+### Email Automation:
 
 ```
-"Generate SSRF payloads for testing"
-"Create an XSS callback to detect blind XSS"
-"Check if any out-of-band callbacks came in"
+"Create a temp email and wait for a password reset link"
+"Monitor this webhook for emails and extract all links from them"
+"Give me 3 temporary emails at once" (batch creation)
 ```
+
+<img width="555" height="555" alt="Email" src="https://github.com/user-attachments/assets/04af7d6e-e8aa-4e35-a817-2204cde8f5e7" />
+
+### API Testing:
+
+```
+"Create a webhook that returns a 404 error with a custom message"
+"Make a webhook with CORS enabled that waits 5 seconds before responding"
+"Send 10 different test requests to a webhook and show me all the captured data"
+```
+
+<img width="555" height="555" alt="API" src="https://github.com/user-attachments/assets/d8f2c46b-fb40-4e57-8957-0edef8e94db6" />
+
+### Real-time Monitoring:
+
+```
+"Create a webhook and wait for any HTTP request to arrive"
+"Monitor for DNS lookups to detect if a server is making DNS queries"
+"Search all requests for ones containing 'password' in the body"
+```
+
+<img width="555" height="555" alt="Monitoring" src="https://github.com/user-attachments/assets/12c9d270-f9df-489a-8be1-9afb4726404b" />
+
+### Data Analysis:
+
+```
+"Export all captured webhook requests to JSON format"
+"Show me statistics on requests received in the last hour"
+"Filter and show only POST requests with specific headers"
+```
+
+<img width="555" height="555" alt="Data" src="https://github.com/user-attachments/assets/51cd0032-d92b-46e7-9f0c-6cee96b6e4f3" />
+
+### Creative/Practical:
+
+```
+"Create a webhook that pretends to be a Stripe payment API"
+"Make a fake login endpoint that captures credentials (for pentesting)"
+"Set up an email inbox that auto-extracts verification codes"
+```
+
+<img width="555" height="555" alt="Practical" src="https://github.com/user-attachments/assets/a15bcbc4-087a-40bb-a1e5-a42475bd1301" />
 
 ### Canary Tokens
 
@@ -85,6 +148,8 @@ Add to `claude_desktop_config.json`:
 "Generate a DNS canary for the config file"
 "Set up an email tracker pixel"
 ```
+
+<img width="555" height="555" alt="CanaryTokens" src="https://github.com/user-attachments/assets/2e6af1f5-55d6-4670-b899-6809f3031439" />
 
 ---
 
@@ -251,6 +316,32 @@ python server.py
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+---
+
+## Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. **Report bugs** - Open an issue describing the problem
+2. **Suggest features** - Open an issue with your idea
+3. **Submit PRs** - Fork the repo and submit a pull request
+
+### Development Setup
+
+```bash
+git clone https://github.com/zebbern/webhook-mcp-server.git
+cd webhook-mcp-server
+pip install -e ".[dev]"
+pytest tests/ -v
+```
+
+### Guidelines
+
+- Follow existing code style
+- Add tests for new features
+- Update documentation as needed
+- Keep PRs focused on a single change
 
 ---
 
