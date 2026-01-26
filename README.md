@@ -7,10 +7,6 @@
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
-<p align="center">
-  <img src="https://webhook.site/images/logo.png" alt="webhook.site" width="120">
-</p>
-
 ## Quick Start
 
 ### Installation

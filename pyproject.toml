@@ -1,6 +1,6 @@
 [project]
 name = "webhook-mcp-server"
-version = "2.1.2"
+version = "2.1.3"
 description = "MCP Server for webhook.site API integration with layered architecture"
 readme = "README.md"
 license = {text = "MIT"}
