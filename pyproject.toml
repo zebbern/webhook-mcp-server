@@ -1,6 +1,6 @@
 [project]
 name = "webhook-mcp-server"
-version = "2.0.0"
+version = "2.0.1"
 description = "MCP Server for webhook.site API integration with layered architecture"
 requires-python = ">=3.10"
 dependencies = [
@@ -21,6 +21,13 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["handlers", "models", "services", "utils", "scripts"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"server.py" = "server.py"
+"py.typed" = "py.typed"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
