@@ -120,7 +120,6 @@ class ToolHandler:
             "extract_links_from_request": self._handle_extract_links_from_request,
             # Batch & utility tools
             "send_multiple_requests": self._handle_send_multiple_requests,
-            "clone_webhook": self._handle_clone_webhook,
             "export_webhook_data": self._handle_export_webhook_data,
         }
         return handlers.get(name)
@@ -386,13 +385,6 @@ class ToolHandler:
             webhook_token=arguments["webhook_token"],
             payloads=arguments["payloads"],
             delay_ms=arguments.get("delay_ms", 0),
-        )
-    
-    async def _handle_clone_webhook(self, arguments: dict[str, Any]) -> ToolResult:
-        """Handle clone_webhook tool."""
-        self._validate_webhook_token(arguments["source_token"])
-        return await self._webhook_service.clone_webhook(
-            source_token=arguments["source_token"],
         )
     
     async def _handle_export_webhook_data(self, arguments: dict[str, Any]) -> ToolResult:
