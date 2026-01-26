@@ -425,10 +425,6 @@ class RequestService:
                 # Exponential backoff
                 await asyncio.sleep(2 ** retry_count)
                 continue
-                        "email": email_data,
-                        "email_address": f"{webhook_token}@email.webhook.site"
-                    }
-                )
         
         return ToolResult(
             success=False,
