@@ -47,3 +47,5 @@ Thumbs.db
 *.log
 .env
 .env.local
+plan/
+server.json
