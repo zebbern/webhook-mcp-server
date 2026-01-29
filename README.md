@@ -20,6 +20,7 @@ A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) -
 - [Contributing](#contributing)
 - [Requirements](#requirements)
 - [Changelog](#changelog)
+- [Credits](#credits)
 - [Links](#links)
 
 ---
