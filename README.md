@@ -346,8 +346,10 @@ pytest tests/ -v
 ---
 
 ## Credits
-- [Founder of @webhooksite](https://github.com/fredsted)
+- [Simon Fredsted (Founder of webhook.site)](https://github.com/fredsted)
 - [Official webhook.site open source repo](https://github.com/webhooksite/webhook.site)
+
+This project is not affiliated with or endorsed by webhook.site
 
 ## Links
 
