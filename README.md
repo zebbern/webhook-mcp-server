@@ -345,12 +345,17 @@ pytest tests/ -v
 
 ---
 
+## Credits
+- [Founder of @webhooksite](https://github.com/fredsted)
+- [Official webhook.site open source repo](https://github.com/webhooksite/webhook.site)
+
 ## Links
 
 - 📦 [PyPI Package](https://pypi.org/project/webhook-mcp-server/)
 - 🐙 [GitHub Repository](https://github.com/zebbern/webhook-mcp-server)
 - 🌐 [webhook.site](https://webhook.site) - The service this MCP wraps
 - 📖 [Model Context Protocol](https://modelcontextprotocol.io/) - MCP specification
+
 
 ---
 
