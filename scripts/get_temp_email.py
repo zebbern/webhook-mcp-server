@@ -8,8 +8,8 @@ async def main():
         service = WebhookService(client)
         result = await service.create()
         token = result.data["token"]
-        email_result = service.get_email(token)
-        dns_result = service.get_dns(token)
+        email_result = await service.get_email(token)
+        dns_result = await service.get_dns(token)
         
         print("=" * 60)
         print("YOUR TEMPORARY WEBHOOK ENDPOINTS")

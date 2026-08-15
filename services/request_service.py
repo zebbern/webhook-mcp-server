@@ -9,14 +9,18 @@ from __future__ import annotations
 
 import asyncio
 import re
+import time
 from typing import Any
 
-from models.schemas import SearchFilters, DeleteFilters, ToolResult
-from utils.http_client import WebhookHttpClient
+from models.schemas import DeleteFilters, SearchFilters, ToolResult
+from utils.http_client import WEBHOOK_SITE_API, WebhookApiError, WebhookHttpClient
+from utils.validation import validate_positive_int
 
 # Constants for request handling
 DEFAULT_REQUEST_LIMIT = 10
 DEFAULT_TIMEOUT_SECONDS = 60
+MIN_TIMEOUT_SECONDS = 1
+MAX_TIMEOUT_SECONDS = 120
 POLL_INTERVAL_SECONDS = 2.0
 
 
@@ -239,258 +243,228 @@ class RequestService:
         webhook_token: str,
         timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
         request_type: str | None = None,
+        return_existing: bool = False,
     ) -> ToolResult:
-        """Wait for a new HTTP request to be received by the webhook.
-        
-        SMART BEHAVIOR: First checks for existing requests and returns immediately
-        if any are found. Only waits/polls if no matching requests exist yet.
-        
+        """Wait for a new request, or optionally return one that already exists.
+
         Args:
             webhook_token: The webhook UUID
-            timeout_seconds: Maximum time to wait (default: 60)
+            timeout_seconds: Maximum time to wait (1-120, default: 60)
             request_type: Filter by type ('web', 'email', 'dns'). None for any.
-            
+            return_existing: If True, return a matching existing request immediately.
+
         Returns:
             ToolResult with the received request or timeout message
         """
-        import time
-        from utils.http_client import WebhookApiError
-        
+        validate_positive_int(
+            timeout_seconds,
+            "timeout_seconds",
+            min_val=MIN_TIMEOUT_SECONDS,
+            max_val=MAX_TIMEOUT_SECONDS,
+        )
+
         poll_interval = POLL_INTERVAL_SECONDS
         max_retries = 3
         retry_count = 0
-        
-        # SMART CHECK: First look for existing requests before waiting
+
         try:
             initial_data = await self._client.get(
                 f"/token/{webhook_token}/requests",
                 params={"per_page": 5, "sorting": "newest"},
             )
             initial_requests = initial_data.get("data", [])
-            
-            # Check if there's already a matching request - return immediately!
-            for req in initial_requests:
-                # Check type filter
-                if request_type and req.get("type") != request_type:
-                    continue
-                    
-                # Found a matching request - return it immediately
-                formatted = self._format_request(req)
-                return ToolResult(
-                    success=True,
-                    message=f"Request found (already received, type: {req.get('type', 'unknown')})",
-                    data={"request": formatted, "waited": False}
-                )
-            
-            # No matching requests yet - track newest ID for polling
+
+            if return_existing:
+                for req in initial_requests:
+                    if request_type and req.get("type") != request_type:
+                        continue
+                    formatted = self._format_request(req)
+                    return ToolResult(
+                        success=True,
+                        message=f"Request found (already received, type: {req.get('type', 'unknown')})",
+                        data={"request": formatted, "waited": False},
+                    )
+
             initial_newest_id = initial_requests[0].get("uuid") if initial_requests else None
-            
+
         except WebhookApiError as e:
             return ToolResult(
                 success=False,
                 message=f"Failed to initialize polling: {e}",
-                data={"error": str(e)}
+                data={"error": str(e)},
             )
-        
-        # No existing match found - start polling
+
         start_time = time.time()
-        
+
         while time.time() - start_time < timeout_seconds:
             await asyncio.sleep(poll_interval)
-            
+
             try:
-                # Check for new requests
                 data = await self._client.get(
                     f"/token/{webhook_token}/requests",
                     params={"per_page": 5, "sorting": "newest"},
                 )
-                retry_count = 0  # Reset retry count on success
-                
+                retry_count = 0
+
                 requests = data.get("data", [])
-                
-                # Find new requests (after initial_newest_id)
+
                 for req in requests:
                     if req.get("uuid") == initial_newest_id:
-                        break  # Reached old requests
-                    
-                    # Check type filter
+                        break
                     if request_type and req.get("type") != request_type:
                         continue
-                    
+
                     formatted = self._format_request(req)
                     return ToolResult(
                         success=True,
                         message=f"Request received (type: {req.get('type', 'unknown')})",
-                        data={"request": formatted}
+                        data={"request": formatted, "waited": True},
                     )
-                    
+
             except WebhookApiError as e:
                 retry_count += 1
                 if retry_count >= max_retries:
                     return ToolResult(
                         success=False,
                         message=f"API error during polling (after {max_retries} retries): {e}",
-                        data={"error": str(e)}
+                        data={"error": str(e)},
                     )
-                # Exponential backoff
                 await asyncio.sleep(2 ** retry_count)
                 continue
-        
+
         type_desc = f" of type '{request_type}'" if request_type else ""
         return ToolResult(
             success=False,
             message=f"Timeout: No request{type_desc} received within {timeout_seconds} seconds",
-            data={"timeout": True, "request": None}
+            data={"timeout": True, "request": None},
         )
     
+    def _format_email(self, req: dict[str, Any], extract_links: bool) -> dict[str, Any]:
+        """Format a captured email request."""
+        email_data = {
+            "uuid": req.get("uuid"),
+            "from": self._extract_header(req, "from"),
+            "subject": self._extract_header(req, "subject"),
+            "text_content": req.get("text_content"),
+            "html_content": req.get("html_content"),
+            "created_at": req.get("created_at"),
+        }
+        links: list[str] = []
+        if extract_links:
+            content = req.get("text_content") or req.get("html_content") or ""
+            url_pattern = r'https?://[^\s<>"\']+(?:[?&][^\s<>"\']+)*'
+            links = list(set(re.findall(url_pattern, content)))
+            email_data["auth_links"] = [
+                link
+                for link in links
+                if any(kw in link.lower() for kw in ["magic", "auth", "token", "verify", "confirm"])
+            ]
+        email_data["all_links"] = links
+        return email_data
+
     async def wait_for_email(
         self,
         webhook_token: str,
         timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
         extract_links: bool = True,
+        return_existing: bool = False,
     ) -> ToolResult:
-        """Wait for an email to be received at the webhook's email address.
-        
+        """Wait for a new email, or optionally return one that already exists.
+
         The email address format is: {token}@email.webhook.site
-        
-        SMART BEHAVIOR: First checks for existing emails and returns immediately
-        if any are found. Only waits/polls if no emails exist yet.
-        
+
         Args:
             webhook_token: The webhook UUID
-            timeout_seconds: Maximum time to wait (default: 60)
+            timeout_seconds: Maximum time to wait (1-120, default: 60)
             extract_links: If True, extract all URLs from the email body
-            
+            return_existing: If True, return an existing email immediately.
+
         Returns:
             ToolResult with the email content and extracted links
         """
-        import time
-        from utils.http_client import WebhookApiError
-        
+        validate_positive_int(
+            timeout_seconds,
+            "timeout_seconds",
+            min_val=MIN_TIMEOUT_SECONDS,
+            max_val=MAX_TIMEOUT_SECONDS,
+        )
+
         poll_interval = POLL_INTERVAL_SECONDS
         max_retries = 3
         retry_count = 0
-        
-        # SMART CHECK: First look for existing emails before waiting
+        initial_email_ids: set[str] = set()
+
         try:
             initial_data = await self._client.get(
                 f"/token/{webhook_token}/requests",
                 params={"per_page": 10, "sorting": "newest"},
             )
             initial_requests = initial_data.get("data", [])
-            
-            # Check if there's already an email - return immediately!
+
             for req in initial_requests:
-                if req.get("type") == "email":
-                    # Found an existing email - return it immediately
-                    email_data = {
-                        "uuid": req.get("uuid"),
-                        "from": self._extract_header(req, "from"),
-                        "subject": self._extract_header(req, "subject"),
-                        "text_content": req.get("text_content"),
-                        "html_content": req.get("html_content"),
-                        "created_at": req.get("created_at"),
-                    }
-                    
-                    # Extract links if requested
-                    links = []
-                    if extract_links:
-                        content = req.get("text_content") or req.get("html_content") or ""
-                        url_pattern = r'https?://[^\s<>"\']+(?:[?&][^\s<>"\']+)*'
-                        links = list(set(re.findall(url_pattern, content)))
-                        auth_links = [l for l in links if any(kw in l.lower() for kw in ['magic', 'auth', 'token', 'verify', 'confirm'])]
-                        email_data["auth_links"] = auth_links
-                    
-                    email_data["all_links"] = links
-                    
+                if req.get("type") != "email":
+                    continue
+                if return_existing:
+                    email_data = self._format_email(req, extract_links)
                     return ToolResult(
                         success=True,
                         message=f"Email found (already received): {email_data['subject']}",
-                        data={"email": email_data, "waited": False}
+                        data={"email": email_data, "waited": False},
                     )
-            
-            # No emails yet - track IDs for polling
-            initial_email_ids: set[str] = set()  # No emails exist yet
-            
+                if req.get("uuid"):
+                    initial_email_ids.add(req["uuid"])
+
         except WebhookApiError as e:
             return ToolResult(
                 success=False,
                 message=f"Failed to initialize email polling: {e}",
-                data={"error": str(e)}
+                data={"error": str(e)},
             )
-        
-        # No existing email found - start polling
+
         start_time = time.time()
-        
+
         while time.time() - start_time < timeout_seconds:
             await asyncio.sleep(poll_interval)
-            
+
             try:
-                # Check for new emails
                 data = await self._client.get(
                     f"/token/{webhook_token}/requests",
                     params={"per_page": 10, "sorting": "newest"},
                 )
-                retry_count = 0  # Reset on success
-                
-                requests = data.get("data", [])
-                
-                # Find new emails
-                for req in requests:
+                retry_count = 0
+
+                for req in data.get("data", []):
                     if req.get("type") != "email":
                         continue
                     if req.get("uuid") in initial_email_ids:
-                        continue  # Already seen this email
-                    
-                    # Found a new email!
-                    email_data = {
-                        "uuid": req.get("uuid"),
-                        "from": self._extract_header(req, "from"),
-                        "subject": self._extract_header(req, "subject"),
-                        "text_content": req.get("text_content"),
-                        "html_content": req.get("html_content"),
-                        "created_at": req.get("created_at"),
-                    }
-                    
-                    # Extract links if requested
-                    links = []
-                    if extract_links:
-                        content = req.get("text_content") or req.get("html_content") or ""
-                        url_pattern = r'https?://[^\s<>"\']+(?:[?&][^\s<>"\']+)*'
-                        links = list(set(re.findall(url_pattern, content)))
-                        
-                        # Identify auth/magic links
-                        auth_links = [l for l in links if any(kw in l.lower() for kw in ['magic', 'auth', 'token', 'verify', 'confirm'])]
-                        email_data["auth_links"] = auth_links
-                    
-                    email_data["all_links"] = links
-                    
+                        continue
+
+                    email_data = self._format_email(req, extract_links)
                     return ToolResult(
                         success=True,
                         message=f"Email received: {email_data['subject']}",
-                        data={"email": email_data}
+                        data={"email": email_data, "waited": True},
                     )
-                    
+
             except WebhookApiError as e:
                 retry_count += 1
                 if retry_count >= max_retries:
                     return ToolResult(
                         success=False,
                         message=f"API error during email polling (after {max_retries} retries): {e}",
-                        data={"error": str(e)}
+                        data={"error": str(e)},
                     )
-                # Exponential backoff
                 await asyncio.sleep(2 ** retry_count)
                 continue
-        
+
         return ToolResult(
             success=False,
             message=f"Timeout: No email received within {timeout_seconds} seconds",
             data={
                 "timeout": True,
                 "email": None,
-                "email_address": f"{webhook_token}@email.webhook.site"
-            }
+                "email_address": f"{webhook_token}@email.webhook.site",
+            },
         )
     
     async def send_multiple(
@@ -511,8 +485,6 @@ class RequestService:
         Returns:
             ToolResult with success/failure counts
         """
-        from utils.http_client import WEBHOOK_SITE_API
-        
         results = []
         success_count = 0
         fail_count = 0

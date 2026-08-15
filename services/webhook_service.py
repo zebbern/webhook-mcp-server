@@ -68,18 +68,15 @@ class WebhookService:
                 return ToolResult(
                     success=False,
                     message=f"Token '{webhook_token}' not found or expired",
-                    data=None
                 )
             return ToolResult(
                 success=False,
                 message=f"Failed to validate token: {str(e)}",
-                data=None
             )
         except Exception as e:
             return ToolResult(
                 success=False,
                 message=f"Failed to validate token: {str(e)}",
-                data=None
             )
     
     async def create(self) -> ToolResult:

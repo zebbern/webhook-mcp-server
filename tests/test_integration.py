@@ -13,7 +13,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from utils.http_client import WebhookHttpClient, WEBHOOK_SITE_API
+from utils.http_client import WEBHOOK_SITE_API, WebhookHttpClient
+
+pytestmark = pytest.mark.live
 
 
 class TestIntegration:

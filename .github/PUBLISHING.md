@@ -898,32 +898,9 @@ mcp-publisher publish --verbose
 
 ### Registry Configuration Files
 
-#### server.json (Optional)
+#### server.json
 
-Create `server.json` for custom registry configuration:
-
-```json
-{
-  "name": "io.github.zebbern/webhook-mcp-server",
-  "displayName": "Webhook MCP Server",
-  "description": "Professional webhook management for MCP",
-  "version": "2.0.0",
-  "author": "zebbern",
-  "license": "MIT",
-  "homepage": "https://github.com/zebbern/webhook-mcp-server",
-  "repository": "https://github.com/zebbern/webhook-mcp-server",
-  "keywords": ["webhook", "http", "automation", "testing"],
-  "category": "Development Tools",
-  "pypi": {
-    "package": "webhook-mcp-server",
-    "version": "2.0.0"
-  },
-  "mcp": {
-    "server": "server:app",
-    "python_version": ">=3.11"
-  }
-}
-```
+The repo includes `server.json` using the official MCP Registry schema (`2025-12-11`). Keep its `version` fields in sync with `pyproject.toml` before publishing.
 
 #### .mcp-registry-ignore
 

@@ -48,4 +48,3 @@ Thumbs.db
 .env
 .env.local
 plan/
-server.json

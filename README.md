@@ -6,6 +6,10 @@
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
+<!-- mcp-name: io.github.zebbern/webhook-mcp-server -->
+
+Security helper tools (SSRF, XSS, canary tokens) are for **authorized testing only** — systems you own or have explicit permission to test.
+
 ---
 
 ## Table of Contents
@@ -53,6 +57,26 @@ Add to `.vscode/mcp.json`:
 }
 ```
 
+### Cursor
+
+Add to `.cursor/mcp.json` (project) or your user MCP config:
+
+```json
+{
+  "mcpServers": {
+    "webhook-mcp-server": {
+      "command": "uvx",
+      "args": ["webhook-mcp-server"],
+      "env": {
+        "WEBHOOK_SITE_API_KEY": "${WEBHOOK_SITE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+`WEBHOOK_SITE_API_KEY` is optional. Set it for authenticated webhook.site / premium features.
+
 ### Claude Desktop
 
 Add to `claude_desktop_config.json`:
@@ -62,7 +86,10 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server"]
+      "args": ["webhook-mcp-server"],
+      "env": {
+        "WEBHOOK_SITE_API_KEY": "your-api-key-if-needed"
+      }
     }
   }
 }
@@ -176,6 +203,7 @@ Add to `claude_desktop_config.json`:
 | `send_to_webhook`      | Send JSON data to a webhook                 |
 | `get_webhook_requests` | List all captured requests                  |
 | `search_requests`      | Search with filters (method, content, date) |
+| `get_latest_request`   | Get the most recent captured request        |
 | `delete_request`       | Delete a specific request                   |
 | `delete_all_requests`  | Bulk delete with filters                    |
 
@@ -183,8 +211,8 @@ Add to `claude_desktop_config.json`:
 
 | Tool               | Description                                   |
 | ------------------ | --------------------------------------------- |
-| `wait_for_request` | Wait for an HTTP request (polling)            |
-| `wait_for_email`   | Wait for email with automatic link extraction |
+| `wait_for_request` | Wait for a **new** HTTP request (polling, 1-120s). Set `return_existing` to reuse old traffic. |
+| `wait_for_email`   | Wait for a **new** email (polling) with optional link extraction |
 
 ### Bug Bounty / Security
 
@@ -262,13 +290,13 @@ Add to `claude_desktop_config.json`:
 
 ```
 webhook-mcp-server/
-├── server.py              # MCP entry point
-├── handlers/              # Tool routing layer
+├── server.py              # MCPServer entry point + lifespan
+├── handlers/              # Typed @mcp.tool() registrations
 ├── services/              # Business logic
 │   ├── webhook_service.py # Webhook CRUD
 │   ├── request_service.py # Request management
 │   └── bugbounty_service.py # Security payloads
-├── models/                # Tool definitions & schemas
+├── models/                # Config / filter / result types
 └── utils/                 # HTTP client, logging, validation
 ```
 
@@ -295,7 +323,11 @@ pip install -e ".[dev]"
 ### Run Tests
 
 ```bash
-pytest tests/ -v
+# Offline unit tests (default for CI)
+pytest -m "not live" -v
+
+# Live webhook.site tests
+pytest -m live -v
 ```
 
 ### Run Locally
@@ -309,7 +341,7 @@ python server.py
 ## Requirements
 
 - Python 3.10+
-- `mcp >= 1.0.0`
+- `mcp >= 2.0.0`
 - `httpx >= 0.25.0`
 
 ---
@@ -334,7 +366,7 @@ Contributions are welcome! Here's how you can help:
 git clone https://github.com/zebbern/webhook-mcp-server.git
 cd webhook-mcp-server
 pip install -e ".[dev]"
-pytest tests/ -v
+pytest -m "not live" -v
 ```
 
 ### Guidelines

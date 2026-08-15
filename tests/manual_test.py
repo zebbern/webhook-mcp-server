@@ -83,7 +83,7 @@ async def run_comprehensive_test():
         # TOOL 12: get_webhook_url
         # =====================================================================
         print("\n[12/14] Testing get_webhook_url...")
-        result = webhook_service.get_url(token)
+        result = await webhook_service.get_url(token)
         if print_result("get_webhook_url", result):
             passed += 1
             expected_url = f"{WEBHOOK_SITE_API}/{token}"
@@ -100,7 +100,7 @@ async def run_comprehensive_test():
         # TOOL 13: get_webhook_email
         # =====================================================================
         print("\n[13/14] Testing get_webhook_email...")
-        result = webhook_service.get_email(token)
+        result = await webhook_service.get_email(token)
         if print_result("get_webhook_email", result):
             passed += 1
             expected_email = f"{token}@email.webhook.site"
@@ -117,7 +117,7 @@ async def run_comprehensive_test():
         # TOOL 14: get_webhook_dns
         # =====================================================================
         print("\n[14/14] Testing get_webhook_dns...")
-        result = webhook_service.get_dns(token)
+        result = await webhook_service.get_dns(token)
         if print_result("get_webhook_dns", result):
             passed += 1
             expected_dns = f"{token}.dnshook.site"

@@ -7,92 +7,44 @@ Provides tools for creating, managing, and monitoring webhooks.
 
 Usage:
     python server.py
-
-Architecture:
-    server.py          - MCP entry point (this file)
-    handlers/          - Tool call routing
-    services/          - Business logic
-    models/            - Data models and schemas
-    utils/             - HTTP client utilities
 """
 
 from __future__ import annotations
 
-import asyncio
-import sys
-from pathlib import Path
-from typing import Any
+import os
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-# Add project root to path for imports
-PROJECT_ROOT = Path(__file__).parent
-sys.path.insert(0, str(PROJECT_ROOT))
+from mcp.server import MCPServer
 
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
-
-from models.schemas import TOOL_DEFINITIONS
-from handlers.tool_handlers import ToolHandler
+from handlers.tools import register_tools
+from models.app_context import AppContext
+from services.bugbounty_service import BugBountyService
+from services.request_service import RequestService
+from services.webhook_service import WebhookService
 from utils.http_client import WebhookHttpClient
 
 
-# =============================================================================
-# SERVER INITIALIZATION
-# =============================================================================
-
-server = Server("webhook-site-mcp")
-
-
-@server.list_tools()
-async def list_tools() -> list[Tool]:
-    """Return all available webhook.site tools.
-    
-    Returns:
-        List of Tool definitions from models/schemas.py
-    """
-    return TOOL_DEFINITIONS
-
-
-@server.call_tool()
-async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
-    """Handle MCP tool calls.
-    
-    Routes tool calls through the handler layer which delegates
-    to appropriate services.
-    
-    Args:
-        name: Tool name
-        arguments: Tool arguments
-        
-    Returns:
-        List of TextContent responses
-    """
-    async with WebhookHttpClient() as client:
-        handler = ToolHandler(client)
-        return await handler.handle(name, arguments)
-
-
-# =============================================================================
-# MAIN ENTRY POINT
-# =============================================================================
-
-async def main() -> None:
-    """Run the MCP server.
-    
-    Starts the stdio transport and runs the server
-    until interrupted.
-    """
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options(),
+@asynccontextmanager
+async def app_lifespan(_server: MCPServer[AppContext]) -> AsyncIterator[AppContext]:
+    """Open one webhook.site HTTP client for the life of the process."""
+    api_key = os.environ.get("WEBHOOK_SITE_API_KEY")
+    async with WebhookHttpClient(api_key=api_key) as client:
+        yield AppContext(
+            client=client,
+            webhooks=WebhookService(client),
+            requests=RequestService(client),
+            bounty=BugBountyService(client),
         )
 
 
+mcp = MCPServer("webhook-site-mcp", lifespan=app_lifespan)
+register_tools(mcp)
+
+
 def run_server() -> None:
-    """Synchronous entry point for console script."""
-    asyncio.run(main())
+    """Synchronous entry point for the console script."""
+    mcp.run()
 
 
 if __name__ == "__main__":

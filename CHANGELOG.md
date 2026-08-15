@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-08-16
+
+### Changed
+
+- Migrated the MCP entry point to Python SDK 2.0 `MCPServer` with typed `@mcp.tool()` handlers
+- Reuse one HTTP client for the process lifetime and read `WEBHOOK_SITE_API_KEY` from the environment
+- `wait_for_request` and `wait_for_email` now wait for **new** events by default (add `return_existing=true` for the old behavior)
+- SSRF output is split into `callback_payloads` and `local_bypass_examples`
+- Require `mcp>=2.0.0`
+
+### Fixed
+
+- Server failed to start on MCP SDK 2.0 (`Server.list_tools` removed)
+- `ToolResult.to_json()` crashed when `data` was `None`
+- Token UUID validation was skipped on several tools, including `get_webhook_dns`
+- Tests called async `get_url` / `get_email` / `get_dns` without `await`
+
+### Added
+
+- Offline unit tests and a GitHub Actions test workflow
+- Official `server.json` for the MCP Registry
+- Cursor MCP config and authorized-use notes in the README
+
 ## [2.1.3] - 2026-01-27
 
 ### Changed
@@ -135,7 +158,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Core webhook creation and management
 - Request capture and retrieval
 
-[Unreleased]: https://github.com/zebbern/webhook-mcp-server/compare/v2.0.6...HEAD
+[Unreleased]: https://github.com/zebbern/webhook-mcp-server/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/zebbern/webhook-mcp-server/compare/v2.1.3...v2.2.0
+[2.1.3]: https://github.com/zebbern/webhook-mcp-server/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/zebbern/webhook-mcp-server/compare/v2.1.1...v2.1.2
+[2.1.1]: https://github.com/zebbern/webhook-mcp-server/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/zebbern/webhook-mcp-server/compare/v2.0.7...v2.1.0
+[2.0.7]: https://github.com/zebbern/webhook-mcp-server/compare/v2.0.6...v2.0.7
 [2.0.6]: https://github.com/zebbern/webhook-mcp-server/compare/v2.0.5...v2.0.6
 [2.0.5]: https://github.com/zebbern/webhook-mcp-server/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/zebbern/webhook-mcp-server/compare/v2.0.3...v2.0.4

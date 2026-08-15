@@ -1,5 +1,5 @@
 """Tool handlers for the webhook MCP server."""
 
-from handlers.tool_handlers import ToolHandler
+from handlers.tools import register_tools
 
-__all__ = ["ToolHandler"]
+__all__ = ["register_tools"]

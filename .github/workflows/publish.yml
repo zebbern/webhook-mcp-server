@@ -8,11 +8,33 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    name: pytest (Python 3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run offline tests
+        run: pytest -m "not live" -v
+
   publish-pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
+    needs: test
     permissions:
-      id-token: write # IMPORTANT: mandatory for trusted publishing
+      id-token: write
       contents: read
 
     steps:
@@ -22,8 +44,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
-          cache: "pip"
+          python-version: "3.12"
+          cache: pip
 
       - name: Install build dependencies
         run: |
@@ -39,44 +61,28 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          # Uses OIDC trusted publishing - no token needed
-          # Configure at: https://pypi.org/manage/account/publishing/
           verbose: true
 
   publish-mcp:
     name: Publish to MCP Registry
     runs-on: ubuntu-latest
-    needs: publish-pypi # Wait for PyPI publishing to complete
+    needs: publish-pypi
     permissions:
-      id-token: write # Required for OIDC authentication
+      id-token: write
       contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install MCP CLI
+      - name: Install mcp-publisher
         run: |
-          pip install mcp-cli
+          curl -fsSL \
+            "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" \
+            | tar xz mcp-publisher
 
-      - name: Publish to MCP Registry
-        env:
-          # GitHub OIDC token automatically available
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # MCP Registry publishing using GitHub OIDC
-          # Server name format: io.github.{username}/{package-name}
-          mcp publish io.github.zebbern/webhook-mcp-server \
-            --github-oidc \
-            --verbose
+      - name: Login with GitHub OIDC
+        run: ./mcp-publisher login github-oidc
 
-      - name: Verify publication
-        run: |
-          echo "✅ Successfully published to MCP Registry"
-          echo "Server: io.github.zebbern/webhook-mcp-server"
-          echo "Version: ${{ github.event.release.tag_name }}"
+      - name: Publish server.json
+        run: ./mcp-publisher publish

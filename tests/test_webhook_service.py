@@ -6,17 +6,19 @@ Tests webhook creation, configuration, update, and deletion.
 
 from __future__ import annotations
 
-import pytest
-
 import sys
 from pathlib import Path
+
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from services.webhook_service import WebhookService
 from models.schemas import WebhookConfig
+from services.webhook_service import WebhookService
 from utils.http_client import WebhookHttpClient
 
 
+@pytest.mark.live
 @pytest.mark.asyncio
 async def test_create_webhook():
     """Test basic webhook creation."""
@@ -31,6 +33,7 @@ async def test_create_webhook():
         assert "webhook.site" in result.data["url"]
 
 
+@pytest.mark.live
 @pytest.mark.asyncio
 async def test_create_webhook_with_config():
     """Test webhook creation with custom configuration."""
@@ -51,6 +54,7 @@ async def test_create_webhook_with_config():
         assert result.data["cors"] is True
 
 
+@pytest.mark.live
 @pytest.mark.asyncio
 async def test_get_webhook_info():
     """Test retrieving webhook information."""
@@ -70,6 +74,7 @@ async def test_get_webhook_info():
         assert "expires_at" in result.data
 
 
+@pytest.mark.live
 @pytest.mark.asyncio
 async def test_update_webhook():
     """Test updating webhook settings."""
@@ -92,6 +97,7 @@ async def test_update_webhook():
         assert result.data["default_content"] == "Updated!"
 
 
+@pytest.mark.live
 @pytest.mark.asyncio
 async def test_send_data():
     """Test sending data to a webhook."""
@@ -119,7 +125,7 @@ async def test_get_url():
     async with WebhookHttpClient() as client:
         service = WebhookService(client)
         
-        result = service.get_url("test-token-123")
+        result = await service.get_url("test-token-123")
         
         assert result.success is True
         assert result.data["token"] == "test-token-123"
@@ -132,7 +138,7 @@ async def test_get_email():
     async with WebhookHttpClient() as client:
         service = WebhookService(client)
         
-        result = service.get_email("test-token-123")
+        result = await service.get_email("test-token-123")
         
         assert result.success is True
         assert result.data["token"] == "test-token-123"
@@ -146,7 +152,7 @@ async def test_get_dns():
     async with WebhookHttpClient() as client:
         service = WebhookService(client)
         
-        result = service.get_dns("test-token-123")
+        result = await service.get_dns("test-token-123")
         
         assert result.success is True
         assert result.data["token"] == "test-token-123"
@@ -155,6 +161,7 @@ async def test_get_dns():
         assert result.data["url"] == "https://webhook.site/test-token-123"
 
 
+@pytest.mark.live
 @pytest.mark.asyncio
 async def test_delete_webhook():
     """Test webhook deletion."""

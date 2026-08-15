@@ -1,17 +1,10 @@
 """Data models and schemas for the webhook MCP server."""
 
-from models.schemas import (
-    WebhookConfig,
-    SearchFilters,
-    DeleteFilters,
-    ToolResult,
-    TOOL_DEFINITIONS,
-)
+from models.schemas import DeleteFilters, SearchFilters, ToolResult, WebhookConfig
 
 __all__ = [
     "WebhookConfig",
     "SearchFilters",
     "DeleteFilters",
     "ToolResult",
-    "TOOL_DEFINITIONS",
 ]
