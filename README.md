@@ -187,10 +187,10 @@ Add to `claude_desktop_config.json`:
 
 | Tool                         | Description                                        |
 | ---------------------------- | -------------------------------------------------- |
-| `create_webhook`             | Create a new webhook endpoint                      |
+| `create_webhook`             | Start here: disposable URL, temp email, and DNS for sign-up or callbacks |
 | `create_webhook_with_config` | Create with custom response, status, CORS, timeout |
 | `get_webhook_url`            | Get the full URL for a webhook token               |
-| `get_webhook_email`          | Get the email address for a webhook                |
+| `get_webhook_email`          | Temp inbox `{token}@email.webhook.site` for sign-up / verify / magic-link / reset |
 | `get_webhook_dns`            | Get the DNS subdomain for a webhook                |
 | `get_webhook_info`           | Get webhook settings and statistics                |
 | `update_webhook`             | Modify webhook configuration                       |
@@ -212,7 +212,7 @@ Add to `claude_desktop_config.json`:
 | Tool               | Description                                   |
 | ------------------ | --------------------------------------------- |
 | `wait_for_request` | Wait for a **new** HTTP request (polling, 1-120s). Set `return_existing` to reuse old traffic. |
-| `wait_for_email`   | Wait for a **new** email (polling) with optional link extraction |
+| `wait_for_email`   | After sign-up: wait for verify / magic-link / reset mail and extract links |
 
 ### Bug Bounty / Security
 
@@ -222,7 +222,7 @@ Add to `claude_desktop_config.json`:
 | `generate_xss_callback`      | Create XSS callback payloads with cookie/DOM capture |
 | `generate_canary_token`      | Create trackable URLs, DNS, or email canaries        |
 | `check_for_callbacks`        | Quick check for OOB callbacks                        |
-| `extract_links_from_request` | Extract URLs from captured requests                  |
+| `extract_links_from_request` | Pull confirm / reset / magic-link URLs from a captured email or HTTP body |
 
 ### Batch & Utility
 
@@ -234,6 +234,15 @@ Add to `claude_desktop_config.json`:
 ---
 
 ## Examples
+
+### Sign up on a website
+
+1. `create_webhook` — get `email` (`{token}@email.webhook.site`)
+2. Use that address on the site (sign-up, verify, magic link, or password reset)
+3. `wait_for_email` — receive the message and extracted confirm / login / reset URLs
+4. `extract_links_from_request` if you need links from an email that already arrived
+
+If you already have a token, `get_webhook_email` returns the same inbox.
 
 ### Create a Webhook
 

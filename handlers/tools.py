@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Awaitable, Callable
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from mcp.server import MCPServer
 from mcp.server.mcpserver import Context
+from pydantic import Field
 
 from models.app_context import AppContext
 from models.schemas import DeleteFilters, SearchFilters, ToolResult, WebhookConfig
@@ -26,6 +27,10 @@ logger = setup_logger(__name__)
 
 RequestType = Literal["web", "email", "dns"]
 CanaryType = Literal["url", "dns", "email"]
+Token = Annotated[
+    str,
+    Field(description="Webhook UUID returned by create_webhook"),
+]
 
 
 def _app(ctx: Context[AppContext]) -> AppContext:
@@ -63,7 +68,14 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def create_webhook(ctx: Context[AppContext]) -> dict[str, Any]:
-        """Create a new webhook.site endpoint. Returns the unique token/URL for the webhook."""
+        """Create a disposable inbox to sign up on a website: HTTP URL, temp email, DNS.
+
+        Use this first when the user wants to sign up, receive a verification /
+        magic-link / password-reset email, catch a webhook callback, or get a
+        one-off URL. Returns token, url, email ({token}@email.webhook.site),
+        and dns. Next: give the email or URL to the site, then wait_for_email
+        or wait_for_request.
+        """
         return await _execute(lambda: _app(ctx).webhooks.create())
 
     @mcp.tool()
@@ -77,7 +89,12 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         alias: str | None = None,
         expiry: int | None = None,
     ) -> dict[str, Any]:
-        """Create a webhook.site endpoint with custom response, status, timeout, CORS, or alias."""
+        """Create a webhook that returns a custom status, body, timeout, CORS, or alias.
+
+        Use when the user wants the endpoint to pretend to be an API (404, delay,
+        JSON body) instead of a default 200. For a normal sign-up inbox, use
+        create_webhook.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             if default_status is not None:
@@ -103,12 +120,16 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def send_to_webhook(
-        webhook_token: str,
+        webhook_token: Token,
         data: dict[str, Any],
         ctx: Context[AppContext],
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        """Send a POST request with JSON data to a webhook.site endpoint."""
+        """POST JSON to the webhook URL to test that capture works.
+
+        Use when the user wants to send a sample payload, not when they are
+        waiting for a real site or email.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -118,12 +139,17 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def get_webhook_requests(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         limit: int = 10,
         request_type: RequestType | None = None,
     ) -> dict[str, Any]:
-        """Get requests that have been sent to a webhook.site endpoint."""
+        """List captured HTTP, email, or DNS events for a webhook.
+
+        Use to inspect what already arrived. For the single newest item use
+        get_latest_request. To wait for something new use wait_for_request or
+        wait_for_email. Filter emails with request_type='email'.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -133,7 +159,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def search_requests(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         request_type: RequestType | None = None,
         query: str | None = None,
@@ -142,7 +168,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         sorting: str = "newest",
         limit: int = 20,
     ) -> dict[str, Any]:
-        """Search requests with filters (method, content, headers, date range, type)."""
+        """Search captured events by method, body text, headers, type, or date.
+
+        Use when the user asks to find POSTs, a keyword, or only emails/DNS.
+        Examples: query='method:POST', query='content:verify', request_type='email'.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -160,10 +190,14 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def get_latest_request(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
     ) -> dict[str, Any]:
-        """Get the most recent request sent to a webhook.site endpoint."""
+        """Return only the newest captured event (HTTP, email, or DNS).
+
+        Use for a quick peek. Prefer wait_for_email after a sign-up, or
+        get_webhook_requests to see history.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -173,10 +207,13 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def get_webhook_info(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
     ) -> dict[str, Any]:
-        """Get detailed information about a webhook (settings, expiry, stats)."""
+        """Show webhook settings, expiry, and how many requests it has received.
+
+        Use when the user asks if a token is still valid or how it is configured.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -186,7 +223,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def update_webhook(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         default_status: int | None = None,
         default_content: str | None = None,
@@ -194,7 +231,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         timeout: int | None = None,
         cors: bool | None = None,
     ) -> dict[str, Any]:
-        """Update webhook settings (response content, status code, timeout, CORS)."""
+        """Change how an existing webhook responds (status, body, timeout, CORS).
+
+        Use after create_webhook when the user wants a different canned reply.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -215,10 +255,13 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def delete_webhook(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
     ) -> dict[str, Any]:
-        """Delete a webhook.site endpoint and all its data."""
+        """Permanently delete a webhook and every captured request/email.
+
+        Use when the user is done with a temp inbox or wants to clean up.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -228,11 +271,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def delete_request(
-        webhook_token: str,
+        webhook_token: Token,
         request_id: str,
         ctx: Context[AppContext],
     ) -> dict[str, Any]:
-        """Delete a specific request from a webhook."""
+        """Delete one captured HTTP, email, or DNS event by request id."""
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -242,13 +285,16 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def delete_all_requests(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         date_from: str | None = None,
         date_to: str | None = None,
         query: str | None = None,
     ) -> dict[str, Any]:
-        """Delete all requests from a webhook, optionally filtered by date range or query."""
+        """Clear captured events on a webhook, optionally by date or search query.
+
+        Use to reset an inbox before a new sign-up or test run.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -261,11 +307,15 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def get_webhook_url(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         validate: bool = False,
     ) -> dict[str, Any]:
-        """Get the full URL for a webhook token. Optionally verify that the token exists."""
+        """Return https://webhook.site/{token} for an existing webhook.
+
+        Use when the user already has a token and needs the HTTP callback URL.
+        For a new inbox, create_webhook already returns url.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -275,11 +325,16 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def get_webhook_email(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         validate: bool = False,
     ) -> dict[str, Any]:
-        """Get the unique email address for a webhook token. Emails sent there are captured."""
+        """Return the temp inbox to sign up, verify, magic-link, or reset a password.
+
+        Address is {token}@email.webhook.site. Use when the user already has a
+        token. If they do not, call create_webhook first — it also returns
+        email. After the site sends mail, call wait_for_email.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -289,11 +344,15 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def get_webhook_dns(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         validate: bool = False,
     ) -> dict[str, Any]:
-        """Get the DNSHook domain for a webhook token. DNS lookups to it are captured."""
+        """Return the DNSHook domain for an existing webhook.
+
+        Use for out-of-band DNS callbacks, not for sign-up email. create_webhook
+        already returns dns.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -303,16 +362,17 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def wait_for_request(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         timeout_seconds: int = 60,
         request_type: RequestType | None = None,
         return_existing: bool = False,
     ) -> dict[str, Any]:
-        """Wait for a new HTTP request by polling webhook.site (1-120 seconds).
+        """Poll until a new HTTP (or DNS) callback hits the webhook (1-120s).
 
-        By default this waits for a request that arrives after the call starts.
-        Set return_existing=true to return a matching request that is already present.
+        Use after giving a site the webhook URL. For verification / magic-link
+        / password-reset mail, use wait_for_email instead. Set
+        return_existing=true if the request may already be there.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -328,16 +388,18 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def wait_for_email(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         timeout_seconds: int = 60,
         extract_links: bool = True,
         return_existing: bool = False,
     ) -> dict[str, Any]:
-        """Wait for a new email at {token}@email.webhook.site by polling (1-120 seconds).
+        """Wait for a sign-up, verify, magic-link, or password-reset email (1-120s).
 
-        By default this waits for an email that arrives after the call starts.
-        Set return_existing=true to return an email that is already present.
+        Call this after the user (or you) submitted {token}@email.webhook.site
+        on a website. Returns the message and, by default, extracted confirm /
+        reset / login URLs. Set return_existing=true if the email already
+        arrived. If there is no token yet, create_webhook first.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -353,16 +415,17 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def generate_ssrf_payload(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         identifier: str | None = None,
         include_dns: bool = True,
         include_ip: bool = True,
     ) -> dict[str, Any]:
-        """Generate authorized SSRF test payloads that callback to this webhook.
+        """Build authorized SSRF callback URLs that ping this webhook.
 
-        For use only on systems you are authorized to test. callback_payloads can be
-        confirmed with check_for_callbacks; local_bypass_examples cannot.
+        Use only on systems you are allowed to test — not for sign-up email.
+        Confirm hits with check_for_callbacks. local_bypass_examples cannot
+        be confirmed here.
         """
 
         def _op() -> ToolResult:
@@ -378,12 +441,16 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def check_for_callbacks(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         since_minutes: int = 60,
         identifier: str | None = None,
     ) -> dict[str, Any]:
-        """Check whether any out-of-band callbacks were received in the last N minutes."""
+        """See if SSRF, XSS, or canary callbacks arrived in the last N minutes.
+
+        Use after generate_ssrf_payload / generate_xss_callback / generate_canary_token.
+        For a website verification email, use wait_for_email.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -397,15 +464,15 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def generate_xss_callback(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         identifier: str | None = None,
         include_cookies: bool = True,
         include_dom: bool = True,
     ) -> dict[str, Any]:
-        """Generate authorized XSS callback payloads that ping this webhook when executed.
+        """Build authorized XSS payloads that ping this webhook when they run.
 
-        For use only on systems you are authorized to test.
+        Use only on systems you are allowed to test. Confirm with check_for_callbacks.
         """
 
         def _op() -> ToolResult:
@@ -421,14 +488,15 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def generate_canary_token(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         token_type: CanaryType = "url",
         identifier: str | None = None,
     ) -> dict[str, Any]:
-        """Generate a canary URL, DNS name, or email that alerts when accessed.
+        """Make a canary URL, DNS name, or email that alerts when someone opens it.
 
-        For authorized monitoring of your own documents and systems only.
+        Use to mark your own files or systems. token_type='email' is a tripwire,
+        not a sign-up inbox — use create_webhook + wait_for_email for that.
         """
 
         def _op() -> ToolResult:
@@ -443,12 +511,17 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def extract_links_from_request(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         request_id: str | None = None,
         filter_domain: str | None = None,
     ) -> dict[str, Any]:
-        """Extract URLs from a captured request. Defaults to the latest request."""
+        """Pull confirm, reset, magic-link, and other URLs from a captured email or HTTP body.
+
+        Use after wait_for_email or get_webhook_requests when the user needs
+        the verification / login / password-reset link. Defaults to the latest
+        event. wait_for_email already extracts links when extract_links=true.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -462,12 +535,15 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def send_multiple_requests(
-        webhook_token: str,
+        webhook_token: Token,
         payloads: list[dict[str, Any]],
         ctx: Context[AppContext],
         delay_ms: int = 0,
     ) -> dict[str, Any]:
-        """Send multiple JSON payloads to a webhook, optionally delayed between requests."""
+        """POST several sample JSON payloads to the webhook, optionally spaced out.
+
+        Use to load-test capture, not to wait for a real site or email.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
@@ -481,11 +557,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool()
     async def export_webhook_data(
-        webhook_token: str,
+        webhook_token: Token,
         ctx: Context[AppContext],
         limit: int = 100,
     ) -> dict[str, Any]:
-        """Export captured requests from a webhook to JSON."""
+        """Dump captured HTTP/email/DNS events as JSON for download or review."""
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)

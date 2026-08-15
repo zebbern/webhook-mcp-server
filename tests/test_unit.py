@@ -55,7 +55,37 @@ async def test_import_server_and_list_tools() -> None:
     assert "create_webhook" in names
     assert "get_latest_request" in names
     assert "get_webhook_dns" in names
+    assert "get_webhook_email" in names
+    assert "wait_for_email" in names
     assert len(names) == 23
+
+
+@pytest.mark.asyncio
+async def test_tool_descriptions_cover_signup_and_email() -> None:
+    import server
+
+    tools = {tool.name: (tool.description or "").lower() for tool in await server.mcp.list_tools()}
+
+    create = tools["create_webhook"]
+    assert "sign up" in create
+    assert "email" in create
+    assert "wait_for_email" in create
+
+    inbox = tools["get_webhook_email"]
+    assert "sign up" in inbox
+    assert "magic" in inbox
+    assert "password" in inbox
+    assert "wait_for_email" in inbox
+
+    wait = tools["wait_for_email"]
+    assert "sign-up" in wait or "sign up" in wait
+    assert "magic" in wait
+    assert "password-reset" in wait or "password" in wait
+    assert "create_webhook" in wait
+
+    links = tools["extract_links_from_request"]
+    assert "magic" in links or "reset" in links
+    assert "verify" in links or "confirm" in links
 
 
 @pytest.mark.asyncio
