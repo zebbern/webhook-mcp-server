@@ -12,6 +12,21 @@ This guide provides step-by-step instructions for publishing the `webhook-mcp-se
 - [Troubleshooting](#troubleshooting)
 - [Version Management](#version-management)
 
+## GitHub Actions trusted publisher (required)
+
+Releases use `.github/workflows/publish.yml` with PyPI trusted publishing (OIDC). No API token is stored in the repo.
+
+Add this once at [webhook-mcp-server publishing settings](https://pypi.org/manage/project/webhook-mcp-server/settings/publishing/):
+
+| Field | Value |
+| --- | --- |
+| Owner | `zebbern` |
+| Repository | `webhook-mcp-server` |
+| Workflow | `publish.yml` |
+| Environment | *leave blank* |
+
+Then publish a GitHub release (or re-run the failed Publish workflow). The MCP Registry job runs after PyPI succeeds.
+
 ## Prerequisites
 
 Before publishing to PyPI, ensure you have the following:

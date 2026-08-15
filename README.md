@@ -35,11 +35,13 @@ Security helper tools (SSRF, XSS, canary tokens) are for **authorized testing on
 
 ```bash
 # Using uvx (recommended - no install needed)
-uvx webhook-mcp-server
+uvx webhook-mcp-server==2.2.1
 
 # Or install via pip
-pip install webhook-mcp-server
+pip install webhook-mcp-server==2.2.1
 ```
+
+Use `2.2.1` or newer. `2.1.3` does not start on MCP 2.0.
 
 ### VS Code / GitHub Copilot
 
@@ -51,7 +53,7 @@ Add to `.vscode/mcp.json`:
     "webhook-mcp-server": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["webhook-mcp-server"]
+      "args": ["webhook-mcp-server==2.2.1"]
     }
   }
 }
@@ -66,7 +68,7 @@ Add to `.cursor/mcp.json` (project) or your user MCP config:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server"],
+      "args": ["webhook-mcp-server==2.2.1"],
       "env": {
         "WEBHOOK_SITE_API_KEY": "${WEBHOOK_SITE_API_KEY}"
       }
@@ -86,7 +88,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server"],
+      "args": ["webhook-mcp-server==2.2.1"],
       "env": {
         "WEBHOOK_SITE_API_KEY": "your-api-key-if-needed"
       }
