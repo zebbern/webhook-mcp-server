@@ -17,15 +17,7 @@
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
-      },
-      "environmentVariables": [
-        {
-          "name": "WEBHOOK_SITE_API_KEY",
-          "description": "Optional webhook.site API key for authenticated / premium requests",
-          "isRequired": false,
-          "isSecret": true
-        }
-      ]
+      }
     }
   ]
 }

@@ -68,16 +68,11 @@ Add to `.cursor/mcp.json` (project) or your user MCP config:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.1"],
-      "env": {
-        "WEBHOOK_SITE_API_KEY": "${WEBHOOK_SITE_API_KEY}"
-      }
+      "args": ["webhook-mcp-server==2.2.1"]
     }
   }
 }
 ```
-
-`WEBHOOK_SITE_API_KEY` is optional. Set it for authenticated webhook.site / premium features.
 
 ### Claude Desktop
 
@@ -88,10 +83,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.1"],
-      "env": {
-        "WEBHOOK_SITE_API_KEY": "your-api-key-if-needed"
-      }
+      "args": ["webhook-mcp-server==2.2.1"]
     }
   }
 }
