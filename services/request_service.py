@@ -22,6 +22,17 @@ DEFAULT_TIMEOUT_SECONDS = 60
 MIN_TIMEOUT_SECONDS = 1
 MAX_TIMEOUT_SECONDS = 120
 POLL_INTERVAL_SECONDS = 2.0
+BODY_PREVIEW_CHARS = 2000
+_TRUNCATION_NOTE = "\n...[truncated; use export_webhook_data for the full body]"
+
+
+def preview_body(value: str | None, limit: int = BODY_PREVIEW_CHARS) -> str | None:
+    """Return a short preview so list/wait tools do not dump huge bodies."""
+    if value is None:
+        return None
+    if len(value) <= limit:
+        return value
+    return value[:limit] + _TRUNCATION_NOTE
 
 
 class RequestService:
@@ -224,19 +235,22 @@ class RequestService:
         Returns:
             Formatted request dictionary with safe defaults
         """
-        return {
+        content = req.get("content") if req.get("content") is not None else ""
+        formatted = {
             "uuid": req.get("uuid", "unknown"),
             "type": req.get("type", "unknown"),
             "method": req.get("method", "UNKNOWN"),
-            "content": req.get("content") if req.get("content") is not None else "",
-            "text_content": req.get("text_content"),
-            "html_content": req.get("html_content"),
+            "content": preview_body(content) or "",
+            "text_content": preview_body(req.get("text_content")),
             "headers": req.get("headers", {}),
             "query": req.get("query", {}),
             "url": req.get("url", ""),
             "ip": req.get("ip", "unknown"),
             "created_at": req.get("created_at", "unknown"),
         }
+        if req.get("html_content"):
+            formatted["html_omitted"] = True
+        return formatted
     
     async def wait_for_request(
         self,
@@ -345,13 +359,18 @@ class RequestService:
             "uuid": req.get("uuid"),
             "from": self._extract_header(req, "from"),
             "subject": self._extract_header(req, "subject"),
-            "text_content": req.get("text_content"),
-            "html_content": req.get("html_content"),
+            "text_content": preview_body(req.get("text_content")),
             "created_at": req.get("created_at"),
         }
+        if req.get("html_content"):
+            email_data["html_omitted"] = True
         links: list[str] = []
         if extract_links:
-            content = req.get("text_content") or req.get("html_content") or ""
+            content = " ".join(
+                part
+                for part in (req.get("text_content"), req.get("html_content"))
+                if part
+            )
             url_pattern = r'https?://[^\s<>"\']+(?:[?&][^\s<>"\']+)*'
             links = list(set(re.findall(url_pattern, content)))
             email_data["auth_links"] = [
@@ -561,6 +580,7 @@ class RequestService:
                 "query": req.get("query", {}),
                 "content": req.get("content"),
                 "text_content": req.get("text_content"),
+                "html_content": req.get("html_content"),
                 "created_at": req.get("created_at"),
                 "user_agent": self._extract_header(req, "User-Agent"),
                 "content_type": self._extract_header(req, "Content-Type"),

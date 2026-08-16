@@ -146,9 +146,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """List captured HTTP, email, or DNS events for a webhook.
 
-        Use to inspect what already arrived. For the single newest item use
-        get_latest_request. To wait for something new use wait_for_request or
-        wait_for_email. Filter emails with request_type='email'.
+        Use to inspect what already arrived. Bodies are truncated and HTML is
+        omitted; use export_webhook_data for the full dump. For the newest item
+        use get_latest_request. To wait for something new use wait_for_request
+        or wait_for_email. Filter emails with request_type='email'.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -370,8 +371,9 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Poll until a new HTTP (or DNS) callback hits the webhook (1-120s).
 
-        Use after giving a site the webhook URL. For verification / magic-link
-        / password-reset mail, use wait_for_email instead. Set
+        Use after giving a site the webhook URL. Bodies are truncated and HTML
+        is omitted; use export_webhook_data for the full dump. For verification
+        / magic-link / password-reset mail, use wait_for_email instead. Set
         return_existing=true if the request may already be there.
         """
 
@@ -397,8 +399,9 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         """Wait for a sign-up, verify, magic-link, or password-reset email (1-120s).
 
         Call this after the user (or you) submitted {token}@email.webhook.site
-        on a website. Returns the message and, by default, extracted confirm /
-        reset / login URLs. Set return_existing=true if the email already
+        on a website. Returns subject, a truncated text preview, and extracted
+        confirm / reset / login URLs. HTML is omitted; use export_webhook_data
+        for the full message. Set return_existing=true if the email already
         arrived. If there is no token yet, create_webhook first.
         """
 
@@ -561,7 +564,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         ctx: Context[AppContext],
         limit: int = 100,
     ) -> dict[str, Any]:
-        """Dump captured HTTP/email/DNS events as JSON for download or review."""
+        """Full dump of captured HTTP/email/DNS events, including HTML and untruncated bodies.
+
+        Use this when list/wait tools omitted HTML or truncated a body.
+        """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)

@@ -10,7 +10,11 @@ import respx
 
 from models.schemas import ToolResult
 from services.bugbounty_service import BugBountyService
-from services.request_service import RequestService
+from services.request_service import (
+    BODY_PREVIEW_CHARS,
+    RequestService,
+    preview_body,
+)
 from services.webhook_service import WebhookService
 from utils.http_client import WEBHOOK_SITE_API, WebhookHttpClient
 from utils.validation import ValidationError, validate_webhook_token
@@ -88,6 +92,84 @@ async def test_tool_descriptions_cover_signup_and_email() -> None:
     assert "verify" in links or "confirm" in links
 
 
+CATALOG_TOKEN_BUDGET = 5000
+
+
+@pytest.mark.asyncio
+async def test_tool_catalog_stays_under_token_budget() -> None:
+    import server
+    import tiktoken
+
+    catalog = []
+    for tool in await server.mcp.list_tools():
+        payload = tool.model_dump()
+        catalog.append(
+            {
+                "name": payload.get("name"),
+                "description": payload.get("description") or "",
+                "inputSchema": payload.get("inputSchema") or payload.get("input_schema") or {},
+            }
+        )
+    blob = json.dumps(catalog, ensure_ascii=False)
+    tokens = len(tiktoken.get_encoding("cl100k_base").encode(blob))
+    assert tokens <= CATALOG_TOKEN_BUDGET, (
+        f"tool catalog is {tokens} tokens (budget {CATALOG_TOKEN_BUDGET})"
+    )
+
+
+def test_preview_body_truncates() -> None:
+    assert preview_body(None) is None
+    assert preview_body("short") == "short"
+    long_body = "x" * (BODY_PREVIEW_CHARS + 50)
+    preview = preview_body(long_body)
+    assert preview is not None
+    assert preview.startswith("x" * BODY_PREVIEW_CHARS)
+    assert "export_webhook_data" in preview
+    assert len(preview) < len(long_body) + 80
+
+
+def test_format_request_omits_html_and_truncates() -> None:
+    service = RequestService(client=None)  # type: ignore[arg-type]
+    formatted = service._format_request(
+        {
+            "uuid": "req-1",
+            "type": "email",
+            "method": "POST",
+            "content": "y" * (BODY_PREVIEW_CHARS + 10),
+            "text_content": "plain",
+            "html_content": "<html>huge</html>",
+            "headers": {"from": ["a@b.test"]},
+            "query": {},
+            "url": "https://webhook.site/x",
+            "ip": "1.2.3.4",
+            "created_at": "2026-01-01 00:00:00",
+        }
+    )
+    assert "html_content" not in formatted
+    assert formatted["html_omitted"] is True
+    assert formatted["text_content"] == "plain"
+    assert "export_webhook_data" in formatted["content"]
+
+
+def test_format_email_keeps_links_without_html() -> None:
+    service = RequestService(client=None)  # type: ignore[arg-type]
+    email = service._format_email(
+        {
+            "uuid": "mail-1",
+            "text_content": "Click https://example.com/verify?token=abc",
+            "html_content": '<a href="https://example.com/magic?x=1">login</a>',
+            "headers": {"from": ["noreply@example.com"], "subject": ["Verify"]},
+            "created_at": "2026-01-01 00:00:00",
+        },
+        extract_links=True,
+    )
+    assert "html_content" not in email
+    assert email["html_omitted"] is True
+    assert "https://example.com/verify?token=abc" in email["all_links"]
+    assert "https://example.com/magic?x=1" in email["all_links"]
+    assert email["auth_links"]
+
+
 @pytest.mark.asyncio
 async def test_get_webhook_dns_rejects_invalid_token() -> None:
     from handlers.tools import _execute
@@ -157,3 +239,31 @@ async def test_get_url_validate_missing_token_serializes() -> None:
     payload = json.loads(result.to_json())
     assert payload["success"] is False
     assert "not found" in payload["message"].lower()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_export_keeps_full_html_and_body() -> None:
+    huge_html = "<html>" + ("z" * (BODY_PREVIEW_CHARS + 20)) + "</html>"
+    respx.get(f"{WEBHOOK_SITE_API}/token/{TOKEN}/requests").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "data": [
+                    {
+                        **_request_json("full-1"),
+                        "content": "y" * (BODY_PREVIEW_CHARS + 10),
+                        "html_content": huge_html,
+                    }
+                ]
+            },
+        )
+    )
+    async with WebhookHttpClient() as client:
+        service = RequestService(client)
+        result = await service.export_requests(TOKEN, limit=1)
+    assert result.success is True
+    exported = result.data["requests"][0]
+    assert exported["html_content"] == huge_html
+    assert exported["content"] == "y" * (BODY_PREVIEW_CHARS + 10)
+    assert "truncated" not in exported["content"]

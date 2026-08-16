@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- List and wait tools omit HTML and truncate bodies; use `export_webhook_data` for the full dump
+
+### Added
+
+- CI budget: the MCP tool catalog must stay under 5000 tokens
+
 ## [2.2.1] - 2026-08-16
 
 ### Changed
