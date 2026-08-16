@@ -16,7 +16,9 @@ from services.request_service import (
     preview_body,
 )
 from services.webhook_service import WebhookService
+from utils.email_extract import extract_verification_codes
 from utils.http_client import WEBHOOK_SITE_API, WebhookHttpClient
+from utils.safe_url import ensure_public_http_url
 from utils.validation import ValidationError, validate_webhook_token
 
 TOKEN = "550e8400-e29b-41d4-a716-446655440000"
@@ -61,7 +63,8 @@ async def test_import_server_and_list_tools() -> None:
     assert "get_webhook_dns" in names
     assert "get_webhook_email" in names
     assert "wait_for_email" in names
-    assert len(names) == 23
+    assert "follow_email_link" in names
+    assert len(names) == 24
 
 
 @pytest.mark.asyncio
@@ -86,6 +89,12 @@ async def test_tool_descriptions_cover_signup_and_email() -> None:
     assert "magic" in wait
     assert "password-reset" in wait or "password" in wait
     assert "create_webhook" in wait
+    assert "verification_codes" in wait or "otp" in wait
+    assert "follow_email_link" in wait
+
+    follow = tools["follow_email_link"]
+    assert "verify" in follow or "magic" in follow
+    assert "wait_for_email" in follow
 
     links = tools["extract_links_from_request"]
     assert "magic" in links or "reset" in links
@@ -168,6 +177,39 @@ def test_format_email_keeps_links_without_html() -> None:
     assert "https://example.com/verify?token=abc" in email["all_links"]
     assert "https://example.com/magic?x=1" in email["all_links"]
     assert email["auth_links"]
+    assert email["verification_codes"] == []
+
+
+def test_extract_verification_codes_ignores_url_digits() -> None:
+    text = (
+        "Your code is 847291. Ignore https://example.com/reset?token=111222 "
+        "and year 2026."
+    )
+    assert extract_verification_codes(text) == ["847291"]
+
+
+def test_format_email_includes_otp() -> None:
+    service = RequestService(client=None)  # type: ignore[arg-type]
+    email = service._format_email(
+        {
+            "uuid": "mail-2",
+            "text_content": "OTP: 442211 https://example.com/login?token=zz",
+            "headers": {"from": ["noreply@example.com"], "subject": ["Code"]},
+            "created_at": "2026-01-01 00:00:00",
+        },
+        extract_links=True,
+    )
+    assert email["verification_codes"] == ["442211"]
+    assert email["auth_links"]
+
+
+def test_ensure_public_http_url_blocks_localhost() -> None:
+    with pytest.raises(ValidationError):
+        ensure_public_http_url("http://localhost/verify")
+    with pytest.raises(ValidationError):
+        ensure_public_http_url("http://127.0.0.1/verify")
+    with pytest.raises(ValidationError):
+        ensure_public_http_url("ftp://example.com/verify")
 
 
 @pytest.mark.asyncio
@@ -267,3 +309,56 @@ async def test_export_keeps_full_html_and_body() -> None:
     assert exported["html_content"] == huge_html
     assert exported["content"] == "y" * (BODY_PREVIEW_CHARS + 10)
     assert "truncated" not in exported["content"]
+
+
+def _email_json(uuid: str, text: str, html: str = "") -> dict:
+    return {
+        "uuid": uuid,
+        "type": "email",
+        "method": "POST",
+        "content": "",
+        "text_content": text,
+        "html_content": html,
+        "headers": {"from": ["noreply@example.com"], "subject": ["Verify"]},
+        "query": {},
+        "url": "",
+        "ip": "1.2.3.4",
+        "created_at": "2026-01-01 00:00:00",
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_follow_email_link_opens_captured_auth_url() -> None:
+    verify = "https://example.com/verify?token=abc"
+    respx.get(f"{WEBHOOK_SITE_API}/token/{TOKEN}/requests").mock(
+        return_value=httpx.Response(
+            200,
+            json={"data": [_email_json("mail-1", f"Click {verify}")]},
+        )
+    )
+    respx.get(verify).mock(
+        return_value=httpx.Response(200, text="<html><title>Verified</title><body>ok</body></html>")
+    )
+    async with WebhookHttpClient() as client:
+        service = RequestService(client)
+        result = await service.follow_email_link(TOKEN)
+    assert result.success is True
+    assert result.data["opened_url"] == verify
+    assert result.data["status_code"] == 200
+    assert result.data["title"] == "Verified"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_follow_email_link_rejects_url_not_in_email() -> None:
+    respx.get(f"{WEBHOOK_SITE_API}/token/{TOKEN}/requests").mock(
+        return_value=httpx.Response(
+            200,
+            json={"data": [_email_json("mail-1", "Click https://example.com/verify?token=abc")]},
+        )
+    )
+    async with WebhookHttpClient() as client:
+        service = RequestService(client)
+        with pytest.raises(ValidationError, match="not found"):
+            await service.follow_email_link(TOKEN, url="https://evil.example/phish")

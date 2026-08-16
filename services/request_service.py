@@ -8,13 +8,22 @@ captured by webhook.site endpoints.
 from __future__ import annotations
 
 import asyncio
-import re
 import time
 from typing import Any
 
+import httpx
+
 from models.schemas import DeleteFilters, SearchFilters, ToolResult
+from utils.email_extract import (
+    combined_request_text,
+    extract_auth_links,
+    extract_html_title,
+    extract_urls,
+    extract_verification_codes,
+)
 from utils.http_client import WEBHOOK_SITE_API, WebhookApiError, WebhookHttpClient
-from utils.validation import validate_positive_int
+from utils.safe_url import ensure_public_http_url
+from utils.validation import ValidationError, validate_positive_int
 
 # Constants for request handling
 DEFAULT_REQUEST_LIMIT = 10
@@ -24,6 +33,9 @@ MAX_TIMEOUT_SECONDS = 120
 POLL_INTERVAL_SECONDS = 2.0
 BODY_PREVIEW_CHARS = 2000
 _TRUNCATION_NOTE = "\n...[truncated; use export_webhook_data for the full body]"
+FOLLOW_TIMEOUT_SECONDS = 15.0
+FOLLOW_MAX_REDIRECTS = 5
+FOLLOW_MAX_BYTES = 65536
 
 
 def preview_body(value: str | None, limit: int = BODY_PREVIEW_CHARS) -> str | None:
@@ -364,20 +376,12 @@ class RequestService:
         }
         if req.get("html_content"):
             email_data["html_omitted"] = True
+        body = combined_request_text(req)
+        email_data["verification_codes"] = extract_verification_codes(body)
         links: list[str] = []
         if extract_links:
-            content = " ".join(
-                part
-                for part in (req.get("text_content"), req.get("html_content"))
-                if part
-            )
-            url_pattern = r'https?://[^\s<>"\']+(?:[?&][^\s<>"\']+)*'
-            links = list(set(re.findall(url_pattern, content)))
-            email_data["auth_links"] = [
-                link
-                for link in links
-                if any(kw in link.lower() for kw in ["magic", "auth", "token", "verify", "confirm"])
-            ]
+            links = extract_urls(body)
+            email_data["auth_links"] = extract_auth_links(links)
         email_data["all_links"] = links
         return email_data
 
@@ -485,6 +489,113 @@ class RequestService:
                 "email_address": f"{webhook_token}@email.webhook.site",
             },
         )
+
+    async def follow_email_link(
+        self,
+        webhook_token: str,
+        request_id: str | None = None,
+        url: str | None = None,
+    ) -> ToolResult:
+        """GET a verify / magic / reset link that already arrived in this inbox."""
+        request = await self._load_follow_request(webhook_token, request_id)
+        if request is None:
+            return ToolResult(
+                success=False,
+                message="No captured email found. Wait with wait_for_email first.",
+            )
+
+        body = combined_request_text(request)
+        allowed = extract_urls(body)
+        auth_links = extract_auth_links(allowed)
+        target = url or (auth_links[0] if auth_links else None)
+        if not target:
+            return ToolResult(
+                success=False,
+                message="No verify / magic / reset link in that email. Pass url= from all_links if you intend to open another captured link.",
+                data={"all_links": allowed, "request_id": request.get("uuid")},
+            )
+        if target not in allowed:
+            raise ValidationError(
+                "That URL was not found in the captured email. Only inbox links can be opened."
+            )
+
+        try:
+            page = await self._fetch_captured_link(target)
+        except httpx.HTTPError as exc:
+            return ToolResult(
+                success=False,
+                message=f"Failed to open email link: {exc}",
+                data={"opened_url": target, "request_id": request.get("uuid")},
+            )
+        return ToolResult(
+            success=200 <= page["status_code"] < 400,
+            message=f"Opened email link ({page['status_code']})",
+            data={
+                "request_id": request.get("uuid"),
+                "opened_url": target,
+                **page,
+            },
+        )
+
+    async def _load_follow_request(
+        self,
+        webhook_token: str,
+        request_id: str | None,
+    ) -> dict[str, Any] | None:
+        if request_id:
+            return await self._client.get(f"/token/{webhook_token}/request/{request_id}")
+
+        data = await self._client.get(
+            f"/token/{webhook_token}/requests",
+            params={"per_page": 20, "sorting": "newest"},
+        )
+        emails = [req for req in data.get("data", []) if req.get("type") == "email"]
+        for req in emails:
+            if extract_auth_links(extract_urls(combined_request_text(req))):
+                return req
+        return emails[0] if emails else None
+
+    async def _fetch_captured_link(self, url: str) -> dict[str, Any]:
+        current = url
+        history: list[dict[str, Any]] = []
+        headers = {
+            "User-Agent": "webhook-mcp-server follow_email_link",
+            "Accept": "text/html,text/plain,*/*",
+        }
+        async with httpx.AsyncClient(
+            timeout=FOLLOW_TIMEOUT_SECONDS,
+            follow_redirects=False,
+            headers=headers,
+        ) as client:
+            for _ in range(FOLLOW_MAX_REDIRECTS + 1):
+                ensure_public_http_url(current)
+                async with client.stream("GET", current) as response:
+                    chunks: list[bytes] = []
+                    size = 0
+                    async for chunk in response.aiter_bytes():
+                        chunks.append(chunk)
+                        size += len(chunk)
+                        if size >= FOLLOW_MAX_BYTES:
+                            break
+                    raw = b"".join(chunks)
+                    history.append({"url": current, "status_code": response.status_code})
+                    if response.is_redirect:
+                        location = response.headers.get("location")
+                        if not location:
+                            break
+                        current = str(response.url.join(location))
+                        continue
+                    text = raw.decode(response.encoding or "utf-8", errors="replace")
+                    preview = preview_body(text) or ""
+                    return {
+                        "status_code": response.status_code,
+                        "final_url": str(response.url),
+                        "title": extract_html_title(text),
+                        "preview": preview,
+                        "redirects": history[:-1],
+                    }
+
+        raise ValidationError("Too many redirects while opening the email link")
     
     async def send_multiple(
         self,

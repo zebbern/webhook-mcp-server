@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-23%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![MCP](https://img.shields.io/badge/MCP-24%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
@@ -35,13 +35,13 @@ Security helper tools (SSRF, XSS, canary tokens) are for **authorized testing on
 
 ```bash
 # Using uvx (recommended - no install needed)
-uvx webhook-mcp-server==2.2.1
+uvx webhook-mcp-server==2.2.2
 
 # Or install via pip
-pip install webhook-mcp-server==2.2.1
+pip install webhook-mcp-server==2.2.2
 ```
 
-Use `2.2.1` or newer. `2.1.3` does not start on MCP 2.0.
+Use `2.2.2` or newer. `2.1.3` does not start on MCP 2.0.
 
 ### VS Code / GitHub Copilot
 
@@ -53,7 +53,7 @@ Add to `.vscode/mcp.json`:
     "webhook-mcp-server": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.1"]
+      "args": ["webhook-mcp-server==2.2.2"]
     }
   }
 }
@@ -68,7 +68,7 @@ Add to `.cursor/mcp.json` (project) or your user MCP config:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.1"]
+      "args": ["webhook-mcp-server==2.2.2"]
     }
   }
 }
@@ -83,7 +83,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.1"]
+      "args": ["webhook-mcp-server==2.2.2"]
     }
   }
 }
@@ -206,7 +206,8 @@ Add to `claude_desktop_config.json`:
 | Tool               | Description                                   |
 | ------------------ | --------------------------------------------- |
 | `wait_for_request` | Wait for a **new** HTTP request (polling, 1-120s). Set `return_existing` to reuse old traffic. |
-| `wait_for_email`   | After sign-up: wait for verify / magic-link / reset mail and extract links |
+| `wait_for_email`   | After sign-up: wait for verify / magic-link / reset mail, links, and OTP codes |
+| `follow_email_link` | Open a captured verify / magic / reset URL and return the page preview |
 
 ### Bug Bounty / Security
 
@@ -233,8 +234,8 @@ Add to `claude_desktop_config.json`:
 
 1. `create_webhook` — get `email` (`{token}@email.webhook.site`)
 2. Use that address on the site (sign-up, verify, magic link, or password reset)
-3. `wait_for_email` — receive the message and extracted confirm / login / reset URLs
-4. `extract_links_from_request` if you need links from an email that already arrived
+3. `wait_for_email` — receive the message, confirm / login / reset URLs, and any OTP
+4. `follow_email_link` to open a verify link, or type `verification_codes` on the site
 
 If you already have a token, `get_webhook_email` returns the same inbox.
 
@@ -258,7 +259,8 @@ If you already have a token, `get_webhook_email` returns the same inbox.
   "email_received": true,
   "subject": "Password Reset Request",
   "from": "noreply@example.com",
-  "links_found": ["https://example.com/reset?token=xyz789"]
+  "auth_links": ["https://example.com/reset?token=xyz789"],
+  "verification_codes": ["847291"]
 }
 ```
 

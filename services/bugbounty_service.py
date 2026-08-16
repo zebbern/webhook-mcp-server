@@ -12,12 +12,17 @@ Provides security testing utilities:
 from __future__ import annotations
 
 import base64
-import re
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from models.schemas import ToolResult
+from utils.email_extract import (
+    combined_request_text,
+    extract_auth_links,
+    extract_urls,
+    extract_verification_codes,
+)
 from utils.http_client import WebhookHttpClient, WEBHOOK_SITE_API
 
 
@@ -340,40 +345,11 @@ class BugBountyService:
             )
         
         request = requests[0]
-        content = request.get("content", "") or request.get("text_content", "")
-        
-        # Extract all URLs using regex
-        url_pattern = r'https?://[^\s<>"\')\]]+|www\.[^\s<>"\')\]]+'
-        all_links = re.findall(url_pattern, content, re.IGNORECASE)
-        
-        # Clean up links
-        cleaned_links = []
-        for link in all_links:
-            # Remove trailing punctuation
-            link = link.rstrip('.,;:!?')
-            if not link.startswith('http'):
-                link = 'https://' + link
-            cleaned_links.append(link)
-        
-        # Remove duplicates while preserving order
-        seen = set()
-        unique_links = []
-        for link in cleaned_links:
-            if link not in seen:
-                seen.add(link)
-                unique_links.append(link)
-        
-        # Filter by domain if specified
+        unique_links = extract_urls(combined_request_text(request))
         if filter_domain:
-            unique_links = [l for l in unique_links if filter_domain in l]
-        
-        # Categorize links
-        categorized = {
-            "auth_links": [l for l in unique_links if any(k in l.lower() for k in ['token', 'auth', 'verify', 'reset', 'confirm', 'magic', 'login'])],
-            "api_links": [l for l in unique_links if any(k in l.lower() for k in ['api', 'webhook', 'callback'])],
-            "all_links": unique_links,
-        }
-        
+            unique_links = [link for link in unique_links if filter_domain in link]
+        codes = extract_verification_codes(combined_request_text(request))
+
         return ToolResult(
             success=True,
             message=f"Extracted {len(unique_links)} unique links",
@@ -382,8 +358,17 @@ class BugBountyService:
                 "request_type": request.get("type"),
                 "total_links": len(unique_links),
                 "filter_domain": filter_domain,
-                "links": categorized,
-            }
+                "verification_codes": codes,
+                "links": {
+                    "auth_links": extract_auth_links(unique_links),
+                    "api_links": [
+                        link
+                        for link in unique_links
+                        if any(key in link.lower() for key in ("api", "webhook", "callback"))
+                    ],
+                    "all_links": unique_links,
+                },
+            },
         )
     
     @staticmethod

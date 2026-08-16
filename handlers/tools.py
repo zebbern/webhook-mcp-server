@@ -73,8 +73,8 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         Use this first when the user wants to sign up, receive a verification /
         magic-link / password-reset email, catch a webhook callback, or get a
         one-off URL. Returns token, url, email ({token}@email.webhook.site),
-        and dns. Next: give the email or URL to the site, then wait_for_email
-        or wait_for_request.
+        and dns. Next: give the email or URL to the site, then wait_for_email,
+        then follow_email_link or use the OTP.
         """
         return await _execute(lambda: _app(ctx).webhooks.create())
 
@@ -399,10 +399,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         """Wait for a sign-up, verify, magic-link, or password-reset email (1-120s).
 
         Call this after the user (or you) submitted {token}@email.webhook.site
-        on a website. Returns subject, a truncated text preview, and extracted
-        confirm / reset / login URLs. HTML is omitted; use export_webhook_data
-        for the full message. Set return_existing=true if the email already
-        arrived. If there is no token yet, create_webhook first.
+        on a website. Returns subject, a truncated text preview, extracted
+        confirm / reset / login URLs, and verification_codes (OTP). Next:
+        follow_email_link, or type the code. HTML is omitted; use
+        export_webhook_data for the full message. Set return_existing=true if
+        the email already arrived. If there is no token yet, create_webhook first.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -412,6 +413,30 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 timeout_seconds=timeout_seconds,
                 extract_links=extract_links,
                 return_existing=return_existing,
+            )
+
+        return await _execute(_op)
+
+    @mcp.tool()
+    async def follow_email_link(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        request_id: str | None = None,
+        url: str | None = None,
+    ) -> dict[str, Any]:
+        """Open the verify / magic-link / reset URL from a captured sign-up email.
+
+        Use after wait_for_email. Only follows http(s) links already in that
+        inbox. Returns status, final URL, and a short page preview. For OTP
+        codes, read verification_codes from wait_for_email instead.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            return _app(ctx).requests.follow_email_link(
+                webhook_token,
+                request_id=request_id,
+                url=url,
             )
 
         return await _execute(_op)
@@ -522,8 +547,8 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         """Pull confirm, reset, magic-link, and other URLs from a captured email or HTTP body.
 
         Use after wait_for_email or get_webhook_requests when the user needs
-        the verification / login / password-reset link. Defaults to the latest
-        event. wait_for_email already extracts links when extract_links=true.
+        the verification / login / password-reset link or OTP. Defaults to the
+        latest event. wait_for_email already extracts links and codes.
         """
 
         def _op() -> Awaitable[ToolResult]:

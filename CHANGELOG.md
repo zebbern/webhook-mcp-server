@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- List and wait tools omit HTML and truncate bodies; use `export_webhook_data` for the full dump
+## [2.2.2] - 2026-08-16
 
 ### Added
 
+- `follow_email_link` opens a verify / magic / reset URL already captured in the inbox
+- `wait_for_email` and `extract_links_from_request` now return `verification_codes` (OTP)
 - CI budget: the MCP tool catalog must stay under 5000 tokens
+
+### Changed
+
+- List and wait tools omit HTML and truncate bodies; use `export_webhook_data` for the full dump
+- Default MCP install configs no longer mention an API key
 
 ## [2.2.1] - 2026-08-16
 
@@ -175,7 +180,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Core webhook creation and management
 - Request capture and retrieval
 
-[Unreleased]: https://github.com/zebbern/webhook-mcp-server/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/zebbern/webhook-mcp-server/compare/v2.2.2...HEAD
+[2.2.2]: https://github.com/zebbern/webhook-mcp-server/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/zebbern/webhook-mcp-server/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/zebbern/webhook-mcp-server/compare/v2.1.3...v2.2.0
 [2.1.3]: https://github.com/zebbern/webhook-mcp-server/compare/v2.1.2...v2.1.3
