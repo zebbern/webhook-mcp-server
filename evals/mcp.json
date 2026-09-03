@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "webhook": {
+      "command": "python",
+      "args": ["server.py"],
+      "env": {
+        "WEBHOOK_SITE_API_KEY": "${WEBHOOK_SITE_API_KEY}"
+      }
+    }
+  }
+}

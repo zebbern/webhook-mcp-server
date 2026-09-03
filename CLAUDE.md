@@ -25,6 +25,10 @@ MCP server for webhook.site. 28 tools in `handlers/tools.py`, services in `servi
 - The API replaces records on PUT. Every update merges into the saved record first.
 - Keep the catalog under the token budget in `tests/test_unit.py` and keep every description honest about what the tool actually does (see `update_request`'s Set Response note).
 
+## Model evals
+
+- `evals/prompts/*.jsonl` + `evals/run_evals.py` drive headless `claude -p` with only this server attached and score tool choice and arguments. They cost real money and create real resources; run them only when the owner asks (release testing), never as part of routine verification.
+
 ## Release
 
 - Commit at each verified step; do not push or tag until the whole plan is done and `scripts/live_tool_check.py` is 100% green.
