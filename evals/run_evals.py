@@ -140,13 +140,17 @@ def score(item: dict[str, Any], calls: list[dict[str, Any]]) -> tuple[bool, list
 
 
 def main() -> int:
+    global MCP_CONFIG
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", help="comma-separated prompt ids")
     parser.add_argument("--group")
     parser.add_argument("--model")
     # The first turn alone costs ~0.7 USD on large models (catalog + system prompt cache creation).
     parser.add_argument("--budget", type=float, default=5.0, help="max USD per prompt (default 5)")
+    parser.add_argument("--mcp-config", default=str(MCP_CONFIG),
+                        help="MCP config to attach (default evals/mcp.json runs the checkout; evals/mcp.published.json runs the PyPI release via uvx)")
     args = parser.parse_args()
+    MCP_CONFIG = Path(args.mcp_config)
     if not os.environ.get("WEBHOOK_SITE_API_KEY"):
         print("Set WEBHOOK_SITE_API_KEY", file=sys.stderr)
         return 2

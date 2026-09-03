@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "webhook": {
+      "command": "uvx",
+      "args": [
+        "webhook-mcp-server==3.0.0"
+      ],
+      "env": {
+        "WEBHOOK_SITE_API_KEY": "${WEBHOOK_SITE_API_KEY}"
+      }
+    }
+  }
+}
