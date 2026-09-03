@@ -192,7 +192,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ## Tools Reference
 
-30 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan.
+30 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan. The full parameter reference, generated from the server itself, is in [docs/TOOLS.md](docs/TOOLS.md).
 
 ### Diagnostics
 
