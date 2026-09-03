@@ -10,6 +10,7 @@ from services.bugbounty_service import BugBountyService
 from services.database_service import DatabaseService
 from services.request_service import RequestService
 from services.schedule_service import ScheduleService
+from services.status_service import StatusService
 from services.webhook_service import WebhookService
 from utils.http_client import WebhookHttpClient
 
@@ -26,3 +27,4 @@ class AppContext:
     actions: ActionsService
     schedules: ScheduleService
     databases: DatabaseService
+    status: StatusService | None = None

@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-28%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![MCP](https://img.shields.io/badge/MCP-29%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
@@ -97,6 +97,7 @@ All settings are environment variables on the server process. Put them in the `e
 | -------- | ------- |
 | `WEBHOOK_SITE_API_KEY` | Your webhook.site API key. Makes new URLs permanent (your plan's quota) and unlocks `list_webhooks`, Custom Actions, Schedules, Global Variables, Groups, Templates, Databases, Users and CSV export |
 | `WEBHOOK_SITE_DEFAULT_EXPIRY` | Seconds until new URLs expire when the call does not pass `expiry`. Unset means permanent on a paid account (7 days for anonymous URLs) |
+| `WEBHOOK_MCP_RATE_LIMIT_MAX_WAIT` | When webhook.site answers 429 with a `Retry-After` up to this many seconds (default 15), the call waits and retries once; longer waits are reported as an error naming the wait |
 | `FOLLOW_EMAIL_LINK_ALLOW_HOSTS` | `follow_email_link` only opens links to public internet hosts, and connects to the address it checked (no DNS rebinding). To test a sign-up flow on your own machine or intranet, list what to allow: `localhost,127.0.0.1,*.corp.example,10.0.0.0/8` |
 | `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` | Honoured by `follow_email_link`. The proxy makes the connection, so the target is checked before the request instead of being pinned |
 | `SSL_CERT_FILE` / `SSL_CERT_DIR` | Custom CA bundle for `follow_email_link`, for corporate TLS interception |
@@ -191,7 +192,13 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ## Tools Reference
 
-28 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan.
+29 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan.
+
+### Diagnostics
+
+| Tool            | Description                                                                                          |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| `server_status` | API key present, account reachable and authenticated, plan hint, real-time socket, env config, problems |
 
 ### Webhooks
 

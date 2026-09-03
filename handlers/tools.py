@@ -115,6 +115,24 @@ def _require_id(value: Any, name: str, action: str) -> int:
 def register_tools(mcp: MCPServer[AppContext]) -> None:
     """Register all webhook.site tools on the MCP server."""
 
+    # --- diagnostics ----------------------------------------------------------
+
+    @mcp.tool(annotations=RO)
+    async def server_status(ctx: Context[AppContext], check_socket: bool = True) -> dict[str, Any]:
+        """Check this server's setup: API key, account reachability, plan, real-time socket, env config.
+
+        Call first when a tool fails unexpectedly or before relying on account
+        features. Lists problems in plain words.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            status = _app(ctx).status
+            if status is None:
+                raise ValidationError("Status service is not configured")
+            return status.report(check_socket=check_socket)
+
+        return await _execute(_op)
+
     # --- webhooks -----------------------------------------------------------
 
     @mcp.tool(annotations=WRITE)

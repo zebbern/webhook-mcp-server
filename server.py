@@ -25,6 +25,7 @@ from services.bugbounty_service import BugBountyService
 from services.database_service import DatabaseService
 from services.request_service import RequestService
 from services.schedule_service import ScheduleService
+from services.status_service import StatusService
 from services.webhook_service import WebhookService
 from utils.http_client import WebhookHttpClient
 from utils.safe_url import ALLOW_HOSTS_ENV, HostAllowList
@@ -49,6 +50,7 @@ async def app_lifespan(_server: MCPServer[AppContext]) -> AsyncIterator[AppConte
             actions=ActionsService(client),
             schedules=ScheduleService(client),
             databases=DatabaseService(client),
+            status=StatusService(client, follow_allowlist=follow_allowlist, default_expiry=default_expiry),
         )
 
 

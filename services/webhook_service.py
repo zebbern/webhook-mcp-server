@@ -12,6 +12,22 @@ from typing import Any
 from models.schemas import ToolResult, WebhookConfig
 from utils.http_client import WEBHOOK_SITE_API, WebhookApiError, WebhookHttpClient
 
+# Settings the token PUT resets when omitted; re-sent from the current token on update.
+# `expiry` is deliberately absent: re-sending it would restart the countdown.
+MERGED_TOKEN_FIELDS = (
+    "default_status",
+    "default_content",
+    "default_content_type",
+    "timeout",
+    "listen",
+    "cors",
+    "alias",
+    "request_limit",
+    "actions",
+    "group_id",
+    "description",
+)
+
 
 def build_webhook_urls(token: str, alias: str | None = None) -> dict[str, str]:
     """Build all URL variants for a webhook token.
@@ -162,7 +178,13 @@ class WebhookService:
                 data={**info, "applied_settings": payload},
             )
 
-        data = await self._client.put(f"/token/{webhook_token}", json_data=payload)
+        # PUT /token/{id} replaces the settings: a body with only `alias` reset
+        # default_status/content, timeout and cors to defaults (seen live). Merge
+        # the requested changes into the current settings first.
+        current = await self._client.get(f"/token/{webhook_token}")
+        merged = {key: current.get(key) for key in MERGED_TOKEN_FIELDS if current.get(key) is not None}
+        merged.update(payload)
+        data = await self._client.put(f"/token/{webhook_token}", json_data=merged)
         info = format_token(data) if data.get("uuid") else {"token": webhook_token}
         return ToolResult(
             success=True,

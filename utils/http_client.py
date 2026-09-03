@@ -29,6 +29,11 @@ DEFAULT_MAX_PAGES = 20
 DEFAULT_MAX_ITEMS = 1000
 PAGE_DELAY_SECONDS = 0.3
 RAW_MAX_BYTES = 5_000_000
+# webhook.site answers 429 with Retry-After (seen: 58 s for the 3/min export
+# endpoint). Waits up to this many seconds are absorbed with one retry; longer
+# ones surface as an error that names the wait, so a tool call never hangs.
+RATE_LIMIT_MAX_WAIT_ENV = "WEBHOOK_MCP_RATE_LIMIT_MAX_WAIT"
+RATE_LIMIT_MAX_WAIT_DEFAULT = 15.0
 
 
 class WebhookApiError(Exception):
@@ -45,10 +50,25 @@ class WebhookApiError(Exception):
         message: str,
         status_code: int | None = None,
         response_body: str | None = None,
+        retry_after: float | None = None,
     ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.response_body = response_body
+        self.retry_after = retry_after
+
+
+def retry_after_seconds(response: httpx.Response) -> float | None:
+    """Seconds the API asked us to wait, from Retry-After (or X-RateLimit-Reset)."""
+    header = response.headers.get("retry-after")
+    if header and header.strip().isdigit():
+        return float(header.strip())
+    reset = response.headers.get("x-ratelimit-reset")
+    if reset and reset.strip().isdigit():
+        import time
+
+        return max(0.0, float(reset) - time.time())
+    return None
 
 
 @dataclass
@@ -95,7 +115,20 @@ def api_error(verb: str, path: str, response: httpx.Response) -> WebhookApiError
     message = f"{verb} {path} failed: {response.status_code}"
     if detail:
         message += f" ({detail.strip()})"
-    return WebhookApiError(message, status_code=response.status_code, response_body=response.text)
+    wait = retry_after_seconds(response) if response.status_code == 429 else None
+    if wait is not None:
+        message += f". Rate limited: retry after {int(wait)} seconds"
+    return WebhookApiError(message, status_code=response.status_code, response_body=response.text, retry_after=wait)
+
+
+def _rate_limit_max_wait() -> float:
+    import os
+
+    raw = os.environ.get(RATE_LIMIT_MAX_WAIT_ENV, "").strip()
+    try:
+        return max(0.0, float(raw)) if raw else RATE_LIMIT_MAX_WAIT_DEFAULT
+    except ValueError:
+        return RATE_LIMIT_MAX_WAIT_DEFAULT
 
 
 def pagination_summary(page: dict[str, Any], *, pages_fetched: int, returned: int, truncated: bool) -> dict[str, Any]:
@@ -150,6 +183,7 @@ class WebhookHttpClient:
         self.timeout = timeout
         self.api_key = api_key
         self._client: httpx.AsyncClient | None = None
+        self.rate_limit_max_wait = _rate_limit_max_wait()
 
     async def __aenter__(self) -> WebhookHttpClient:
         """Enter async context manager."""
@@ -200,7 +234,7 @@ class WebhookHttpClient:
             content_type=content_type,
             response=body,
             response_is_text=is_text,
-            location=response.headers.get("location"),
+            headers={name: response.headers[name] for name in recorder.REPLAYED_HEADERS if name in response.headers},
         )
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -225,6 +259,16 @@ class WebhookHttpClient:
     def _accept(accept: str | None) -> dict[str, str] | None:
         return {"Accept": accept} if accept else None
 
+    async def _send(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
+        """Send a request; on a short 429 wait as told and retry once."""
+        response = await self.client.request(method, url, **kwargs)
+        if response.status_code == 429:
+            wait = retry_after_seconds(response)
+            if wait is not None and wait <= self.rate_limit_max_wait:
+                await asyncio.sleep(wait + 0.5)
+                response = await self.client.request(method, url, **kwargs)
+        return response
+
     async def get(
         self,
         path: str,
@@ -246,7 +290,8 @@ class WebhookHttpClient:
             WebhookApiError: On HTTP or API errors
         """
         try:
-            response = await self.client.get(
+            response = await self._send(
+                "GET",
                 self._build_url(path),
                 params=params,
                 headers=self._accept(accept),
@@ -269,6 +314,22 @@ class WebhookHttpClient:
     ) -> RawResponse:
         """GET a non-JSON body (CSV, raw request content, file download), capped at max_bytes."""
         try:
+            return await self._get_raw_once(path, params, accept, follow_redirects, max_bytes)
+        except WebhookApiError as exc:
+            if exc.status_code == 429 and exc.retry_after is not None and exc.retry_after <= self.rate_limit_max_wait:
+                await asyncio.sleep(exc.retry_after + 0.5)
+                return await self._get_raw_once(path, params, accept, follow_redirects, max_bytes)
+            raise
+
+    async def _get_raw_once(
+        self,
+        path: str,
+        params: dict[str, Any] | None,
+        accept: str | None,
+        follow_redirects: bool,
+        max_bytes: int,
+    ) -> RawResponse:
+        try:
             async with self.client.stream(
                 "GET",
                 self._build_url(path),
@@ -276,6 +337,8 @@ class WebhookHttpClient:
                 headers=self._accept(accept),
                 follow_redirects=follow_redirects,
             ) as response:
+                if response.status_code >= 400:
+                    await response.aread()  # keep the error body for the message
                 response.raise_for_status()
                 chunks: list[bytes] = []
                 size = 0
@@ -298,7 +361,6 @@ class WebhookHttpClient:
                     truncated=truncated,
                 )
         except httpx.HTTPStatusError as e:
-            await e.response.aread()
             raise api_error("GET", path, e.response) from e
         except httpx.RequestError as e:
             raise WebhookApiError(f"Request failed: {str(e)}") from e
@@ -368,7 +430,8 @@ class WebhookHttpClient:
             WebhookApiError: On HTTP or API errors
         """
         try:
-            response = await self.client.post(
+            response = await self._send(
+                "POST",
                 self._build_url(path),
                 json=json_data,
                 headers=headers,
@@ -401,7 +464,8 @@ class WebhookHttpClient:
             WebhookApiError: On HTTP or API errors
         """
         try:
-            response = await self.client.put(
+            response = await self._send(
+                "PUT",
                 self._build_url(path),
                 json=json_data,
             )
@@ -433,7 +497,8 @@ class WebhookHttpClient:
             WebhookApiError: On HTTP or API errors
         """
         try:
-            response = await self.client.delete(
+            response = await self._send(
+                "DELETE",
                 self._build_url(path),
                 params=params,
             )

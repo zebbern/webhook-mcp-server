@@ -33,7 +33,8 @@ from services.webhook_service import WebhookService
 from utils.http_client import WebhookHttpClient
 
 RECORDINGS = Path(__file__).parent / "recordings" / "live"
-SKIP = {"wait_for_request", "wait_for_email", "follow_email_link"}
+# Socket-dependent, leave webhook.site, or describe the local environment rather than the API.
+SKIP = {"wait_for_request", "wait_for_email", "follow_email_link", "server_status"}
 pytestmark = pytest.mark.skipif(not (RECORDINGS / "tools.json").exists(), reason="no live recordings yet")
 
 
@@ -65,11 +66,9 @@ def _cases() -> list[tuple[str, dict[str, Any], dict[str, Any], list[dict[str, A
 
 
 def _response(entry: dict[str, Any]) -> httpx.Response:
-    headers = {}
+    headers = dict(entry.get("headers") or {})
     if entry.get("content_type"):
         headers["content-type"] = entry["content_type"]
-    if entry.get("location"):
-        headers["location"] = entry["location"]
     if entry["response_is_text"]:
         return httpx.Response(entry["status"], text=entry["response"], headers=headers)
     return httpx.Response(entry["status"], json=entry["response"], headers=headers)

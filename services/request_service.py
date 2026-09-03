@@ -531,6 +531,10 @@ class RequestService:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     break
+                if connected and not waiter.connected:
+                    # The server closed the socket mid-wait: poll at the fast cadence instead.
+                    connected = False
+                    interval = POLL_INTERVAL_SECONDS
                 if connected:
                     event = await waiter.next(timeout=min(interval, remaining))
                     if event is not None:

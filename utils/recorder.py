@@ -70,7 +70,7 @@ class Recorder:
         content_type: str,
         response: Any,
         response_is_text: bool,
-        location: str | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         with self._lock:
             self._write(
@@ -83,7 +83,7 @@ class Recorder:
                     "json": sanitize(json_body),
                     "status": status,
                     "content_type": content_type,
-                    "location": location,
+                    "headers": headers or {},
                     "response": sanitize(response),
                     "response_is_text": response_is_text,
                 }
@@ -92,6 +92,10 @@ class Recorder:
     def _write(self, line: dict[str, Any]) -> None:
         with self._path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(line, ensure_ascii=False) + "\n")
+
+
+# Response headers that change behaviour and therefore must survive a replay.
+REPLAYED_HEADERS = ("location", "retry-after", "x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset")
 
 
 _recorder: Recorder | None = None

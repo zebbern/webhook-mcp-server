@@ -118,15 +118,29 @@ async def test_configure_creates_with_default_expiry_when_unset() -> None:
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_configure_updates_existing_token() -> None:
+async def test_configure_updates_existing_token_without_resetting_the_rest() -> None:
+    # Seen live 2026-09-03: PUT with only {"alias"} reset status/content/timeout/cors.
+    respx.get(BASE).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "uuid": TOKEN, "default_status": 203, "default_content": "keep-me", "default_content_type": "text/html",
+                "timeout": 2, "listen": 0, "cors": True, "alias": None, "request_limit": 50, "actions": False,
+                "group_id": None, "description": None, "expiry": None, "expires_at": None,
+            },
+        )
+    )
     route = respx.put(BASE).mock(return_value=httpx.Response(200, json={"uuid": TOKEN, "alias": "my-hook"}))
     async with WebhookHttpClient() as client:
         result = await WebhookService(client).configure(
             WebhookConfig(alias="my-hook", listen=5, actions=False), webhook_token=TOKEN
         )
-    assert json.loads(route.calls[0].request.content) == {"listen": 5, "alias": "my-hook", "actions": False}
+    assert json.loads(route.calls[0].request.content) == {
+        "default_status": 203, "default_content": "keep-me", "default_content_type": "text/html",
+        "timeout": 2, "listen": 5, "cors": True, "alias": "my-hook", "request_limit": 50, "actions": False,
+    }
     assert result.data["url"] == f"{WEBHOOK_SITE_API}/my-hook"
-    assert result.data["updated_settings"]["alias"] == "my-hook"
+    assert result.data["updated_settings"] == {"listen": 5, "alias": "my-hook", "actions": False}
 
 
 @pytest.mark.asyncio

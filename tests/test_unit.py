@@ -59,6 +59,7 @@ async def test_import_server_and_list_tools() -> None:
     tools = await server.mcp.list_tools()
     names = [tool.name for tool in tools]
     expected = {
+        "server_status",
         "create_webhook",
         "configure_webhook",
         "get_webhook_info",
@@ -89,7 +90,7 @@ async def test_import_server_and_list_tools() -> None:
         "send_requests",
     }
     assert set(names) == expected
-    assert len(names) == 28
+    assert len(names) == 29
     for removed in ("get_webhook_url", "get_webhook_dns", "get_latest_request", "generate_ssrf_payload"):
         assert removed not in names
     annotated = {tool.name: tool.annotations for tool in tools}

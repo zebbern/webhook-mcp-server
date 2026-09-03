@@ -30,7 +30,7 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://webhook.site"
-EXPECTED_TOOLS = 28
+EXPECTED_TOOLS = 29
 
 
 class Check:
@@ -98,6 +98,9 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
         c.expect(len(names) == EXPECTED_TOOLS, "list_tools", f"{len(names)} tools")
 
         try:
+            status = await c.call("server_status")
+            c.expect(status.get("account", {}).get("authenticated") is True and status.get("realtime_socket") == "connected", "server_status sees key, account and socket", json.dumps(status.get("account")))
+
             # --- webhooks -----------------------------------------------------
             a = await c.call("create_webhook")
             token_a = a["token"]
@@ -229,6 +232,44 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             await task
             c.expect(waited.get("source") == "socket", "wait_for_request delivered over the socket", f"source={waited.get('source')}")
 
+            # --- DNSHook ---------------------------------------------------------------
+            async def lookup() -> None:
+                await asyncio.sleep(1)
+                loop = asyncio.get_running_loop()
+                try:
+                    await loop.getaddrinfo(f"probe.{token_a}.dnshook.site", 80)
+                except OSError:
+                    pass  # the lookup itself is what webhook.site records
+
+            task = asyncio.create_task(lookup())
+            dns_hit = await c.call("wait_for_request", webhook_token=token_a, timeout_seconds=30, request_type="dns")
+            await task
+            # Resolvers may ask for NS before A; any record type proves the hook fired.
+            c.expect(dns_hit.get("request", {}).get("type") == "dns" and bool(dns_hit["request"].get("method")), "wait_for_request captured a DNSHook lookup", f"source={dns_hit.get('source')} record={dns_hit.get('request', {}).get('method')}")
+            dns_found = await c.call("search_requests", webhook_token=token_a, request_type="dns")
+            c.expect(dns_found.get("total_found", 0) >= 1, "search_requests request_type=dns", f"{dns_found.get('total_found')} found")
+
+            # --- token settings that change behaviour ----------------------------------
+            cloned = await c.call("configure_webhook", clone_from=token_b)
+            if cloned.get("token"):
+                created_tokens.append(cloned["token"])
+                c.expect(cloned.get("default_status") == 203, "configure_webhook clone_from copies settings", f"status={cloned.get('default_status')}")
+            quiet = await c.call("configure_webhook", request_limit=0)
+            if quiet.get("token"):
+                created_tokens.append(quiet["token"])
+                await c.call("send_requests", webhook_token=quiet["token"], data={"stored": False})
+                await asyncio.sleep(1.5)
+                stored = await c.call("get_webhook_requests", webhook_token=quiet["token"])
+                c.expect(stored.get("total_requests") == 0, "request_limit=0 stores nothing", f"{stored.get('total_requests')} stored")
+            await c.call("configure_webhook", webhook_token=token_a, actions=False)
+            await c.call("send_requests", webhook_token=token_a, data={"actions": "off"})
+            await asyncio.sleep(1.5)
+            silent = await c.call("get_request", webhook_token=token_a)
+            c.expect(not silent.get("request", {}).get("custom_action_output"), "actions=false skips custom actions", "")
+            await c.call("configure_webhook", webhook_token=token_a, actions=True)
+            aged = await c.call("delete_all_requests", webhook_token=token_a, date_to="now-7d")
+            c.expect(aged.get("success") is True, "delete_all_requests with a date expression", aged.get("message", "")[:60])
+
             # --- security ------------------------------------------------------------
             ssrf = await c.call("generate_oob_payloads", webhook_token=token_a, kind="ssrf", identifier="lc-ssrf")
             xss = await c.call("generate_oob_payloads", webhook_token=token_a, kind="xss", identifier="lc-xss")
@@ -246,6 +287,13 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             c.expect(exported.get("request_count", 0) >= 6 and any(r.get("html_content") for r in exported.get("requests", [])), "export_webhook_data json includes html", f"{exported.get('request_count')} rows")
             csv = await c.call("export_webhook_data", webhook_token=token_a, format="csv")
             c.expect(csv.get("csv", "").startswith("uuid,"), "export_webhook_data csv", f"{csv.get('request_count')} rows")
+            # The export endpoint allows 3 calls a minute; the 4th must fail with a clear wait, not hang.
+            limited = None
+            for _ in range(3):
+                limited = await c.call("export_webhook_data", expect_success=None, webhook_token=token_a, format="csv")
+                if limited.get("success") is False:
+                    break
+            c.expect(limited is not None and limited.get("success") is False and "Rate limited: retry after" in limited.get("message", ""), "export rate limit surfaces Retry-After", limited.get("message", "")[:100] if limited else "")
 
             # --- global variables, templates, schedules, databases, users -------------
             var = await c.call("manage_global_variables", action="create", name="mcp_live_check", value="1")
