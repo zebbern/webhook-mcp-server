@@ -1,0 +1,2222 @@
+{
+  "source": "https://docs.webhook.site/api/action-types.html",
+  "verified_at": "2026-09-03",
+  "types": {
+    "auth_basic": {
+      "params": {
+        "username": {
+          "required": false,
+          "type": "string"
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Require HTTP Basic auth on the URL.",
+      "verified": {
+        "status": "ok",
+        "message": "Basic Auth: Authorization Denied",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "password": "pass"
+      }
+    },
+    "auto_json": {
+      "params": {
+        "source": {
+          "required": false,
+          "type": "string"
+        },
+        "jsonpath": {
+          "required": false,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Register every JSON field of the body as a variable (optionally under a name prefix).",
+      "verified": {
+        "status": "ok",
+        "message": "Extracted 2 variables.",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "$request.content$"
+      }
+    },
+    "aws_cf_invalidate": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "int"
+        },
+        "distribution_id": {
+          "required": true,
+          "type": "string"
+        },
+        "paths": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Aws cf invalidate",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "aws_s3_create_bucket": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "region": {
+          "required": true,
+          "type": "string"
+        },
+        "bucket_name": {
+          "required": true,
+          "type": "string"
+        },
+        "canned_acl": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "private",
+            "public-read",
+            "public-read-write",
+            "authenticated-read"
+          ]
+        }
+      },
+      "description": "Aws s3 create bucket",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "aws_s3_delete_object": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "region": {
+          "required": false,
+          "type": "string"
+        },
+        "bucket_name": {
+          "required": true,
+          "type": "string"
+        },
+        "object_key": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Aws s3 delete object",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "aws_s3_get_object": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "region": {
+          "required": false,
+          "type": "string"
+        },
+        "bucket_name": {
+          "required": true,
+          "type": "string"
+        },
+        "object_key": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string",
+          "min": 1
+        }
+      },
+      "description": "Aws s3 get object",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "aws_s3_put_object": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "region": {
+          "required": true,
+          "type": "string"
+        },
+        "bucket_name": {
+          "required": false,
+          "type": "string"
+        },
+        "object_key": {
+          "required": true,
+          "type": "string"
+        },
+        "body": {
+          "required": true,
+          "type": "string"
+        },
+        "canned_acl": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "private",
+            "public-read",
+            "public-read-write",
+            "authenticated-read"
+          ]
+        }
+      },
+      "description": "Aws s3 put object",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "condition": {
+      "params": {
+        "input": {
+          "required": false,
+          "type": "string",
+          "required_live": true,
+          "live_note": "without it the API compares the request body, not what you meant"
+        },
+        "operator": {
+          "required": true,
+          "type": "string",
+          "in": [
+            "eq",
+            "neq",
+            "sw",
+            "ew",
+            "ct",
+            "nct",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "ex",
+            "false",
+            "true",
+            "num",
+            "int",
+            "float",
+            "json",
+            "email",
+            "domain",
+            "url"
+          ]
+        },
+        "value": {
+          "required": false,
+          "type": "string",
+          "required_live": true,
+          "live_note": "test-action returned 500 without it"
+        },
+        "action": {
+          "required": true,
+          "type": "string",
+          "in": [
+            "stop",
+            "continue",
+            "noop"
+          ]
+        }
+      },
+      "description": "Compare `input` with `value` using `operator`; `action` stop/continue/noop decides what happens when it passes.",
+      "verified": {
+        "status": "ok",
+        "message": "Condition \"{\"a\":1,\"probe\":true}\" is equal to \"POST\" evaluated to NO: Execution continued.",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "operator": "eq",
+        "value": "POST",
+        "action": "noop"
+      }
+    },
+    "conditions": {
+      "params": {
+        "conditions": {
+          "required": true,
+          "type": "array"
+        },
+        "mode": {
+          "required": true,
+          "type": "string",
+          "in": [
+            "one",
+            "all",
+            "none"
+          ]
+        },
+        "action": {
+          "required": true,
+          "type": "string",
+          "in": [
+            "stop",
+            "continue",
+            "noop"
+          ]
+        }
+      },
+      "description": "Several conditions with mode one/all/none; `action` stop/continue/noop when they pass.",
+      "verified": {
+        "status": "ok",
+        "message": "1 of 1 conditions matched. Result: YES. Action: None",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "conditions": [
+          {
+            "input": "a",
+            "operator": "eq",
+            "value": "a"
+          }
+        ],
+        "mode": "all",
+        "action": "noop"
+      }
+    },
+    "database": {
+      "params": {
+        "type": {
+          "required": true,
+          "type": null,
+          "in": [
+            "mysql",
+            "pgsql",
+            "sqlsrv"
+          ]
+        },
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "number",
+          "min": 1,
+          "max": 65535
+        },
+        "database": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": false,
+          "type": "string"
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "statement": {
+          "required": true,
+          "type": "string"
+        },
+        "params": {
+          "required": false,
+          "type": "array"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        },
+        "charset": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Run SQL on your own MySQL/Postgres/SQL Server.",
+      "verified": {
+        "status": "runtime_error",
+        "message": "Database error: [2002] php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "type": "mysql",
+        "host": "example.invalid",
+        "database": "probe",
+        "username": "user",
+        "statement": "select 1"
+      }
+    },
+    "discord_send_message": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": true,
+          "type": "string"
+        },
+        "username": {
+          "required": false,
+          "type": "string"
+        },
+        "avatar_url": {
+          "required": false,
+          "type": "url"
+        },
+        "embed_type": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "link",
+            "image",
+            "video"
+          ]
+        },
+        "embed_url": {
+          "required": false,
+          "type": "url"
+        }
+      },
+      "description": "Post to Discord through a connected provider.",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "dont_save": {
+      "params": {},
+      "description": "Do not store this request in the history.",
+      "verified": {
+        "status": "ok",
+        "message": "Marked request as Don't Save.",
+        "checked_at": "2026-09-03"
+      },
+      "example": {}
+    },
+    "dropbox_create_folder": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Dropbox create folder",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "dropbox_delete": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Dropbox delete",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "dropbox_download_file": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Dropbox download file",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "ok",
+        "message": "Dropbox: Could not get file \"/probe\": No query results for model [App\\Models\\Provider] 1",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "provider_id": "1",
+        "path": "/probe",
+        "variable_name": "probe_var"
+      }
+    },
+    "dropbox_get_link": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        },
+        "type": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "share_link",
+            "temporary"
+          ]
+        },
+        "share_audience": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "public",
+            "team",
+            "no_one"
+          ]
+        }
+      },
+      "description": "Dropbox get link",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "ok",
+        "message": "Dropbox: Could not create link for \"/probe\": No query results for model [App\\Models\\Provider] 1",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "provider_id": "1",
+        "path": "/probe"
+      }
+    },
+    "dropbox_upload_file": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "body": {
+          "required": true,
+          "type": "string"
+        },
+        "mode": {
+          "required": true,
+          "type": "string",
+          "in": [
+            "add",
+            "overwrite",
+            "update"
+          ]
+        }
+      },
+      "description": "Dropbox upload file",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "extract_jsonpath": {
+      "params": {
+        "jsonpath": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        },
+        "source": {
+          "required": false,
+          "type": "string"
+        },
+        "default": {
+          "required": false,
+          "type": "string"
+        },
+        "repeat": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Pull a value out of JSON with a JSONPath expression into $variable_name$.",
+      "verified": {
+        "status": "ok",
+        "message": "Matched JSONPath \"$\"; $probe_var$ set to \"{\"a\":1}\"",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "jsonpath": "$",
+        "variable_name": "probe_var",
+        "source": "{\"a\": 1}"
+      }
+    },
+    "extract_regex": {
+      "params": {
+        "regex": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        },
+        "source": {
+          "required": false,
+          "type": "string"
+        },
+        "default": {
+          "required": false,
+          "type": "string"
+        },
+        "repeat": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Capture a regex match from the request into $variable_name$.",
+      "verified": {
+        "status": "ok",
+        "message": "No result for regex \"(.*)\"",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "regex": "(.*)",
+        "variable_name": "probe_var"
+      }
+    },
+    "extract_xpath": {
+      "params": {
+        "xpath": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        },
+        "source": {
+          "required": false,
+          "type": "string"
+        },
+        "default": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Pull a value out of XML/HTML with XPath into $variable_name$.",
+      "verified": {
+        "status": "ok",
+        "message": "No result for XPath \"/\" (Invalid XML document: Start tag expected, '<' not found)",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "xpath": "/",
+        "variable_name": "probe_var"
+      }
+    },
+    "ftp_download": {
+      "params": {
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "number",
+          "min": 1,
+          "max": 65535
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "ssl": {
+          "required": false,
+          "type": "bool"
+        },
+        "passive": {
+          "required": false,
+          "type": "bool"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Ftp download",
+      "verified": {
+        "status": "runtime_error",
+        "message": "FTP error: Unable to connect to host example.invalid at port 21. ",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "host": "example.invalid",
+        "password": "pass",
+        "username": "user",
+        "path": "/probe"
+      }
+    },
+    "ftp_upload": {
+      "params": {
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "number",
+          "min": 1,
+          "max": 65535
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": true,
+          "type": "string"
+        },
+        "ssl": {
+          "required": false,
+          "type": "bool"
+        },
+        "passive": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Ftp upload",
+      "verified": {
+        "status": "runtime_error",
+        "message": "FTP error: Unable to connect to host example.invalid at port 21. ",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "host": "example.invalid",
+        "password": "pass",
+        "username": "user",
+        "path": "/probe",
+        "content": "probe"
+      }
+    },
+    "google_sheets_add_row": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "spreadsheet_id": {
+          "required": true,
+          "type": "string"
+        },
+        "range": {
+          "required": true,
+          "type": "string"
+        },
+        "values": {
+          "required": true,
+          "type": "string"
+        },
+        "formula_mode": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Google sheets add row",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "google_sheets_get_values": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "spreadsheet_id": {
+          "required": true,
+          "type": "string"
+        },
+        "range": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Google sheets get values",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "google_sheets_update_row": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "spreadsheet_id": {
+          "required": true,
+          "type": "string"
+        },
+        "range": {
+          "required": true,
+          "type": "string"
+        },
+        "values": {
+          "required": true,
+          "type": "string"
+        },
+        "formula_mode": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Google sheets update row",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "http": {
+      "params": {
+        "url": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        },
+        "method": {
+          "required": false,
+          "type": null,
+          "nullable": true,
+          "in": [
+            "POST",
+            "GET",
+            "OPTIONS",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "TRACE"
+          ]
+        },
+        "mode": {
+          "required": false,
+          "type": null,
+          "nullable": true,
+          "in": [
+            "text",
+            "json",
+            "multipart",
+            "urlencoded",
+            "forward"
+          ]
+        },
+        "auth": {
+          "required": false,
+          "type": "array",
+          "nullable": true
+        },
+        "auth.mode": {
+          "required": false,
+          "type": "string",
+          "nullable": true,
+          "in": [
+            "basic",
+            "digest",
+            "ntlm"
+          ]
+        },
+        "auth.username": {
+          "required": false,
+          "type": "string"
+        },
+        "auth.password": {
+          "required": false,
+          "type": "string"
+        },
+        "multipart": {
+          "required": false,
+          "type": "array",
+          "required_if": "mode,multipart"
+        },
+        "multipart.*.name": {
+          "required": false,
+          "type": "string"
+        },
+        "multipart.*.filename": {
+          "required": false,
+          "type": "string"
+        },
+        "multipart.*.content": {
+          "required": false,
+          "type": "string"
+        },
+        "urlencoded": {
+          "required": false,
+          "type": "array"
+        },
+        "urlencoded.*.name": {
+          "required": false,
+          "type": "string",
+          "required_if": "mode,urlencoded"
+        },
+        "urlencoded.*.value": {
+          "required": false,
+          "type": "string",
+          "required_if": "mode,urlencoded"
+        },
+        "headers": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        },
+        "skip_ssl_verification": {
+          "required": false,
+          "type": "bool",
+          "nullable": true
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        },
+        "timeout": {
+          "required": false,
+          "type": "number",
+          "nullable": true,
+          "max": 15
+        },
+        "retry": {
+          "required": false,
+          "type": "array"
+        },
+        "retry.enabled": {
+          "required": false,
+          "type": "bool",
+          "nullable": true
+        },
+        "retry.retries": {
+          "required": false,
+          "type": "number",
+          "nullable": true,
+          "min": 1,
+          "max": 10
+        },
+        "retry.delay": {
+          "required": false,
+          "type": "number",
+          "nullable": true,
+          "min": 0,
+          "max": 10
+        },
+        "retry.require_status": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "description": "Send an HTTP request to any URL (forward, JSON, multipart, urlencoded); response goes into $variable_name$.",
+      "verified": {
+        "status": "ok",
+        "message": "Successfully sent request to https://example.com/; status: 405; time: 0.04s",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "url": "https://example.com/"
+      }
+    },
+    "hubspot_create_contact": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "properties": {
+          "required": true,
+          "type": "array"
+        }
+      },
+      "description": "Hubspot create contact",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "image_resize": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string"
+        },
+        "width": {
+          "required": false,
+          "type": "string",
+          "required_without": "height"
+        },
+        "height": {
+          "required": false,
+          "type": "string",
+          "required_without": "width"
+        },
+        "aspect_ratio": {
+          "required": true,
+          "type": "bool"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Resize an uploaded image.",
+      "verified": {
+        "status": "ok",
+        "message": "Width or height needs to be defined",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "$request.content$",
+        "aspect_ratio": true
+      }
+    },
+    "javascript": {
+      "params": {
+        "script": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Run JavaScript; access variables and set the response from code.",
+      "verified": {
+        "status": "ok",
+        "message": "ok",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "script": "console.log('ok')"
+      }
+    },
+    "log": {
+      "params": {
+        "text": {
+          "required": true,
+          "type": "string"
+        },
+        "mode": {
+          "required": false,
+          "type": null,
+          "nullable": true,
+          "in": [
+            "text",
+            "markdown"
+          ]
+        }
+      },
+      "description": "Write text or markdown to the request's action log.",
+      "verified": {
+        "status": "ok",
+        "message": "probe",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "text": "probe"
+      }
+    },
+    "microsoft_drive_download": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string",
+          "required_live": true,
+          "live_note": "API answered 'Missing parameter: variable_name'"
+        }
+      },
+      "description": "Microsoft drive download",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "microsoft_drive_upload": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "content_type": {
+          "required": false,
+          "type": "string"
+        },
+        "content": {
+          "required": false,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Microsoft drive upload",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "microsoft_excel_add_rows": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": false,
+          "type": "string"
+        },
+        "table": {
+          "required": false,
+          "type": "string"
+        },
+        "index": {
+          "required": false,
+          "type": "int"
+        },
+        "values": {
+          "required": true,
+          "type": "array"
+        }
+      },
+      "description": "Microsoft excel add rows",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "microsoft_excel_get_values": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "worksheet": {
+          "required": true,
+          "type": "string"
+        },
+        "range": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Microsoft excel get values",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "mock": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string",
+          "notes": [
+            "OpenAPI/Swagger spec as JSON or YAML, or a URL to one"
+          ]
+        },
+        "path": {
+          "required": false,
+          "type": "string",
+          "notes": [
+            "Path to match, e.g. https://example.com$request.path$"
+          ]
+        }
+      },
+      "description": "Turn the URL into a mock server for an OpenAPI/Swagger spec: responses follow the spec's paths and schemas.",
+      "verified": {
+        "status": "runtime_error",
+        "message": "Action error: OpenAPI spec contains no such operation [/,post]",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "{\"openapi\": \"3.0.0\", \"info\": {\"title\": \"probe\", \"version\": \"1\"}, \"paths\": {\"/\": {\"get\": {\"responses\": {\"200\": {\"description\": \"ok\", \"content\": {\"application/json\": {\"schema\": {\"type\": \"object\", \"properties\": {\"ok\": {\"type\": \"boolean\"}}}}}}}}}}}"
+      }
+    },
+    "modify_response": {
+      "params": {
+        "content": {
+          "required": false,
+          "type": "string"
+        },
+        "status": {
+          "required": false,
+          "type": "string"
+        },
+        "headers": {
+          "required": false,
+          "type": "string"
+        },
+        "stop": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Set the HTTP response (body, status, headers) the URL returns for this request; `stop` ends the chain.",
+      "verified": {
+        "status": "ok",
+        "message": "Response modified (default status):\nprobe",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "content": "probe"
+      }
+    },
+    "ntfy": {
+      "params": {
+        "topic": {
+          "required": true,
+          "type": "string"
+        },
+        "title": {
+          "required": false,
+          "type": "string"
+        },
+        "icon": {
+          "required": false,
+          "type": "string"
+        },
+        "message": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Push a notification to an ntfy.sh topic.",
+      "verified": {
+        "status": "ok",
+        "message": "Successfully sent message",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "topic": "mcp-probe",
+        "message": "probe"
+      }
+    },
+    "pdf_generate": {
+      "params": {
+        "content": {
+          "required": false,
+          "type": "string"
+        },
+        "mode": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "html",
+            "markdown"
+          ]
+        },
+        "paper": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "a4",
+            "letter"
+          ]
+        },
+        "orientation": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "portrait",
+            "landscape"
+          ]
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Render HTML or markdown to a PDF file variable.",
+      "verified": {
+        "status": "ok",
+        "message": "PDF file content stored in variable $pdf$",
+        "checked_at": "2026-09-03"
+      },
+      "example": {}
+    },
+    "pushed_send": {
+      "params": {
+        "app_key": {
+          "required": true,
+          "type": "string"
+        },
+        "app_secret": {
+          "required": true,
+          "type": "string"
+        },
+        "target_type": {
+          "required": true,
+          "type": "string"
+        },
+        "target": {
+          "required": true,
+          "type": "string"
+        },
+        "message": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Pushed send",
+      "verified": {
+        "status": "runtime_error",
+        "message": "Action error: Could not resolve host: api.pushed.co",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "app_key": "k",
+        "app_secret": "s",
+        "target_type": "app",
+        "target": "t",
+        "message": "probe"
+      }
+    },
+    "rabbitmq_get": {
+      "params": {
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "int"
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "vhost": {
+          "required": false,
+          "type": "string"
+        },
+        "queue": {
+          "required": true,
+          "type": "string"
+        },
+        "ssl": {
+          "required": false,
+          "type": "bool"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Rabbitmq get",
+      "verified": {
+        "status": "server_error",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"f563bbf6e8db4c60b1b0d1f7f0921563\", \"code\": 2}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "rabbitmq_publish": {
+      "params": {
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "int"
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "vhost": {
+          "required": false,
+          "type": "string"
+        },
+        "queue": {
+          "required": true,
+          "type": "string"
+        },
+        "ssl": {
+          "required": false,
+          "type": "bool"
+        },
+        "message": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Rabbitmq publish",
+      "verified": {
+        "status": "runtime_error",
+        "message": "RabbitMQ Error: stream_socket_client(): Unable to connect to tcp://example.invalid:5672 (php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known)",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "host": "example.invalid",
+        "username": "user",
+        "password": "pass",
+        "queue": "probe",
+        "message": "probe"
+      }
+    },
+    "rate_limit": {
+      "params": {
+        "period": {
+          "required": true,
+          "type": "int"
+        },
+        "count": {
+          "required": true,
+          "type": "int"
+        },
+        "key": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Reject requests beyond `count` per `period` seconds (optionally per `key`).",
+      "verified": {
+        "status": "ok",
+        "message": "",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "period": 60,
+        "count": 100
+      }
+    },
+    "script": {
+      "params": {
+        "script": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Run WebhookScript (webhook.site's scripting language); use echo(), respond(), var(), set().",
+      "verified": {
+        "status": "ok",
+        "message": "ok",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "script": "echo('ok')"
+      }
+    },
+    "send_email": {
+      "params": {
+        "sender": {
+          "required": false,
+          "type": "string"
+        },
+        "recipient": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": false,
+          "type": "string"
+        },
+        "is_html": {
+          "required": false,
+          "type": "bool"
+        },
+        "subject": {
+          "required": true,
+          "type": "string"
+        },
+        "attachments": {
+          "required": false,
+          "type": "array"
+        }
+      },
+      "description": "Send an email from webhook.site (also fires on incoming emails: guard with a condition on $request.type$).",
+      "verified": {
+        "status": "ok",
+        "message": "Email sent to 29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site with subject \"probe\"",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "recipient": "29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site",
+        "subject": "probe"
+      }
+    },
+    "send_email_smtp": {
+      "params": {
+        "sender_name": {
+          "required": false,
+          "type": "string"
+        },
+        "sender_email": {
+          "required": false,
+          "type": "string"
+        },
+        "recipient": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": false,
+          "type": "string"
+        },
+        "is_html": {
+          "required": false,
+          "type": "bool"
+        },
+        "subject": {
+          "required": true,
+          "type": "string"
+        },
+        "encryption": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "none",
+            "ssl",
+            "tls"
+          ]
+        },
+        "port": {
+          "required": false,
+          "type": "int"
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "attachments": {
+          "required": false,
+          "type": "array"
+        }
+      },
+      "description": "Send an email through your own SMTP server.",
+      "verified": {
+        "status": "server_error",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"c2f25ebca87646b28f2d532b45e27fa3\"}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "send_request": {
+      "params": {
+        "url": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        },
+        "method": {
+          "required": false,
+          "type": null,
+          "nullable": true,
+          "in": [
+            "POST",
+            "GET",
+            "OPTIONS",
+            "PUT",
+            "DELETE"
+          ]
+        },
+        "headers": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        },
+        "skip_ssl_verification": {
+          "required": false,
+          "type": "bool",
+          "nullable": true
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        },
+        "timeout": {
+          "required": false,
+          "type": "number",
+          "nullable": true,
+          "max": 30
+        }
+      },
+      "description": "Simpler HTTP request action (legacy); prefer `http`.",
+      "verified": {
+        "status": "ok",
+        "message": "Successfully sent request to https://example.com/; status: 405",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "url": "https://example.com/"
+      }
+    },
+    "set_variable": {
+      "params": {
+        "name": {
+          "required": true,
+          "type": "string"
+        },
+        "value": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        },
+        "mode": {
+          "required": false,
+          "type": null,
+          "nullable": true,
+          "in": [
+            "text",
+            "random",
+            "date"
+          ]
+        },
+        "random": {
+          "required": false,
+          "type": "array"
+        },
+        "random.*.length": {
+          "required": false,
+          "type": "int",
+          "max": 10000,
+          "required_if": "mode,random"
+        },
+        "random.*.characters": {
+          "required": false,
+          "type": "array",
+          "in": [
+            "lowercase",
+            "uppercase",
+            "digits",
+            "symbols",
+            "user"
+          ]
+        },
+        "random.*.alphabet": {
+          "required": false,
+          "type": "string"
+        },
+        "date": {
+          "required": false,
+          "type": "array"
+        },
+        "date.*.input": {
+          "required": false,
+          "type": "string"
+        },
+        "date.*.format": {
+          "required": false,
+          "type": "string",
+          "in": [
+            "iso8601",
+            "mysql",
+            "unix",
+            "unixmicro",
+            "user"
+          ]
+        },
+        "date.*.user_format": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Set a runtime variable (text, random string, or formatted date).",
+      "verified": {
+        "status": "ok",
+        "message": "$mcp_probe_var$ set to \"1\"",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "name": "mcp_probe_var",
+        "value": "1"
+      }
+    },
+    "sftp_download": {
+      "params": {
+        "provider_id": {
+          "required": false,
+          "type": "string"
+        },
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "number",
+          "min": 1,
+          "max": 65535
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": false,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Sftp download",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "server_error",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"e9c1e00fac064670a4580786dc9b316a\"}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "sftp_upload": {
+      "params": {
+        "provider_id": {
+          "required": false,
+          "type": "string"
+        },
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "number",
+          "min": 1,
+          "max": 65535
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": false,
+          "type": "string"
+        },
+        "path": {
+          "required": true,
+          "type": "string"
+        },
+        "content": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Sftp upload",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "server_error",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"9a4edfc457c74dd78e4d43afc8ae5efb\"}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "slack_send_message": {
+      "params": {
+        "webhook_url": {
+          "required": true,
+          "type": "url"
+        },
+        "raw": {
+          "required": false,
+          "type": "bool"
+        },
+        "content": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Post to a Slack incoming webhook URL.",
+      "verified": {
+        "status": "runtime_error",
+        "message": "Could not send Slack message: Client error: `POST https://example.com/` resulted in a `405 Method Not Allowed` response:\n<!doctype html><html lang=\"en\"><head><title>Example Domain</title><link rel=\"icon\" href=\"data:,\"><meta name=\"viewport\" c (truncated...)\n",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "webhook_url": "https://example.com/",
+        "content": "probe"
+      }
+    },
+    "sleep": {
+      "params": {
+        "delay": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Pause for `delay` seconds before continuing.",
+      "verified": {
+        "status": "ok",
+        "message": "Slept for 1 seconds",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "delay": "1"
+      }
+    },
+    "ssh_run_command": {
+      "params": {
+        "provider_id": {
+          "required": false,
+          "type": "string"
+        },
+        "host": {
+          "required": true,
+          "type": "string"
+        },
+        "port": {
+          "required": false,
+          "type": "number",
+          "min": 1,
+          "max": 65535
+        },
+        "username": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": false,
+          "type": "string"
+        },
+        "command": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        }
+      },
+      "description": "Ssh run command",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "server_error",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"fea0628667a249f3bd304fdc71881aaa\"}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "stop": {
+      "params": {},
+      "description": "Stop running further actions.",
+      "verified": {
+        "status": "ok",
+        "message": "Stopped action execution.",
+        "checked_at": "2026-09-03"
+      },
+      "example": {}
+    },
+    "store_global_variable": {
+      "params": {
+        "name": {
+          "required": true,
+          "type": "string"
+        },
+        "value": {
+          "required": false,
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "description": "Persist a value as a Global Variable shared by all URLs.",
+      "verified": {
+        "status": "ok",
+        "message": "Set global variable $mcp_probe_var$ to \"\"",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "name": "mcp_probe_var"
+      }
+    },
+    "template": {
+      "params": {
+        "template_id": {
+          "required": true,
+          "type": "int"
+        },
+        "variables": {
+          "required": false,
+          "type": "array"
+        }
+      },
+      "description": "Include the actions of a saved Template.",
+      "verified": {
+        "status": "runtime_error",
+        "message": "Action error: Template not found",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "template_id": 1
+      }
+    },
+    "text_decrypt": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string",
+          "default": "text_decrypt"
+        }
+      },
+      "description": "Decrypt text produced by text_encrypt.",
+      "verified": {
+        "status": "runtime_error",
+        "message": "Action error: Source is not valid base64",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "$request.content$",
+        "password": "pass"
+      }
+    },
+    "text_encrypt": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string"
+        },
+        "password": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string",
+          "default": "text_encrypt"
+        }
+      },
+      "description": "AES-encrypt `source` with `password`.",
+      "verified": {
+        "status": "ok",
+        "message": "Encrypted text stored in $text_encrypt$",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "$request.content$",
+        "password": "pass"
+      }
+    },
+    "text_map": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string"
+        },
+        "operator": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        },
+        "default": {
+          "required": true,
+          "type": "string",
+          "required_live": true,
+          "live_note": "API answered 'Missing parameter: default' for an empty string"
+        },
+        "mappings": {
+          "required": true,
+          "type": "array"
+        }
+      },
+      "description": "Map `source` to another value through a lookup table.",
+      "verified": {
+        "status": "ok",
+        "message": "No matches for \"{\"a\":1,\"probe\":true}\"; set variable $probe_var$ to \"none\" (default)",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "$request.content$",
+        "operator": "eq",
+        "variable_name": "probe_var",
+        "default": "none",
+        "mappings": [
+          {
+            "from": "a",
+            "to": "b"
+          }
+        ]
+      }
+    },
+    "text_replace": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": true,
+          "type": "string"
+        },
+        "replacements": {
+          "required": true,
+          "type": "array"
+        }
+      },
+      "description": "Replace substrings in `source`.",
+      "verified": {
+        "status": "ok",
+        "message": "Set variable $probe_var$ with 1 replacements",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "$request.content$",
+        "variable_name": "probe_var",
+        "replacements": [
+          {
+            "from": "a",
+            "to": "b"
+          }
+        ]
+      }
+    },
+    "text_split": {
+      "params": {
+        "delimiter": {
+          "required": true,
+          "type": "string"
+        },
+        "source": {
+          "required": true,
+          "type": "string"
+        },
+        "variable_name": {
+          "required": false,
+          "type": "string"
+        },
+        "repeat": {
+          "required": false,
+          "type": "bool"
+        }
+      },
+      "description": "Split `source` on `delimiter` (can repeat over the parts).",
+      "verified": {
+        "status": "ok",
+        "message": "Created 2 variables",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "delimiter": ",",
+        "source": "$request.content$"
+      }
+    },
+    "twitter_tweet": {
+      "params": {
+        "provider_id": {
+          "required": true,
+          "type": "string"
+        },
+        "tweet": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      "description": "Twitter tweet",
+      "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
+      "verified": {
+        "status": "needs_provider",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Entity not found\", \"ids\": [\"1\"]}}",
+        "checked_at": "2026-09-03"
+      }
+    },
+    "validate_json": {
+      "params": {
+        "source": {
+          "required": true,
+          "type": "string",
+          "notes": [
+            "JSON text to validate, e.g. $request.content$"
+          ]
+        },
+        "schema": {
+          "required": false,
+          "type": "string",
+          "notes": [
+            "JSON Schema text or URL"
+          ]
+        }
+      },
+      "description": "Check that `source` is valid JSON (optionally against a JSON Schema); sets $validator.count$ and $validator.errors$, errors the action on failure.",
+      "verified": {
+        "status": "ok",
+        "message": "JSON is valid.",
+        "checked_at": "2026-09-03"
+      },
+      "example": {
+        "source": "{\"a\": 1}"
+      }
+    },
+    "webhook_get_requests": {
+      "params": {
+        "variable_name": {
+          "required": false,
+          "type": "string",
+          "default": "req"
+        },
+        "repeat": {
+          "required": false,
+          "type": "bool"
+        },
+        "token_id": {
+          "required": true,
+          "type": "string"
+        },
+        "sorting": {
+          "required": false,
+          "type": "string"
+        },
+        "query": {
+          "required": false,
+          "type": "string"
+        },
+        "max": {
+          "required": false,
+          "type": "int",
+          "default": "100",
+          "max": 1000
+        }
+      },
+      "description": "Fetch requests of another token into $variable_name$ (can repeat over them).",
+      "verified": {
+        "status": "server_error",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"80ce346b04094f9eb65aaf9aa8b84d45\"}}",
+        "checked_at": "2026-09-03"
+      }
+    }
+  }
+}

@@ -15,6 +15,7 @@ MCP server for webhook.site. 28 tools in `handlers/tools.py`, services in `servi
 - Tokens created with the key are permanent. Every test or probe must delete what it creates in a `finally`, then confirm with `list_webhooks`.
 - Custom actions run on incoming emails too. Any `send_email` action to a token's own inbox must be guarded by a `condition` action on `$request.type$` or it loops (37 emails in a minute, seen).
 - Do not invite or delete users, and do not send email to real addresses.
+- Never point an outbound action (`http`, `send_request`, `slack_send_message`, schedules) at a webhook.site URL, including the token's own. The platform detects the recursion, disables the action and emails the account owner. Use `https://example.com/` as the harmless target in probes.
 
 ## Product stance
 

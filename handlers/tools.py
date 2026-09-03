@@ -14,6 +14,7 @@ from pydantic import Field
 
 from models.app_context import AppContext
 from models.schemas import DeleteFilters, SearchFilters, ToolResult, WebhookConfig
+from utils import action_types
 from utils.http_client import WebhookApiError
 from utils.logger import setup_logger
 from utils.validation import (
@@ -36,7 +37,7 @@ CanaryType = Literal["url", "dns", "email"]
 PayloadKind = Literal["ssrf", "xss", "canary"]
 ExportFormat = Literal["json", "csv"]
 CrudAction = Literal["list", "create", "update", "delete"]
-ActionAction = Literal["list", "create", "update", "delete", "test", "execute"]
+ActionAction = Literal["list", "create", "update", "delete", "test", "execute", "types", "variables"]
 ScheduleAction = Literal["list", "get", "create", "update", "delete", "run", "logs"]
 DatabaseAction = Literal["list", "create", "update", "delete", "query"]
 UserAction = Literal["list", "invite", "update", "delete"]
@@ -575,9 +576,9 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
     @mcp.tool(annotations=FAMILY)
     async def manage_custom_actions(
-        webhook_token: Token,
         action: ActionAction,
         ctx: Context[AppContext],
+        webhook_token: str | None = None,
         action_id: str | None = None,
         request_id: str | None = None,
         type: str | None = None,
@@ -591,22 +592,39 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Manage the Custom Actions webhook.site runs on every request or email a token receives.
 
-        action: list | create | update | delete | test | execute. create/update
-        take type (e.g. modify_response, http, script, javascript, send_email,
-        extract_jsonpath, extract_regex, condition, rate_limit, log,
-        set_variable, store_global_variable, slack_send_message, ...) with
-        parameters per the webhook.site action-types reference, order, and
+        action: types (reference of all 63 action types; pass type= for one
+        type's parameters, live-verified status and example) | variables
+        ($request.*$ variables and modifiers) | list | create | update |
+        delete | test | execute. create/update take type (modify_response,
+        http, script, javascript, send_email, extract_jsonpath, condition,
+        rate_limit, log, set_variable, mock, ...) with parameters, order, and
         optionally queue/delay/condition (id of a conditions action). test
         dry-runs the given action against request_id; execute re-runs all
         saved actions on request_id. Actions also fire on incoming emails, so
-        guard email-sending actions with a condition on $request.type$.
+        guard email-sending actions with a condition on $request.type$. Never
+        point http/send_request at a webhook.site URL (recursion is disabled).
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op() -> Awaitable[ToolResult] | ToolResult:
+            if action == "types":
+                if type:
+                    return ToolResult(success=True, message=f"Reference for '{type}'", data=action_types.describe(type))
+                catalogue = [action_types.summarise(name, entry) for name, entry in action_types.all_types().items()]
+                return ToolResult(
+                    success=True,
+                    message=f"{len(catalogue)} action types (verified {action_types.load().get('verified_at')})",
+                    data={"types": catalogue},
+                )
+            if action == "variables":
+                return ToolResult(success=True, message="Variable reference", data=action_types.variables_reference())
+            validate_webhook_token(_require(webhook_token, "webhook_token", action))
             svc = _app(ctx).actions
             if action == "list":
                 return svc.list(webhook_token)
+            if action in ("create", "test"):
+                action_types.validate_action(_require(type, "type", action), parameters)
+            elif action == "update" and type is not None:
+                action_types.validate_action(type, parameters, partial=True)
             if action == "create":
                 return svc.create(
                     webhook_token,

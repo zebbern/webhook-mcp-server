@@ -1,0 +1,44 @@
+name: Live API check
+
+# webhook.site changes without notice. Once a day, drive the real server over
+# stdio and call every tool against the live API (creates and deletes its own
+# tokens). Needs the WEBHOOK_SITE_API_KEY repository secret; skips without it.
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  live-tool-check:
+    runs-on: ubuntu-latest
+    env:
+      WEBHOOK_SITE_API_KEY: ${{ secrets.WEBHOOK_SITE_API_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Exercise every tool against webhook.site
+        run: |
+          if [ -z "$WEBHOOK_SITE_API_KEY" ]; then
+            echo "WEBHOOK_SITE_API_KEY secret not configured; skipping"
+            exit 0
+          fi
+          python scripts/live_tool_check.py
+
+      - name: Authenticated pytest tier
+        run: |
+          if [ -z "$WEBHOOK_SITE_API_KEY" ]; then exit 0; fi
+          pytest -m live_auth -v

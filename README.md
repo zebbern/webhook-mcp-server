@@ -230,7 +230,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 | Tool                      | Description                                                                                        |
 | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| `manage_custom_actions`   | list / create / update / delete / test / execute the Custom Actions a token runs on each request or email |
+| `manage_custom_actions`   | list / create / update / delete / test / execute the Custom Actions a token runs on each request or email; `types` and `variables` return the built-in reference (63 action types, each verified against the live API, plus every `$request.*$` variable) and required parameters are checked before the call |
 | `manage_schedules`        | list / get / create / update / delete / run / logs for Schedules that call a URL on an interval or cron |
 | `manage_global_variables` | list / create / update / delete Global Variables usable as `$name$` in actions and schedules          |
 | `manage_groups`           | list / create / update / delete Groups that organise URLs                                            |

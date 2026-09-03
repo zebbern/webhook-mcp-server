@@ -168,6 +168,13 @@ async def run(api_key: str) -> int:
             await c.call("configure_webhook", webhook_token=token_a, listen=0)
 
             # --- custom actions + email flow ----------------------------------
+            types = await c.call("manage_custom_actions", action="types")
+            c.expect(len(types.get("types", [])) >= 63, "manage_custom_actions types catalogue", f"{len(types.get('types', []))} types")
+            one = await c.call("manage_custom_actions", action="types", type="send_email")
+            c.expect(one.get("params", {}).get("recipient", {}).get("required") is True, "manage_custom_actions types detail", str(one.get("verified", {}).get("status")))
+            await c.call("manage_custom_actions", action="variables")
+            rejected = await c.call("manage_custom_actions", expect_success=False, webhook_token=token_a, action="create", type="http", parameters={})
+            c.expect("url" in rejected.get("message", ""), "manage_custom_actions validates required params before calling the API", rejected.get("message", "")[:80])
             guard = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="condition", order=1, parameters={"input": "$request.type$", "operator": "neq", "value": "web", "action": "stop"})
             log_action = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="log", order=2, parameters={"text": "seen $request.method$"})
             log_id = log_action.get("action", {}).get("uuid")

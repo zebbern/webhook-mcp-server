@@ -1,0 +1,2900 @@
+{
+ "checked_at": "2026-09-03",
+ "exchanges": [
+  {
+   "type": "auth_basic",
+   "payload": {
+    "type": "auth_basic",
+    "order": 1,
+    "parameters": {
+     "password": "pass"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Basic Auth: Authorization Denied"
+      ]
+     },
+     "response": {
+      "content": "Unauthorized.",
+      "status": 401,
+      "headers": {
+       "www-authenticate": "Basic realm=Webhook.site, charset=\"UTF-8\""
+      }
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "auto_json",
+   "payload": {
+    "type": "auto_json",
+    "order": 1,
+    "parameters": {
+     "source": "$request.content$"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Extracted 2 variables."
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "json.a": 1,
+      "json.probe": true,
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "aws_cf_invalidate",
+   "payload": {
+    "type": "aws_cf_invalidate",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "distribution_id": "dist",
+     "paths": "/*"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "aws_s3_create_bucket",
+   "payload": {
+    "type": "aws_s3_create_bucket",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "region": "us-east-1",
+     "bucket_name": "bucket"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "aws_s3_delete_object",
+   "payload": {
+    "type": "aws_s3_delete_object",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "bucket_name": "bucket",
+     "object_key": "key"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "aws_s3_get_object",
+   "payload": {
+    "type": "aws_s3_get_object",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "bucket_name": "bucket",
+     "object_key": "key",
+     "variable_name": "probe_var"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "aws_s3_put_object",
+   "payload": {
+    "type": "aws_s3_put_object",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "region": "us-east-1",
+     "object_key": "key",
+     "body": "probe"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "condition",
+   "payload": {
+    "type": "condition",
+    "order": 1,
+    "parameters": {
+     "operator": "eq",
+     "value": "POST",
+     "action": "noop"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Condition \"{\"a\":1,\"probe\":true}\" is equal to \"POST\" evaluated to NO: Execution continued."
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "conditions",
+   "payload": {
+    "type": "conditions",
+    "order": 1,
+    "parameters": {
+     "conditions": [
+      {
+       "input": "a",
+       "operator": "eq",
+       "value": "a"
+      }
+     ],
+     "mode": "all",
+     "action": "noop"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "1 of 1 conditions matched. Result: YES. Action: None"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "database",
+   "payload": {
+    "type": "database",
+    "order": 1,
+    "parameters": {
+     "type": "mysql",
+     "host": "example.invalid",
+     "database": "probe",
+     "username": "user",
+     "statement": "select 1"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Database error: [2002] php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "db.error": "[2002] php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known",
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "discord_send_message",
+   "payload": {
+    "type": "discord_send_message",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "content": "probe"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "dont_save",
+   "payload": {
+    "type": "dont_save",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Marked request as Don't Save."
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "dropbox_create_folder",
+   "payload": {
+    "type": "dropbox_create_folder",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "dropbox_delete",
+   "payload": {
+    "type": "dropbox_delete",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "dropbox_download_file",
+   "payload": {
+    "type": "dropbox_download_file",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe",
+     "variable_name": "probe_var"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Dropbox: Could not get file \"/probe\": No query results for model [App\\Models\\Provider] 1"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "dropbox_get_link",
+   "payload": {
+    "type": "dropbox_get_link",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Dropbox: Could not create link for \"/probe\": No query results for model [App\\Models\\Provider] 1"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "dropbox_upload_file",
+   "payload": {
+    "type": "dropbox_upload_file",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe",
+     "body": "probe",
+     "mode": "all"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "extract_jsonpath",
+   "payload": {
+    "type": "extract_jsonpath",
+    "order": 1,
+    "parameters": {
+     "jsonpath": "$",
+     "variable_name": "probe_var",
+     "source": "{\"a\": 1}"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Matched JSONPath \"$\"; $probe_var$ set to \"{\"a\":1}\""
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "probe_var": "{\"a\":1}",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "extract_regex",
+   "payload": {
+    "type": "extract_regex",
+    "order": 1,
+    "parameters": {
+     "regex": "(.*)",
+     "variable_name": "probe_var"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "No result for regex \"(.*)\""
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "probe_var": "",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "extract_xpath",
+   "payload": {
+    "type": "extract_xpath",
+    "order": 1,
+    "parameters": {
+     "xpath": "/",
+     "variable_name": "probe_var"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "No result for XPath \"/\" (Invalid XML document: Start tag expected, '<' not found)"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "probe_var": "",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "ftp_download",
+   "payload": {
+    "type": "ftp_download",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "password": "pass",
+     "username": "user",
+     "path": "/probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "FTP error: Unable to connect to host example.invalid at port 21. "
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "ftp_upload",
+   "payload": {
+    "type": "ftp_upload",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "password": "pass",
+     "username": "user",
+     "path": "/probe",
+     "content": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "FTP error: Unable to connect to host example.invalid at port 21. "
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "google_sheets_add_row",
+   "payload": {
+    "type": "google_sheets_add_row",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "spreadsheet_id": "sheet",
+     "range": "A1",
+     "values": "a"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "google_sheets_get_values",
+   "payload": {
+    "type": "google_sheets_get_values",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "spreadsheet_id": "sheet",
+     "range": "A1",
+     "variable_name": "probe_var"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "google_sheets_update_row",
+   "payload": {
+    "type": "google_sheets_update_row",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "spreadsheet_id": "sheet",
+     "range": "A1",
+     "values": "a"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "http",
+   "payload": {
+    "type": "http",
+    "order": 1,
+    "parameters": {
+     "url": "https://example.com/"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Successfully sent request to https://example.com/; status: 405; time: 0.04s"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "http.url": "https://example.com/",
+      "http.status": 405,
+      "http.content": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><link rel=\"icon\" href=\"data:,\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>",
+      "http.headers.date": "Thu, 03 Sep 2026 19:45:57 GMT",
+      "http.headers.content-type": "text/html",
+      "http.headers.transfer-encoding": "chunked",
+      "http.headers.connection": "keep-alive",
+      "http.headers.cache-control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+      "http.headers.expires": "Thu, 01 Jan 1970 00:00:01 GMT",
+      "http.headers.referrer-policy": "same-origin",
+      "http.headers.x-frame-options": "SAMEORIGIN",
+      "http.headers.server": "cloudflare",
+      "http.headers.cf-ray": "a35741fbcd52000d-PRG",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "hubspot_create_contact",
+   "payload": {
+    "type": "hubspot_create_contact",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "properties": [
+      {
+       "name": "email",
+       "value": "probe@example.com"
+      }
+     ]
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "image_resize",
+   "payload": {
+    "type": "image_resize",
+    "order": 1,
+    "parameters": {
+     "source": "$request.content$",
+     "aspect_ratio": true
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Width or height needs to be defined"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "javascript",
+   "payload": {
+    "type": "javascript",
+    "order": 1,
+    "parameters": {
+     "script": "console.log('ok')"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "ok"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "log",
+   "payload": {
+    "type": "log",
+    "order": 1,
+    "parameters": {
+     "text": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "probe"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "microsoft_drive_download",
+   "payload": {
+    "type": "microsoft_drive_download",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe",
+     "variable_name": "file"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "microsoft_drive_upload",
+   "payload": {
+    "type": "microsoft_drive_upload",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "microsoft_excel_add_rows",
+   "payload": {
+    "type": "microsoft_excel_add_rows",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "values": "a"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "microsoft_excel_get_values",
+   "payload": {
+    "type": "microsoft_excel_get_values",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "path": "/probe",
+     "worksheet": "Sheet1",
+     "range": "A1",
+     "variable_name": "probe_var"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "mock",
+   "payload": {
+    "type": "mock",
+    "order": 1,
+    "parameters": {
+     "source": "{\"openapi\": \"3.0.0\", \"info\": {\"title\": \"probe\", \"version\": \"1\"}, \"paths\": {\"/\": {\"get\": {\"responses\": {\"200\": {\"description\": \"ok\", \"content\": {\"application/json\": {\"schema\": {\"type\": \"object\", \"properties\": {\"ok\": {\"type\": \"boolean\"}}}}}}}}}}}"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Action error: OpenAPI spec contains no such operation [/,post]"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "OpenAPI spec contains no such operation [/,post]",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "modify_response",
+   "payload": {
+    "type": "modify_response",
+    "order": 1,
+    "parameters": {
+     "content": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Response modified (default status):\nprobe"
+      ]
+     },
+     "response": {
+      "content": "probe",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "ntfy",
+   "payload": {
+    "type": "ntfy",
+    "order": 1,
+    "parameters": {
+     "topic": "mcp-probe",
+     "message": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Successfully sent message"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "pdf_generate",
+   "payload": {
+    "type": "pdf_generate",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "PDF file content stored in variable $pdf$"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "pdf": "(file content not shown)",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "pushed_send",
+   "payload": {
+    "type": "pushed_send",
+    "order": 1,
+    "parameters": {
+     "app_key": "k",
+     "app_secret": "s",
+     "target_type": "app",
+     "target": "t",
+     "message": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Action error: Could not resolve host: api.pushed.co"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Could not resolve host: api.pushed.co",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "rabbitmq_get",
+   "payload": {
+    "type": "rabbitmq_get",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "username": "user",
+     "password": "pass",
+     "queue": "probe"
+    }
+   },
+   "status": 500,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Internal Error. Contact Webhook.site Support.",
+     "id": "f563bbf6e8db4c60b1b0d1f7f0921563",
+     "code": 2
+    }
+   },
+   "verdict": "server_error",
+   "learned_required": []
+  },
+  {
+   "type": "rabbitmq_publish",
+   "payload": {
+    "type": "rabbitmq_publish",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "username": "user",
+     "password": "pass",
+     "queue": "probe",
+     "message": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "RabbitMQ Error: stream_socket_client(): Unable to connect to tcp://example.invalid:5672 (php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known)"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "rate_limit",
+   "payload": {
+    "type": "rate_limit",
+    "order": 1,
+    "parameters": {
+     "period": 60,
+     "count": 100
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": []
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "script",
+   "payload": {
+    "type": "script",
+    "order": 1,
+    "parameters": {
+     "script": "echo('ok')"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "ok"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "send_email",
+   "payload": {
+    "type": "send_email",
+    "order": 1,
+    "parameters": {
+     "recipient": "29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site",
+     "subject": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Email sent to 29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site with subject \"probe\""
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "send_email_smtp",
+   "payload": {
+    "type": "send_email_smtp",
+    "order": 1,
+    "parameters": {
+     "recipient": "29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site",
+     "subject": "probe",
+     "username": "user",
+     "password": "pass",
+     "host": "example.invalid"
+    }
+   },
+   "status": 500,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Internal Error. Contact Webhook.site Support.",
+     "id": "c2f25ebca87646b28f2d532b45e27fa3"
+    }
+   },
+   "verdict": "server_error",
+   "learned_required": []
+  },
+  {
+   "type": "send_request",
+   "payload": {
+    "type": "send_request",
+    "order": 1,
+    "parameters": {
+     "url": "https://example.com/"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Successfully sent request to https://example.com/; status: 405"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><link rel=\"icon\" href=\"data:,\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://example.com/",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST",
+      "request.status": 405,
+      "request.headers": {
+       "Date": [
+        "Thu, 03 Sep 2026 19:46:08 GMT"
+       ],
+       "Content-Type": [
+        "text/html"
+       ],
+       "Transfer-Encoding": [
+        "chunked"
+       ],
+       "Connection": [
+        "keep-alive"
+       ],
+       "Cache-Control": [
+        "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+       ],
+       "Expires": [
+        "Thu, 01 Jan 1970 00:00:01 GMT"
+       ],
+       "Referrer-Policy": [
+        "same-origin"
+       ],
+       "X-Frame-Options": [
+        "SAMEORIGIN"
+       ],
+       "Server": [
+        "cloudflare"
+       ],
+       "CF-RAY": [
+        "a3574245bb1f83da-PRG"
+       ]
+      },
+      "request.error": "",
+      "request.headers.date": "Thu, 03 Sep 2026 19:46:08 GMT",
+      "request.headers.content-type": "text/html",
+      "request.headers.transfer-encoding": "chunked",
+      "request.headers.connection": "keep-alive",
+      "request.headers.cache-control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+      "request.headers.expires": "Thu, 01 Jan 1970 00:00:01 GMT",
+      "request.headers.referrer-policy": "same-origin",
+      "request.headers.x-frame-options": "SAMEORIGIN",
+      "request.headers.server": "cloudflare",
+      "request.headers.cf-ray": "a3574245bb1f83da-PRG"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "set_variable",
+   "payload": {
+    "type": "set_variable",
+    "order": 1,
+    "parameters": {
+     "name": "mcp_probe_var",
+     "value": "1"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "$mcp_probe_var$ set to \"1\""
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "mcp_probe_var": "1",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "sftp_download",
+   "payload": {
+    "type": "sftp_download",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "username": "user",
+     "path": "/probe"
+    }
+   },
+   "status": 500,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Internal Error. Contact Webhook.site Support.",
+     "id": "e9c1e00fac064670a4580786dc9b316a"
+    }
+   },
+   "verdict": "server_error",
+   "learned_required": []
+  },
+  {
+   "type": "sftp_upload",
+   "payload": {
+    "type": "sftp_upload",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "username": "user",
+     "path": "/probe",
+     "content": "probe"
+    }
+   },
+   "status": 500,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Internal Error. Contact Webhook.site Support.",
+     "id": "9a4edfc457c74dd78e4d43afc8ae5efb"
+    }
+   },
+   "verdict": "server_error",
+   "learned_required": []
+  },
+  {
+   "type": "slack_send_message",
+   "payload": {
+    "type": "slack_send_message",
+    "order": 1,
+    "parameters": {
+     "webhook_url": "https://example.com/",
+     "content": "probe"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Could not send Slack message: Client error: `POST https://example.com/` resulted in a `405 Method Not Allowed` response:\n<!doctype html><html lang=\"en\"><head><title>Example Domain</title><link rel=\"icon\" href=\"data:,\"><meta name=\"viewport\" c (truncated...)\n"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Unknown error",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "sleep",
+   "payload": {
+    "type": "sleep",
+    "order": 1,
+    "parameters": {
+     "delay": "1"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Slept for 1 seconds"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "ssh_run_command",
+   "payload": {
+    "type": "ssh_run_command",
+    "order": 1,
+    "parameters": {
+     "host": "example.invalid",
+     "username": "user",
+     "command": "probe"
+    }
+   },
+   "status": 500,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Internal Error. Contact Webhook.site Support.",
+     "id": "fea0628667a249f3bd304fdc71881aaa"
+    }
+   },
+   "verdict": "server_error",
+   "learned_required": []
+  },
+  {
+   "type": "stop",
+   "payload": {
+    "type": "stop",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Stopped action execution."
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "store_global_variable",
+   "payload": {
+    "type": "store_global_variable",
+    "order": 1,
+    "parameters": {
+     "name": "mcp_probe_var"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Set global variable $mcp_probe_var$ to \"\""
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "mcp_probe_var": "",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "template",
+   "payload": {
+    "type": "template",
+    "order": 1,
+    "parameters": {
+     "template_id": 1
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Action error: Template not found"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Template not found",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "text_decrypt",
+   "payload": {
+    "type": "text_decrypt",
+    "order": 1,
+    "parameters": {
+     "source": "$request.content$",
+     "password": "pass"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Action error: Source is not valid base64"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "error.1": "Source is not valid base64",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": [
+      "00000000-0000-4000-0000-000000000000"
+     ]
+    }
+   },
+   "verdict": "runtime_error",
+   "learned_required": []
+  },
+  {
+   "type": "text_encrypt",
+   "payload": {
+    "type": "text_encrypt",
+    "order": 1,
+    "parameters": {
+     "source": "$request.content$",
+     "password": "pass"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Encrypted text stored in $text_encrypt$"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "text_encrypt": "tGd8qJrxciaLDVUltnKDKlthNLLUg7/EmUgGIq8KIHQWJO5f9jVW7YcQF578Ou6qKE3S3MnL1upfVW/+Vjh3uhQ7zPazrFB58EVBpA==",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "text_map",
+   "payload": {
+    "type": "text_map",
+    "order": 1,
+    "parameters": {
+     "source": "$request.content$",
+     "operator": "eq",
+     "variable_name": "probe_var",
+     "default": "none",
+     "mappings": [
+      {
+       "from": "a",
+       "to": "b"
+      }
+     ]
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "No matches for \"{\"a\":1,\"probe\":true}\"; set variable $probe_var$ to \"none\" (default)"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "probe_var": "none",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "text_replace",
+   "payload": {
+    "type": "text_replace",
+    "order": 1,
+    "parameters": {
+     "source": "$request.content$",
+     "variable_name": "probe_var",
+     "replacements": [
+      {
+       "from": "a",
+       "to": "b"
+      }
+     ]
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Set variable $probe_var$ with 1 replacements"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "probe_var": "{\"b\":1,\"probe\":true}",
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "text_split",
+   "payload": {
+    "type": "text_split",
+    "order": 1,
+    "parameters": {
+     "delimiter": ",",
+     "source": "$request.content$"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "Created 2 variables"
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "text_split.1": "{\"a\":1",
+      "text_split.2": "\"probe\":true}",
+      "text_split.count": 2,
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "twitter_tweet",
+   "payload": {
+    "type": "twitter_tweet",
+    "order": 1,
+    "parameters": {
+     "provider_id": "1",
+     "tweet": "probe"
+    }
+   },
+   "status": 404,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Entity not found",
+     "ids": [
+      "1"
+     ]
+    }
+   },
+   "verdict": "needs_provider",
+   "learned_required": []
+  },
+  {
+   "type": "validate_json",
+   "payload": {
+    "type": "validate_json",
+    "order": 1,
+    "parameters": {
+     "source": "{\"a\": 1}"
+    }
+   },
+   "status": 200,
+   "body": {
+    "success": true,
+    "result": {
+     "output": {
+      "00000000-0000-4000-0000-000000000000": [
+       "JSON is valid."
+      ]
+     },
+     "response": {
+      "content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/29592567-e90b-4e6a-ad08-0c33a6387f13\">Change response in Webhook.site</a>.",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "validator.count": 0,
+      "request.uuid": "93b34835-d52f-41c2-9924-d84fe630ead6",
+      "request.token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.content": "{\"a\":1,\"probe\":true}",
+      "request.date": "2026-09-03 19:45:41",
+      "request.timestamp": 1788464741,
+      "request.sorting": 1788464741750445,
+      "request.hostname": "webhook.site",
+      "request.size": 20,
+      "request.type": "web",
+      "request.header.content-length": "20",
+      "request.header.api-key": "00000000-0000-4000-8000-0000000000ee",
+      "request.header.content-type": "application/json",
+      "request.header.accept": "application/json",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.host": "webhook.site",
+      "request.ip": "80.212.26.253",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/29592567-e90b-4e6a-ad08-0c33a6387f13",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   },
+   "verdict": "ok",
+   "learned_required": []
+  },
+  {
+   "type": "webhook_get_requests",
+   "payload": {
+    "type": "webhook_get_requests",
+    "order": 1,
+    "parameters": {
+     "variable_name": "req",
+     "token_id": "29592567-e90b-4e6a-ad08-0c33a6387f13"
+    }
+   },
+   "status": 500,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Internal Error. Contact Webhook.site Support.",
+     "id": "80ce346b04094f9eb65aaf9aa8b84d45"
+    }
+   },
+   "verdict": "server_error",
+   "learned_required": []
+  },
+  {
+   "type": "openapi",
+   "payload": {
+    "type": "openapi",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 422,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Invalid action type",
+     "id": ""
+    }
+   },
+   "verdict": "unknown_type",
+   "learned_required": []
+  },
+  {
+   "type": "extract_json",
+   "payload": {
+    "type": "extract_json",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 422,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Invalid action type",
+     "id": ""
+    }
+   },
+   "verdict": "unknown_type",
+   "learned_required": []
+  },
+  {
+   "type": "json_validate",
+   "payload": {
+    "type": "json_validate",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 422,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Invalid action type",
+     "id": ""
+    }
+   },
+   "verdict": "unknown_type",
+   "learned_required": []
+  },
+  {
+   "type": "http_request",
+   "payload": {
+    "type": "http_request",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 422,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Invalid action type",
+     "id": ""
+    }
+   },
+   "verdict": "unknown_type",
+   "learned_required": []
+  },
+  {
+   "type": "not_a_real_type",
+   "payload": {
+    "type": "not_a_real_type",
+    "order": 1,
+    "parameters": {}
+   },
+   "status": 422,
+   "body": {
+    "success": false,
+    "error": {
+     "message": "Invalid action type",
+     "id": ""
+    }
+   },
+   "verdict": "unknown_type",
+   "learned_required": []
+  }
+ ]
+}
