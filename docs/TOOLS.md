@@ -162,7 +162,7 @@ another link from that email. Only follows http(s) links already in the
 inbox, to public hosts unless the server's FOLLOW_EMAIL_LINK_ALLOW_HOSTS
 allows more. Returns status, final URL, page preview, the ranked
 auth_links, and blocked_redirect if a redirect was refused after the
-link itself succeeded. For OTP codes, read verification_codes from
+link itself answered. For OTP codes, read verification_codes from
 wait_for_email.
 
 | Parameter | Type | Required | Default |

@@ -101,7 +101,7 @@ All settings are environment variables on the server process. Put them in the `e
 | `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` | Honoured by `follow_email_link`. The proxy makes the connection, so the target is checked before the request instead of being pinned |
 | `SSL_CERT_FILE` / `SSL_CERT_DIR` | Custom CA bundle for `follow_email_link`, for corporate TLS interception |
 
-If a verification link succeeds and then redirects somewhere that is not allowed (a local dev server, an intranet dashboard), the tool reports success with the redirect in `blocked_redirect` instead of failing: the request that consumed the token already went through.
+If the request to a verification link completes and then redirects somewhere that is not allowed (a local dev server, an intranet dashboard), the tool reports that hop's status with the refused target in `blocked_redirect` instead of failing: the request that consumed the token already went through, whether or not the site counted it as verified.
 
 ---
 
