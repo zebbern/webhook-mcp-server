@@ -81,8 +81,12 @@ def run_claude(prompt: str, model: str | None, budget: float) -> tuple[list[dict
             event = json.loads(line)
         except ValueError:
             continue
-        message = event.get("message") or {}
-        for block in message.get("content") or []:
+        message = event.get("message")
+        if not isinstance(message, dict):
+            # system notices carry a plain-text message; only assistant/user messages have content blocks
+            continue
+        content = message.get("content")
+        for block in content if isinstance(content, list) else []:
             if isinstance(block, dict) and block.get("type") == "tool_use" and str(block.get("name", "")).startswith(TOOL_PREFIX):
                 calls.append({"id": block.get("id"), "tool": block["name"][len(TOOL_PREFIX):], "input": block.get("input") or {}})
             if isinstance(block, dict) and block.get("type") == "tool_result":
@@ -161,7 +165,12 @@ def main() -> int:
     report: list[dict[str, Any]] = []
     created: set[str] = set()
     for item in prompts:
-        calls, final, raw = run_claude(item["prompt"], args.model, args.budget)
+        try:
+            calls, final, raw = run_claude(item["prompt"], args.model, args.budget)
+        except Exception as exc:  # one broken session must not end the whole run
+            print(f"ERROR {item['id']}: {type(exc).__name__}: {exc}", flush=True)
+            report.append({"id": item["id"], "group": item.get("group"), "ok": False, "problems": [f"runner error: {type(exc).__name__}: {exc}"], "calls": [], "answer": ""})
+            continue
         ok, problems = score(item, calls)
         created |= tokens_created(calls)
         report.append({"id": item["id"], "group": item.get("group"), "ok": ok, "problems": problems, "calls": [{"tool": c["tool"], "input": c["input"]} for c in calls], "answer": final[:1000]})
