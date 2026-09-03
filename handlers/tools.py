@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import sys
 from collections.abc import Awaitable, Callable
 from typing import Annotated, Any, Literal
 
@@ -14,7 +15,7 @@ from pydantic import Field
 
 from models.app_context import AppContext
 from models.schemas import DeleteFilters, SearchFilters, ToolResult, WebhookConfig
-from utils import action_types
+from utils import action_types, recorder
 from utils.http_client import WebhookApiError
 from utils.logger import setup_logger
 from utils.validation import (
@@ -85,6 +86,10 @@ def _error_payload(exc: Exception) -> dict[str, Any]:
 
 
 async def _execute(action: Callable[[], Any]) -> dict[str, Any]:
+    active = recorder.active()
+    if active is not None:
+        # Called from inside each tool coroutine; its frame name is the tool name.
+        active.mark(sys._getframe(1).f_code.co_name)
     try:
         result = action()
         if inspect.isawaitable(result):

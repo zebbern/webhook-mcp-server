@@ -9,10 +9,13 @@ and a pagination helper for the Laravel-style list endpoints.
 from __future__ import annotations
 
 import asyncio
+import json
 from dataclasses import dataclass
 from typing import Any
 
 import httpx
+
+from utils import recorder
 
 # API Configuration
 WEBHOOK_SITE_API = "https://webhook.site"
@@ -154,11 +157,51 @@ class WebhookHttpClient:
         if self.api_key:
             headers["Api-Key"] = self.api_key
 
+        hooks: dict[str, list[Any]] = {}
+        if recorder.active() is not None:
+            hooks["response"] = [self._record_response]
         self._client = httpx.AsyncClient(
             timeout=self.timeout,
             headers=headers,
+            event_hooks=hooks,
         )
         return self
+
+    @staticmethod
+    async def _record_response(response: httpx.Response) -> None:
+        """Log the exchange for tests/recordings when WEBHOOK_MCP_RECORD is set."""
+        active = recorder.active()
+        if active is None:
+            return
+        await response.aread()
+        request = response.request
+        content_type = response.headers.get("content-type", "")
+        try:
+            body: Any = response.json()
+            is_text = False
+        except ValueError:
+            body = response.text
+            is_text = True
+        try:
+            await request.aread()  # streamed requests have not buffered their body yet
+            raw = request.content
+        except Exception:
+            raw = b""
+        try:
+            sent: Any = json.loads(raw) if raw else None
+        except ValueError:
+            sent = raw.decode("utf-8", errors="replace")
+        active.http(
+            request.method,
+            str(request.url.copy_with(query=None)),
+            params=dict(request.url.params) or None,
+            json_body=sent,
+            status=response.status_code,
+            content_type=content_type,
+            response=body,
+            response_is_text=is_text,
+            location=response.headers.get("location"),
+        )
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit async context manager."""

@@ -5,7 +5,11 @@ client (so schemas, serialization and the lifespan run exactly as a client sees
 them), calls all 28 tools with real side effects, and deletes everything it made.
 
 Usage:
-    WEBHOOK_SITE_API_KEY=... python scripts/live_tool_check.py
+    WEBHOOK_SITE_API_KEY=... python scripts/live_tool_check.py [--record DIR]
+
+--record DIR writes DIR/http.jsonl (every HTTP exchange the server made, tagged
+with the tool call that caused it) and DIR/tools.json (every tool call with its
+arguments and result), sanitised. tests/test_replay_recordings.py replays them.
 
 Exit code 1 if any tool call did not behave as expected.
 """
@@ -33,13 +37,20 @@ class Check:
     def __init__(self, session: ClientSession) -> None:
         self.session = session
         self.results: list[tuple[str, bool, str]] = []
+        self.calls: list[dict[str, Any]] = []
+        self._started = 0
 
     async def call(self, tool: str, expect_success: bool | None = True, **args: Any) -> dict[str, Any]:
         """Call a tool and record PASS/FAIL. expect_success=None records without judging."""
         label = f"{tool}({args.get('action', '')})".replace("()", "")
+        # Sequence numbers are assigned when the call starts, like the server's
+        # recorder does, so overlapping calls line up between both recordings.
+        self._started += 1
+        seq = self._started
         try:
             raw = await self.session.call_tool(tool, args, read_timeout_seconds=150)
             payload = self._payload(raw)
+            self.calls.append({"seq": seq, "tool": tool, "args": args, "result": payload})
         except Exception as exc:  # transport / schema errors are failures too
             self.results.append((label, False, f"exception: {exc}"))
             print(f"FAIL {label}: exception {exc}")
@@ -70,8 +81,11 @@ class Check:
         print(f"{'PASS' if condition else 'FAIL'} {label}: {detail}")
 
 
-async def run(api_key: str) -> int:
+async def run(api_key: str, record_dir: Path | None = None) -> int:
     env = {**os.environ, "WEBHOOK_SITE_API_KEY": api_key}
+    if record_dir is not None:
+        record_dir.mkdir(parents=True, exist_ok=True)
+        env["WEBHOOK_MCP_RECORD"] = str(record_dir / "http.jsonl")
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "server.py")], env=env, cwd=str(ROOT))
     created_tokens: list[str] = []
     cleanup: list[tuple[str, dict[str, Any]]] = []
@@ -194,7 +208,7 @@ async def run(api_key: str) -> int:
 
             async def trigger() -> None:
                 await asyncio.sleep(1)
-                await session.call_tool("send_requests", {"webhook_token": token_a, "data": {"trigger": "mail"}})
+                await c.call("send_requests", expect_success=None, webhook_token=token_a, data={"trigger": "mail"})
 
             task = asyncio.create_task(trigger())
             mail = await c.call("wait_for_email", webhook_token=token_a, timeout_seconds=90)
@@ -208,7 +222,7 @@ async def run(api_key: str) -> int:
             # --- wait_for_request over the socket --------------------------------
             async def fire() -> None:
                 await asyncio.sleep(1)
-                await session.call_tool("send_requests", {"webhook_token": token_a, "data": {"ping": time.time()}})
+                await c.call("send_requests", expect_success=None, webhook_token=token_a, data={"ping": time.time()})
 
             task = asyncio.create_task(fire())
             waited = await c.call("wait_for_request", webhook_token=token_a, timeout_seconds=30, request_type="web")
@@ -296,6 +310,24 @@ async def run(api_key: str) -> int:
             left = {hook["token"] for hook in remaining.get("webhooks", [])} & set(created_tokens)
             c.expect(not left, "cleanup: created tokens deleted", f"left={left}")
 
+        if record_dir is not None:
+            from utils.recorder import sanitize
+
+            calls = sorted(c.calls, key=lambda item: item["seq"])
+            # Team member names appear as plain arguments (manage_users update); scrub them too.
+            names = {
+                user.get("name")
+                for call in calls
+                if call["tool"] == "manage_users"
+                for user in (call["result"].get("users") or [])
+                if user.get("name")
+            }
+            text = json.dumps({"calls": sanitize(calls)}, indent=1, ensure_ascii=False)
+            for name in names:
+                text = text.replace(json.dumps(name)[1:-1], "Recorded User")
+            (record_dir / "tools.json").write_text(text + "\n", encoding="utf-8")
+            print(f"recorded {len(c.calls)} tool calls to {record_dir}")
+
         failures = [(label, detail) for label, ok, detail in c.results if not ok]
         print("\n" + "=" * 70)
         print(f"{len(c.results) - len(failures)}/{len(c.results)} checks passed")
@@ -305,8 +337,12 @@ async def run(api_key: str) -> int:
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, str(ROOT))
     key = os.environ.get("WEBHOOK_SITE_API_KEY", "").strip()
     if not key:
         print("Set WEBHOOK_SITE_API_KEY first", file=sys.stderr)
         sys.exit(2)
-    sys.exit(asyncio.run(run(key)))
+    target = None
+    if "--record" in sys.argv:
+        target = Path(sys.argv[sys.argv.index("--record") + 1])
+    sys.exit(asyncio.run(run(key, target)))

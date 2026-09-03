@@ -6,7 +6,8 @@ MCP server for webhook.site. 28 tools in `handlers/tools.py`, services in `servi
 
 - webhook.site's docs were wrong in several places (paths, required fields, response shapes). Before relying on any endpoint, call it for real with `WEBHOOK_SITE_API_KEY` and look at the actual response. Record what you saw in the code comment or the CHANGELOG.
 - A test is only valid if its expectation was checked against real behaviour. Never write a mock whose response shape you invented. Use recorded real responses (`tests/recordings/`) or a live test. A green test that encodes a guess is worse than no test.
-- After any change to a service or tool, run the real check: `WEBHOOK_SITE_API_KEY=... python scripts/live_tool_check.py` (drives `server.py` over stdio, calls every tool, cleans up). Then `pytest -m "not live and not live_auth"`, `pytest -m live`, `pytest -m live_auth`.
+- After any change to a service or tool, run the real check: `WEBHOOK_SITE_API_KEY=... python scripts/live_tool_check.py --record tests/recordings/live` (drives `server.py` over stdio, calls every tool, cleans up, refreshes the recordings). Then `pytest -m "not live and not live_auth"` (includes the replay of those recordings), `pytest -m live`, `pytest -m live_auth`.
+- Custom Action knowledge lives in `utils/action_types.json`. Regenerate from the docs with `scripts/gen_action_types.py ../docs/api/action-types.md`, then re-verify live with `scripts/verify_action_types.py`; never hand-edit the `verified` blocks.
 - Verify both sides: that the call succeeds, and that the effect happened (the alias answers, the note is stored, the email arrived). A 200 alone proves nothing.
 
 ## Account safety while testing

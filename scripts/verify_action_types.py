@@ -33,6 +33,7 @@ sys.path.insert(0, str(ROOT))
 from services.account_service import AccountService  # noqa: E402
 from services.webhook_service import WebhookService  # noqa: E402
 from utils.http_client import WebhookApiError, WebhookHttpClient  # noqa: E402
+from utils.recorder import sanitize  # noqa: E402
 
 DATA = ROOT / "utils" / "action_types.json"
 RECORDING = ROOT / "tests" / "recordings" / "action_types_live.json"
@@ -262,7 +263,10 @@ async def main() -> int:
     data["verified_at"] = checked_at
     DATA.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     RECORDING.parent.mkdir(parents=True, exist_ok=True)
-    RECORDING.write_text(json.dumps({"checked_at": checked_at, "exchanges": exchanges}, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    RECORDING.write_text(
+        json.dumps({"checked_at": checked_at, "exchanges": sanitize(exchanges)}, indent=1, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     counts: dict[str, int] = {}
     for item in exchanges:
         counts[item["verdict"]] = counts.get(item["verdict"], 0) + 1
