@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-09-03
+
+Full coverage of the documented webhook.site API. With `WEBHOOK_SITE_API_KEY` set you get what your plan pays for; without it everything still works on anonymous URLs.
+
+### Added
+
+- `list_webhooks`, `configure_webhook` (all token settings: `listen`, `request_limit`, `actions`, `clone_from`, `group_id`, alias, expiry), `get_request` (latest or by id, `raw`), `update_request` (notes, dynamic responses), `download_request_file`
+- `manage_custom_actions` (list / create / update / delete / test / execute), `manage_schedules` (incl. run-now and logs), `manage_global_variables`, `manage_groups`, `manage_templates`, `manage_databases` (incl. SQL query), `manage_users`
+- `export_webhook_data` pages through the requests list (the API caps a page at 100) and can return the account's CSV export
+- `wait_for_request` / `wait_for_email` listen on `ws.webhook.site` (socket.io) and fall back to polling; results carry `source`
+- Emails expose `sender`, `checks` (spam, virus, SPF, DKIM, DMARC), `email_truncated` and `attachments`; list results carry `pagination`
+- MCP tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`) on every tool
+- `WEBHOOK_SITE_DEFAULT_EXPIRY` for operators who want new URLs to auto-expire
+- `live_auth` test tier that runs the real sign-up flow (create URL, send a verification-style email through a Custom Action, `wait_for_email`, `follow_email_link`) when `WEBHOOK_SITE_API_KEY` is set
+- `FOLLOW_EMAIL_LINK_ALLOW_HOSTS`: operator-configured hosts, `*.suffixes`, IPs or networks that `follow_email_link` may open although they are local or private (for testing your own sign-up flow on `localhost` or an intranet)
+- `follow_email_link` honours `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY`; proxied targets are checked before the request since the proxy makes the connection
+- `follow_email_link` reports a refused redirect after a successful public hop as `blocked_redirect` on a successful result, instead of failing the whole call
+
+### Changed
+
+- Tool merges (no capability removed): `create_webhook_with_config` + `update_webhook` -> `configure_webhook`; `get_webhook_url` + `get_webhook_dns` -> fields of `get_webhook_info`; `get_latest_request` -> `get_request`; `send_to_webhook` + `send_multiple_requests` -> `send_requests`; `generate_ssrf_payload` + `generate_xss_callback` + `generate_canary_token` -> `generate_oob_payloads`
+- Tokens created with an API key are permanent by default (pass `expiry` or set `WEBHOOK_SITE_DEFAULT_EXPIRY` to change that)
+- The HTTP client now raises `WebhookApiError` on failed DELETEs like every other verb, and every API error carries webhook.site's own validation message
+- Verified against the live API rather than the docs: notes and Set Response live on `/request/{id}` (singular); updates of actions, schedules, templates, global variables, databases and users send the full record because the API replaces it (a value-only variable update would have wiped its name); `run-now` answers with a redirect; `check_for_callbacks` matches the identifier anywhere in the captured request, not only in the body
+- `scripts/live_tool_check.py` drives the real server over stdio and exercises all 28 tools against the live API
+- Catalog token budget raised to 9000 for the 28-tool catalog
+- New dependency: `python-socketio[asyncio_client]`
+
+### Fixed
+
+- `follow_email_link` now connects to the address it vetted (no DNS rebinding), also blocks cloud metadata and NAT64 / IPv4-mapped private addresses, resolves hosts without blocking the event loop, treats a 3xx without `Location` as the final page, rejects `javascript:` and other non-http redirects cleanly, and reports the ranked `auth_links` it chose from. Environment proxies are ignored for these fetches because a proxy would bypass the address check
+- `follow_email_link` picks the email that contains `url=`, or the newest email with a verify / confirm / magic link, instead of the newest email with any login link
+- Link extraction ignores the raw quoted-printable message when decoded text or HTML exists, decodes `&amp;` in hrefs (but leaves `&region=`-style query strings alone), handles IPv6-literal URLs, ranks verify / confirm links and "Verify your email" anchor text ahead of login links, and never returns unsubscribe or asset links as `auth_links`
+- `verification_codes` understands "code is 512930", "code: 123 456", "G-847291 is your code" and "847291 is your code", ignores zip / promo / sort codes and order numbers, and no longer lists CSS colours ahead of the real OTP; markup stripping is linear on hostile input
+
 ## [2.2.2] - 2026-08-16
 
 ### Added

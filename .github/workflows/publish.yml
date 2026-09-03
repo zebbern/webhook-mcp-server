@@ -27,7 +27,7 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Run offline tests
-        run: pytest -m "not live" -v
+        run: pytest -m "not live and not live_auth" -v
 
   publish-pypi:
     name: Publish to PyPI

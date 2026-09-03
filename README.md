@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-24%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![MCP](https://img.shields.io/badge/MCP-28%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
@@ -35,13 +35,13 @@ Security helper tools (SSRF, XSS, canary tokens) are for **authorized testing on
 
 ```bash
 # Using uvx (recommended - no install needed)
-uvx webhook-mcp-server==2.2.2
+uvx webhook-mcp-server==3.0.0
 
 # Or install via pip
-pip install webhook-mcp-server==2.2.2
+pip install webhook-mcp-server==3.0.0
 ```
 
-Use `2.2.2` or newer. `2.1.3` does not start on MCP 2.0.
+Use `3.0.0` or newer. `2.1.3` does not start on MCP 2.0; 3.0 renames a few tools (see Upgrading from 2.x).
 
 ### VS Code / GitHub Copilot
 
@@ -53,7 +53,7 @@ Add to `.vscode/mcp.json`:
     "webhook-mcp-server": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.2"]
+      "args": ["webhook-mcp-server==3.0.0"]
     }
   }
 }
@@ -68,7 +68,7 @@ Add to `.cursor/mcp.json` (project) or your user MCP config:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.2"]
+      "args": ["webhook-mcp-server==3.0.0"]
     }
   }
 }
@@ -83,11 +83,25 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "webhook-mcp-server": {
       "command": "uvx",
-      "args": ["webhook-mcp-server==2.2.2"]
+      "args": ["webhook-mcp-server==3.0.0"]
     }
   }
 }
 ```
+
+### Configuration
+
+All settings are environment variables on the server process. Put them in the `env` block of your MCP client config.
+
+| Variable | Purpose |
+| -------- | ------- |
+| `WEBHOOK_SITE_API_KEY` | Your webhook.site API key. Makes new URLs permanent (your plan's quota) and unlocks `list_webhooks`, Custom Actions, Schedules, Global Variables, Groups, Templates, Databases, Users and CSV export |
+| `WEBHOOK_SITE_DEFAULT_EXPIRY` | Seconds until new URLs expire when the call does not pass `expiry`. Unset means permanent on a paid account (7 days for anonymous URLs) |
+| `FOLLOW_EMAIL_LINK_ALLOW_HOSTS` | `follow_email_link` only opens links to public internet hosts, and connects to the address it checked (no DNS rebinding). To test a sign-up flow on your own machine or intranet, list what to allow: `localhost,127.0.0.1,*.corp.example,10.0.0.0/8` |
+| `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` | Honoured by `follow_email_link`. The proxy makes the connection, so the target is checked before the request instead of being pinned |
+| `SSL_CERT_FILE` / `SSL_CERT_DIR` | Custom CA bundle for `follow_email_link`, for corporate TLS interception |
+
+If a verification link succeeds and then redirects somewhere that is not allowed (a local dev server, an intranet dashboard), the tool reports success with the redirect in `blocked_redirect` instead of failing: the request that consumed the token already went through.
 
 ---
 
@@ -177,54 +191,70 @@ Add to `claude_desktop_config.json`:
 
 ## Tools Reference
 
-### Webhook Management
+28 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan.
 
-| Tool                         | Description                                        |
-| ---------------------------- | -------------------------------------------------- |
-| `create_webhook`             | Start here: disposable URL, temp email, and DNS for sign-up or callbacks |
-| `create_webhook_with_config` | Create with custom response, status, CORS, timeout |
-| `get_webhook_url`            | Get the full URL for a webhook token               |
-| `get_webhook_email`          | Temp inbox `{token}@email.webhook.site` for sign-up / verify / magic-link / reset |
-| `get_webhook_dns`            | Get the DNS subdomain for a webhook                |
-| `get_webhook_info`           | Get webhook settings and statistics                |
-| `update_webhook`             | Modify webhook configuration                       |
-| `delete_webhook`             | Delete a webhook endpoint                          |
+### Webhooks
 
-### Request Handling
+| Tool                | Description                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| `create_webhook`    | Start here: disposable URL, temp email, and DNS for sign-up or callbacks                          |
+| `configure_webhook` | Create with, or update to, custom status / body / content type / timeout / CORS, alias, expiry, `request_limit`, `listen`, actions on/off, `clone_from`, `group_id`; DNSHook answers via a JSON `default_content` |
+| `get_webhook_info`  | Settings, expiry, request count and every address (`url`, `subdomain_url`, `api_url`, `email`, `dns`) |
+| `get_webhook_email` | Temp inbox `{token}@email.webhook.site` for sign-up / verify / magic-link / reset                  |
+| `list_webhooks`     | List the account's URLs with aliases, request counts and `latest_request_at` (API key)             |
+| `delete_webhook`    | Delete a webhook and all its data                                                                 |
 
-| Tool                   | Description                                 |
-| ---------------------- | ------------------------------------------- |
-| `send_to_webhook`      | Send JSON data to a webhook                 |
-| `get_webhook_requests` | List all captured requests                  |
-| `search_requests`      | Search with filters (method, content, date) |
-| `get_latest_request`   | Get the most recent captured request        |
-| `delete_request`       | Delete a specific request                   |
-| `delete_all_requests`  | Bulk delete with filters                    |
+### Requests
+
+| Tool                    | Description                                                                                  |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `send_requests`         | Send one body (`data`) or many (`payloads`) to the URL, any HTTP method, optional delay        |
+| `get_webhook_requests`  | List captured events page by page (`page`, `pagination` in the result)                         |
+| `search_requests`       | webhook.site search syntax (`method:POST`, `content:verify`, `type:email AND ...`), dates, pages |
+| `get_request`           | Newest event or a specific `request_id`; `raw=true` adds the untouched body                    |
+| `update_request`        | Attach a note, or call Set Response for a request the webhook.site CLI is holding (`listen` > 0) |
+| `download_request_file` | Download an uploaded file or email attachment (base64)                                         |
+| `delete_request`        | Delete a specific request                                                                     |
+| `delete_all_requests`   | Bulk delete, optionally by date expression or search query                                    |
+| `export_webhook_data`   | Full dump with HTML and untruncated bodies: paged JSON, or the account's CSV export            |
 
 ### Real-Time Waiting
 
-| Tool               | Description                                   |
-| ------------------ | --------------------------------------------- |
-| `wait_for_request` | Wait for a **new** HTTP request (polling, 1-120s). Set `return_existing` to reuse old traffic. |
-| `wait_for_email`   | After sign-up: wait for verify / magic-link / reset mail, links, and OTP codes |
-| `follow_email_link` | Open a captured verify / magic / reset URL and return the page preview |
+| Tool                | Description                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `wait_for_request`  | Wait for a **new** HTTP / DNS event (1-120s) over webhook.site's socket, polling as backstop. `return_existing` reuses old traffic |
+| `wait_for_email`    | After sign-up: wait for verify / magic-link / reset mail; returns links, OTP codes, sender, spam / DKIM checks, attachments |
+| `follow_email_link` | Open a captured verify / magic / reset URL and return the page preview (public hosts only unless allowlisted) |
+
+### Account Features (API key)
+
+| Tool                      | Description                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------- |
+| `manage_custom_actions`   | list / create / update / delete / test / execute the Custom Actions a token runs on each request or email |
+| `manage_schedules`        | list / get / create / update / delete / run / logs for Schedules that call a URL on an interval or cron |
+| `manage_global_variables` | list / create / update / delete Global Variables usable as `$name$` in actions and schedules          |
+| `manage_groups`           | list / create / update / delete Groups that organise URLs                                            |
+| `manage_templates`        | list / create / update / delete reusable Custom Action Templates                                     |
+| `manage_databases`        | list / create / update / delete Databases and run SQL queries                                        |
+| `manage_users`            | list / invite / update / delete team users (Enterprise)                                              |
 
 ### Bug Bounty / Security
 
-| Tool                         | Description                                          |
-| ---------------------------- | ---------------------------------------------------- |
-| `generate_ssrf_payload`      | Create SSRF test payloads (HTTP, DNS, IP-based)      |
-| `generate_xss_callback`      | Create XSS callback payloads with cookie/DOM capture |
-| `generate_canary_token`      | Create trackable URLs, DNS, or email canaries        |
-| `check_for_callbacks`        | Quick check for OOB callbacks                        |
-| `extract_links_from_request` | Pull confirm / reset / magic-link URLs from a captured email or HTTP body |
+| Tool                         | Description                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `generate_oob_payloads`      | SSRF URLs, XSS callbacks, or canary URL / DNS / email tokens (`kind=`)       |
+| `check_for_callbacks`        | Quick check for OOB callbacks                                               |
+| `extract_links_from_request` | Pull confirm / reset / magic-link URLs and OTP from a captured email or body |
 
-### Batch & Utility
+### Upgrading from 2.x
 
-| Tool                     | Description                             |
-| ------------------------ | --------------------------------------- |
-| `send_multiple_requests` | Send batch of requests for load testing |
-| `export_webhook_data`    | Export all requests to JSON             |
+| 2.x tool | 3.0 replacement |
+| -------- | --------------- |
+| `create_webhook_with_config`, `update_webhook` | `configure_webhook` (pass `webhook_token` to update) |
+| `get_webhook_url`, `get_webhook_dns` | fields of `get_webhook_info` |
+| `get_latest_request` | `get_request` |
+| `send_to_webhook`, `send_multiple_requests` | `send_requests` (`data` or `payloads`) |
+| `generate_ssrf_payload`, `generate_xss_callback`, `generate_canary_token` | `generate_oob_payloads` (`kind=ssrf\|xss\|canary`, `canary_type`) |
 
 ---
 
@@ -347,7 +377,8 @@ python server.py
 
 - Python 3.10+
 - `mcp >= 2.0.0`
-- `httpx >= 0.25.0`
+- `httpx >= 0.26.0`, `httpcore >= 1.0.0`, `anyio >= 4.0.0`
+- `python-socketio[asyncio_client] >= 5.11.0` (real-time waiting; the tools fall back to polling without it)
 
 ---
 

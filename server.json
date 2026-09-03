@@ -3,7 +3,7 @@
   "name": "io.github.zebbern/webhook-mcp-server",
   "title": "Webhook.site MCP Server",
   "description": "Capture HTTP, email, and DNS callbacks with webhook.site from MCP clients.",
-  "version": "2.2.2",
+  "version": "3.0.0",
   "repository": {
     "url": "https://github.com/zebbern/webhook-mcp-server",
     "source": "github"
@@ -13,7 +13,7 @@
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "webhook-mcp-server",
-      "version": "2.2.2",
+      "version": "3.0.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

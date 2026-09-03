@@ -121,15 +121,53 @@ def validate_alias(alias: str) -> None:
 
 def validate_expiry(expiry: int) -> None:
     """Validate webhook expiry time.
-    
+
     Args:
         expiry: Expiry time in seconds
-        
+
     Raises:
         ValidationError: If expiry is invalid
-        
+
     Rules:
         - Maximum: 604800 seconds (7 days)
         - Minimum: 0 (no expiry)
     """
     validate_positive_int(expiry, "expiry", min_val=0, max_val=604800)
+
+
+def validate_request_limit(request_limit: int) -> None:
+    """Validate a token's request history size (0 stores nothing, max 10000)."""
+    validate_positive_int(request_limit, "request_limit", min_val=0, max_val=10000)
+
+
+def validate_listen(listen: int) -> None:
+    """Validate the Set Response listen window (0 disables, max 10 seconds)."""
+    validate_positive_int(listen, "listen", min_val=0, max_val=10)
+
+
+def validate_int_id(value: int, name: str) -> None:
+    """Validate a numeric webhook.site resource id (group, template, schedule, user...)."""
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ValidationError(f"{name} must be a positive integer id, got {value!r}")
+
+
+def validate_page(page: int, per_page: int | None = None) -> None:
+    """Validate pagination inputs (page >= 1, per_page 1-100)."""
+    validate_positive_int(page, "page", min_val=1)
+    if per_page is not None:
+        validate_positive_int(per_page, "per_page", min_val=1, max_val=100)
+
+
+def resolve_default_expiry(raw: str | None) -> int | None:
+    """Parse WEBHOOK_SITE_DEFAULT_EXPIRY (seconds). Blank means no default expiry."""
+    if raw is None or not raw.strip():
+        return None
+    try:
+        value = int(raw.strip())
+    except ValueError as exc:
+        raise ValueError("WEBHOOK_SITE_DEFAULT_EXPIRY must be a whole number of seconds") from exc
+    try:
+        validate_expiry(value)
+    except ValidationError as exc:
+        raise ValueError(f"WEBHOOK_SITE_DEFAULT_EXPIRY: {exc}") from exc
+    return value or None

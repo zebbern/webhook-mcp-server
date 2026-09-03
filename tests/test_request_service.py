@@ -64,7 +64,7 @@ async def test_get_latest_request(webhook_with_requests):
     token, client = webhook_with_requests
     service = RequestService(client)
     
-    result = await service.get_latest(token)
+    result = await service.get_request(token)
     
     assert result.success is True
     assert result.data["request"] is not None
@@ -149,7 +149,7 @@ async def test_get_latest_request_empty_webhook():
         create_result = await webhook_service.create()
         token = create_result.data["token"]
         
-        result = await request_service.get_latest(token)
+        result = await request_service.get_request(token)
         
         assert result.success is True
         assert result.data["request"] is None

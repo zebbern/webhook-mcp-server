@@ -47,11 +47,12 @@ async def test_create_webhook_with_config():
             cors=True,
         )
         
-        result = await service.create_with_config(config)
-        
+        result = await service.configure(config)
+
         assert result.success is True
         assert result.data["default_status"] == 201
         assert result.data["cors"] is True
+        await service.delete(result.data["token"])
 
 
 @pytest.mark.live
@@ -90,11 +91,12 @@ async def test_update_webhook():
             default_status=202,
             default_content="Updated!",
         )
-        result = await service.update(token, config)
-        
+        result = await service.configure(config, webhook_token=token)
+
         assert result.success is True
         assert result.data["default_status"] == 202
         assert result.data["default_content"] == "Updated!"
+        await service.delete(token)
 
 
 @pytest.mark.live
@@ -119,17 +121,17 @@ async def test_send_data():
         assert result.data["data_sent"]["event"] == "test"
 
 
-@pytest.mark.asyncio
-async def test_get_url():
-    """Test URL generation."""
-    async with WebhookHttpClient() as client:
-        service = WebhookService(client)
-        
-        result = await service.get_url("test-token-123")
-        
-        assert result.success is True
-        assert result.data["token"] == "test-token-123"
-        assert result.data["url"] == "https://webhook.site/test-token-123"
+def test_build_webhook_urls():
+    """Every address variant derives from the token (alias only changes url)."""
+    from services.webhook_service import build_webhook_urls
+
+    urls = build_webhook_urls("test-token-123")
+    assert urls["url"] == "https://webhook.site/test-token-123"
+    assert urls["subdomain_url"] == "https://test-token-123.webhook.site"
+    assert urls["api_url"] == "https://webhook.site/token/test-token-123"
+    assert urls["email"] == "test-token-123@email.webhook.site"
+    assert urls["dns"] == "test-token-123.dnshook.site"
+    assert build_webhook_urls("test-token-123", alias="my-alias")["url"] == "https://webhook.site/my-alias"
 
 
 @pytest.mark.asyncio
@@ -143,21 +145,6 @@ async def test_get_email():
         assert result.success is True
         assert result.data["token"] == "test-token-123"
         assert result.data["email"] == "test-token-123@email.webhook.site"
-        assert result.data["url"] == "https://webhook.site/test-token-123"
-
-
-@pytest.mark.asyncio
-async def test_get_dns():
-    """Test DNSHook domain generation."""
-    async with WebhookHttpClient() as client:
-        service = WebhookService(client)
-        
-        result = await service.get_dns("test-token-123")
-        
-        assert result.success is True
-        assert result.data["token"] == "test-token-123"
-        assert result.data["dns_domain"] == "test-token-123.dnshook.site"
-        assert result.data["example_subdomain"] == "mydata.test-token-123.dnshook.site"
         assert result.data["url"] == "https://webhook.site/test-token-123"
 
 

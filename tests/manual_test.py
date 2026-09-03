@@ -67,8 +67,8 @@ async def run_comprehensive_test():
             cors=True,
             timeout=2,
         )
-        result = await webhook_service.create_with_config(config)
-        if print_result("create_webhook_with_config", result):
+        result = await webhook_service.configure(config)
+        if print_result("configure_webhook (create)", result):
             passed += 1
             token2 = result.data["token"]
             print(f"       Configured token: {token2}")
@@ -82,9 +82,9 @@ async def run_comprehensive_test():
         # =====================================================================
         # TOOL 12: get_webhook_url
         # =====================================================================
-        print("\n[12/14] Testing get_webhook_url...")
-        result = await webhook_service.get_url(token)
-        if print_result("get_webhook_url", result):
+        print("\n[12/14] Testing get_webhook_info (url)...")
+        result = await webhook_service.get_info(token)
+        if print_result("get_webhook_info", result):
             passed += 1
             expected_url = f"{WEBHOOK_SITE_API}/{token}"
             if result.data["url"] == expected_url:
@@ -116,16 +116,16 @@ async def run_comprehensive_test():
         # =====================================================================
         # TOOL 14: get_webhook_dns
         # =====================================================================
-        print("\n[14/14] Testing get_webhook_dns...")
-        result = await webhook_service.get_dns(token)
-        if print_result("get_webhook_dns", result):
+        print("\n[14/14] Testing get_webhook_info (dns)...")
+        result = await webhook_service.get_info(token)
+        if print_result("get_webhook_info", result):
             passed += 1
             expected_dns = f"{token}.dnshook.site"
-            if result.data["dns_domain"] == expected_dns:
-                print(f"       DNS domain correct: {result.data['dns_domain']}")
-                print(f"       Example subdomain: {result.data['example_subdomain']}")
+            if result.data["dns"] == expected_dns:
+                print(f"       DNS domain correct: {result.data['dns']}")
+                print(f"       Example subdomain: mydata.{result.data['dns']}")
             else:
-                print(f"       DNS MISMATCH: got {result.data['dns_domain']}")
+                print(f"       DNS MISMATCH: got {result.data['dns']}")
                 failed += 1
                 passed -= 1
         else:
@@ -167,9 +167,9 @@ async def run_comprehensive_test():
         # =====================================================================
         # TOOL 6: get_latest_request
         # =====================================================================
-        print("\n[6/14] Testing get_latest_request...")
-        result = await request_service.get_latest(token)
-        if print_result("get_latest_request", result):
+        print("\n[6/14] Testing get_request (latest)...")
+        result = await request_service.get_request(token)
+        if print_result("get_request", result):
             passed += 1
             print(f"       Method: {result.data.get('method')}")
             print(f"       Created at: {result.data.get('created_at')}")
@@ -209,14 +209,14 @@ async def run_comprehensive_test():
         # =====================================================================
         # TOOL 8: update_webhook
         # =====================================================================
-        print("\n[8/14] Testing update_webhook...")
+        print("\n[8/14] Testing configure_webhook (update)...")
         update_config = WebhookConfig(
             default_status=202,
             default_content="Updated content",
             cors=True,
         )
-        result = await webhook_service.update(token, update_config)
-        if print_result("update_webhook", result):
+        result = await webhook_service.configure(update_config, webhook_token=token)
+        if print_result("configure_webhook (update)", result):
             passed += 1
             print(f"       Updated status: {result.data.get('default_status')}")
         else:

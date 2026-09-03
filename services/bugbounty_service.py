@@ -12,6 +12,7 @@ Provides security testing utilities:
 from __future__ import annotations
 
 import base64
+import json
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -44,6 +45,30 @@ class BugBountyService:
         """
         self._client = client
     
+    def generate_oob_payloads(
+        self,
+        webhook_token: str,
+        kind: str,
+        identifier: str | None = None,
+        include_dns: bool = True,
+        include_ip: bool = True,
+        include_cookies: bool = True,
+        include_dom: bool = True,
+        canary_type: str = "url",
+    ) -> ToolResult:
+        """Dispatch to the SSRF, XSS or canary generator by ``kind``."""
+        if kind == "ssrf":
+            return self.generate_ssrf_payload(
+                webhook_token, identifier=identifier, include_dns=include_dns, include_ip=include_ip
+            )
+        if kind == "xss":
+            return self.generate_xss_callback(
+                webhook_token, identifier=identifier, include_cookies=include_cookies, include_dom=include_dom
+            )
+        if kind == "canary":
+            return self.generate_canary_token(webhook_token, token_type=canary_type, identifier=identifier)
+        return ToolResult(success=False, message=f"Unknown payload kind: {kind}. Use ssrf, xss or canary.")
+
     def generate_ssrf_payload(
         self,
         webhook_token: str,
@@ -133,20 +158,21 @@ class BugBountyService:
         date_from = since.strftime("%Y-%m-%d %H:%M:%S")
         
         params = {
-            "per_page": 50,
+            "per_page": 100,
             "sorting": "newest",
             "date_from": date_from,
         }
-        
-        if identifier:
-            params["query"] = identifier
-        
+
         data = await self._client.get(
             f"/token/{webhook_token}/requests",
             params=params,
         )
-        
+
         requests_data = data.get("data", [])
+        if identifier:
+            # A bare search term only matches the body, but OOB hits carry the
+            # identifier in the query string, URL or DNS name; match the whole record.
+            requests_data = [req for req in requests_data if identifier in json.dumps(req)]
         
         # Categorize by type
         web_requests = [r for r in requests_data if r.get("type") == "web"]
@@ -345,10 +371,11 @@ class BugBountyService:
             )
         
         request = requests[0]
-        unique_links = extract_urls(combined_request_text(request))
+        body = combined_request_text(request)
+        unique_links = extract_urls(body)
         if filter_domain:
             unique_links = [link for link in unique_links if filter_domain in link]
-        codes = extract_verification_codes(combined_request_text(request))
+        codes = extract_verification_codes(body)
 
         return ToolResult(
             success=True,
@@ -360,7 +387,7 @@ class BugBountyService:
                 "filter_domain": filter_domain,
                 "verification_codes": codes,
                 "links": {
-                    "auth_links": extract_auth_links(unique_links),
+                    "auth_links": extract_auth_links(unique_links, body),
                     "api_links": [
                         link
                         for link in unique_links

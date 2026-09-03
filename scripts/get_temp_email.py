@@ -1,26 +1,29 @@
 """Quick script to create a webhook and get temp email."""
 import asyncio
-from utils.http_client import WebhookHttpClient
+import os
+
 from services.webhook_service import WebhookService
+from utils.http_client import WebhookHttpClient
+
 
 async def main():
-    async with WebhookHttpClient() as client:
+    async with WebhookHttpClient(api_key=os.environ.get("WEBHOOK_SITE_API_KEY")) as client:
         service = WebhookService(client)
         result = await service.create()
         token = result.data["token"]
-        email_result = await service.get_email(token)
-        dns_result = await service.get_dns(token)
-        
+
         print("=" * 60)
         print("YOUR TEMPORARY WEBHOOK ENDPOINTS")
         print("=" * 60)
         print(f"Token:  {token}")
         print(f"URL:    {result.data['url']}")
-        print(f"Email:  {email_result.data['email']}")
-        print(f"DNS:    {dns_result.data['dns_domain']}")
+        print(f"Email:  {result.data['email']}")
+        print(f"DNS:    {result.data['dns']}")
+        print(f"Expiry: {result.data['expires_at'] or 'never'}")
         print("=" * 60)
         print("View incoming requests at:")
         print(f"https://webhook.site/#!/view/{token}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

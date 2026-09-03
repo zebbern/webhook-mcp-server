@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import inspect
+import json
 from collections.abc import Awaitable, Callable
 from typing import Annotated, Any, Literal
 
 from mcp.server import MCPServer
 from mcp.server.mcpserver import Context
+from mcp.types import ToolAnnotations
 from pydantic import Field
 
 from models.app_context import AppContext
@@ -19,7 +21,11 @@ from utils.validation import (
     validate_alias,
     validate_expiry,
     validate_http_status_code,
+    validate_int_id,
+    validate_listen,
+    validate_page,
     validate_positive_int,
+    validate_request_limit,
     validate_webhook_token,
 )
 
@@ -27,10 +33,36 @@ logger = setup_logger(__name__)
 
 RequestType = Literal["web", "email", "dns"]
 CanaryType = Literal["url", "dns", "email"]
+PayloadKind = Literal["ssrf", "xss", "canary"]
+ExportFormat = Literal["json", "csv"]
+CrudAction = Literal["list", "create", "update", "delete"]
+ActionAction = Literal["list", "create", "update", "delete", "test", "execute"]
+ScheduleAction = Literal["list", "get", "create", "update", "delete", "run", "logs"]
+DatabaseAction = Literal["list", "create", "update", "delete", "query"]
+UserAction = Literal["list", "invite", "update", "delete"]
 Token = Annotated[
     str,
     Field(description="Webhook UUID returned by create_webhook"),
 ]
+# Free text that often carries JSON (a response body, a note, a variable value).
+# The MCP SDK pre-parses JSON-looking strings into objects for any field whose
+# annotation is not exactly `str`, so accept the object form too and serialise it.
+JsonText = str | dict[str, Any] | list[Any] | None
+
+
+def _text(value: JsonText) -> str | None:
+    if value is None or isinstance(value, str):
+        return value
+    return json.dumps(value)
+
+# Tool annotations: hints for MCP clients, never a gate on what a tool can do.
+_OPEN = {"open_world_hint": True}
+RO = ToolAnnotations(read_only_hint=True, **_OPEN)
+WRITE = ToolAnnotations(read_only_hint=False, destructive_hint=False, **_OPEN)
+WRITE_IDEMPOTENT = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=True, **_OPEN)
+DESTRUCTIVE = ToolAnnotations(read_only_hint=False, destructive_hint=True, idempotent_hint=True, **_OPEN)
+FAMILY = ToolAnnotations(read_only_hint=False, destructive_hint=True, **_OPEN)
+FOLLOW = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, **_OPEN)
 
 
 def _app(ctx: Context[AppContext]) -> AppContext:
@@ -63,10 +95,23 @@ async def _execute(action: Callable[[], Any]) -> dict[str, Any]:
         return _error_payload(exc)
 
 
+def _require(value: Any, name: str, action: str) -> Any:
+    if value is None:
+        raise ValidationError(f"{name} is required for action='{action}'")
+    return value
+
+
+def _require_id(value: Any, name: str, action: str) -> int:
+    validate_int_id(_require(value, name, action), name)
+    return value
+
+
 def register_tools(mcp: MCPServer[AppContext]) -> None:
     """Register all webhook.site tools on the MCP server."""
 
-    @mcp.tool()
+    # --- webhooks -----------------------------------------------------------
+
+    @mcp.tool(annotations=WRITE)
     async def create_webhook(ctx: Context[AppContext]) -> dict[str, Any]:
         """Create a disposable inbox to sign up on a website: HTTP URL, temp email, DNS.
 
@@ -74,146 +119,86 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         magic-link / password-reset email, catch a webhook callback, or get a
         one-off URL. Returns token, url, email ({token}@email.webhook.site),
         and dns. Next: give the email or URL to the site, then wait_for_email,
-        then follow_email_link or use the OTP.
+        then follow_email_link or use the OTP. With an API key the URL is
+        permanent (premium) unless WEBHOOK_SITE_DEFAULT_EXPIRY is set; use
+        configure_webhook for custom responses, alias, expiry or request_limit.
         """
         return await _execute(lambda: _app(ctx).webhooks.create())
 
-    @mcp.tool()
-    async def create_webhook_with_config(
+    @mcp.tool(annotations=WRITE)
+    async def configure_webhook(
         ctx: Context[AppContext],
+        webhook_token: str | None = None,
         default_status: int | None = None,
-        default_content: str | None = None,
+        default_content: JsonText = None,
         default_content_type: str | None = None,
         timeout: int | None = None,
+        listen: int | None = None,
         cors: bool | None = None,
         alias: str | None = None,
         expiry: int | None = None,
+        request_limit: int | None = None,
+        actions: bool | None = None,
+        clone_from: str | None = None,
+        group_id: int | None = None,
     ) -> dict[str, Any]:
-        """Create a webhook that returns a custom status, body, timeout, CORS, or alias.
+        """Create a webhook with custom settings, or update one (pass webhook_token).
 
-        Use when the user wants the endpoint to pretend to be an API (404, delay,
-        JSON body) instead of a default 200. For a normal sign-up inbox, use
-        create_webhook.
+        Use when the endpoint should pretend to be an API (status, body, content
+        type, delay up to 30s, CORS), needs an alias, expiry (seconds), a
+        request_limit (0 stores nothing), listen (seconds to wait for
+        update_request response), actions on/off, clone_from another token, or
+        a group_id. default_content can be a JSON array of DNS records
+        ([{"type":"a","value":"..."}]) to answer DNSHook lookups. For a plain
+        sign-up inbox use create_webhook.
         """
 
         def _op() -> Awaitable[ToolResult]:
+            if webhook_token is not None:
+                validate_webhook_token(webhook_token)
             if default_status is not None:
                 validate_http_status_code(default_status)
             if timeout is not None:
                 validate_positive_int(timeout, "timeout", min_val=0, max_val=30)
+            if listen is not None:
+                validate_listen(listen)
             if alias is not None:
                 validate_alias(alias)
             if expiry is not None:
                 validate_expiry(expiry)
+            if request_limit is not None:
+                validate_request_limit(request_limit)
+            if group_id is not None:
+                validate_int_id(group_id, "group_id")
             config = WebhookConfig(
                 default_status=default_status,
-                default_content=default_content,
+                default_content=_text(default_content),
                 default_content_type=default_content_type,
                 timeout=timeout,
+                listen=listen,
                 cors=cors,
                 alias=alias,
                 expiry=expiry,
+                request_limit=request_limit,
+                actions=actions,
+                clone_from=clone_from,
+                group_id=group_id,
             )
-            return _app(ctx).webhooks.create_with_config(config)
+            return _app(ctx).webhooks.configure(config, webhook_token=webhook_token)
 
         return await _execute(_op)
 
-    @mcp.tool()
-    async def send_to_webhook(
-        webhook_token: Token,
-        data: dict[str, Any],
-        ctx: Context[AppContext],
-        headers: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
-        """POST JSON to the webhook URL to test that capture works.
-
-        Use when the user wants to send a sample payload, not when they are
-        waiting for a real site or email.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).webhooks.send_data(webhook_token, data, headers)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def get_webhook_requests(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        limit: int = 10,
-        request_type: RequestType | None = None,
-    ) -> dict[str, Any]:
-        """List captured HTTP, email, or DNS events for a webhook.
-
-        Use to inspect what already arrived. Bodies are truncated and HTML is
-        omitted; use export_webhook_data for the full dump. For the newest item
-        use get_latest_request. To wait for something new use wait_for_request
-        or wait_for_email. Filter emails with request_type='email'.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).requests.get_all(webhook_token, limit, request_type)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def search_requests(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        request_type: RequestType | None = None,
-        query: str | None = None,
-        date_from: str | None = None,
-        date_to: str | None = None,
-        sorting: str = "newest",
-        limit: int = 20,
-    ) -> dict[str, Any]:
-        """Search captured events by method, body text, headers, type, or date.
-
-        Use when the user asks to find POSTs, a keyword, or only emails/DNS.
-        Examples: query='method:POST', query='content:verify', request_type='email'.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            filters = SearchFilters(
-                request_type=request_type,
-                query=query,
-                date_from=date_from,
-                date_to=date_to,
-                sorting=sorting,
-                limit=limit,
-            )
-            return _app(ctx).requests.search(webhook_token, filters)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def get_latest_request(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-    ) -> dict[str, Any]:
-        """Return only the newest captured event (HTTP, email, or DNS).
-
-        Use for a quick peek. Prefer wait_for_email after a sign-up, or
-        get_webhook_requests to see history.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).requests.get_latest(webhook_token)
-
-        return await _execute(_op)
-
-    @mcp.tool()
+    @mcp.tool(annotations=RO)
     async def get_webhook_info(
         webhook_token: Token,
         ctx: Context[AppContext],
     ) -> dict[str, Any]:
-        """Show webhook settings, expiry, and how many requests it has received.
+        """Show a webhook's settings, expiry, request count and every address.
 
-        Use when the user asks if a token is still valid or how it is configured.
+        Returns url, subdomain_url, api_url, email and dns for the token, plus
+        premium / expires_at / alias / request_limit. Use when the user asks if a
+        token is still valid, how it is configured, or needs its callback URL or
+        DNSHook domain.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -222,109 +207,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
-    async def update_webhook(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        default_status: int | None = None,
-        default_content: str | None = None,
-        default_content_type: str | None = None,
-        timeout: int | None = None,
-        cors: bool | None = None,
-    ) -> dict[str, Any]:
-        """Change how an existing webhook responds (status, body, timeout, CORS).
-
-        Use after create_webhook when the user wants a different canned reply.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            if default_status is not None:
-                validate_http_status_code(default_status)
-            if timeout is not None:
-                validate_positive_int(timeout, "timeout", min_val=0, max_val=30)
-            config = WebhookConfig(
-                default_status=default_status,
-                default_content=default_content,
-                default_content_type=default_content_type,
-                timeout=timeout,
-                cors=cors,
-            )
-            return _app(ctx).webhooks.update(webhook_token, config)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def delete_webhook(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-    ) -> dict[str, Any]:
-        """Permanently delete a webhook and every captured request/email.
-
-        Use when the user is done with a temp inbox or wants to clean up.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).webhooks.delete(webhook_token)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def delete_request(
-        webhook_token: Token,
-        request_id: str,
-        ctx: Context[AppContext],
-    ) -> dict[str, Any]:
-        """Delete one captured HTTP, email, or DNS event by request id."""
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).requests.delete_one(webhook_token, request_id)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def delete_all_requests(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        date_from: str | None = None,
-        date_to: str | None = None,
-        query: str | None = None,
-    ) -> dict[str, Any]:
-        """Clear captured events on a webhook, optionally by date or search query.
-
-        Use to reset an inbox before a new sign-up or test run.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            filters = None
-            if any(value is not None for value in (date_from, date_to, query)):
-                filters = DeleteFilters(date_from=date_from, date_to=date_to, query=query)
-            return _app(ctx).requests.delete_all(webhook_token, filters)
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def get_webhook_url(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        validate: bool = False,
-    ) -> dict[str, Any]:
-        """Return https://webhook.site/{token} for an existing webhook.
-
-        Use when the user already has a token and needs the HTTP callback URL.
-        For a new inbox, create_webhook already returns url.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).webhooks.get_url(webhook_token, validate=validate)
-
-        return await _execute(_op)
-
-    @mcp.tool()
+    @mcp.tool(annotations=RO)
     async def get_webhook_email(
         webhook_token: Token,
         ctx: Context[AppContext],
@@ -343,25 +226,265 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
-    async def get_webhook_dns(
+    @mcp.tool(annotations=RO)
+    async def list_webhooks(
+        ctx: Context[AppContext],
+        page: int = 1,
+        per_page: int = 50,
+        order_by: Literal["created_at", "token_id"] = "created_at",
+        order_direction: Literal["asc", "desc"] = "desc",
+        max_items: int = 200,
+    ) -> dict[str, Any]:
+        """List the webhooks (URLs / inboxes) in the account. Needs WEBHOOK_SITE_API_KEY.
+
+        Use to find an existing token, alias, request count or latest_request_at
+        before creating a new one. Returns pagination.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_page(page, per_page)
+            validate_positive_int(max_items, "max_items", min_val=1, max_val=1000)
+            return _app(ctx).account.list_tokens(
+                page=page,
+                per_page=per_page,
+                order_by=order_by,
+                order_direction=order_direction,
+                max_items=max_items,
+            )
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=DESTRUCTIVE)
+    async def delete_webhook(
         webhook_token: Token,
         ctx: Context[AppContext],
-        validate: bool = False,
     ) -> dict[str, Any]:
-        """Return the DNSHook domain for an existing webhook.
+        """Permanently delete a webhook and every captured request/email.
 
-        Use for out-of-band DNS callbacks, not for sign-up email. create_webhook
-        already returns dns.
+        Use when the user is done with a temp inbox or wants to clean up.
         """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
-            return _app(ctx).webhooks.get_dns(webhook_token, validate=validate)
+            return _app(ctx).webhooks.delete(webhook_token)
 
         return await _execute(_op)
 
-    @mcp.tool()
+    # --- requests -------------------------------------------------------------
+
+    @mcp.tool(annotations=RO)
+    async def get_webhook_requests(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        limit: int = 10,
+        request_type: RequestType | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """List captured HTTP, email, or DNS events for a webhook, one page at a time.
+
+        Use to inspect what already arrived. Bodies are truncated and HTML is
+        omitted; use export_webhook_data for the full dump. For the newest item
+        use get_request. To wait for something new use wait_for_request or
+        wait_for_email. Filter emails with request_type='email'. Returns
+        pagination (is_last_page, total).
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            validate_page(page, limit)
+            return _app(ctx).requests.get_all(webhook_token, limit, request_type, page=page)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=RO)
+    async def search_requests(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        request_type: RequestType | None = None,
+        query: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        sorting: Literal["newest", "oldest"] = "newest",
+        limit: int = 20,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Search captured events by method, body text, headers, type, or date.
+
+        Use when the user asks to find POSTs, a keyword, or only emails/DNS.
+        query uses webhook.site search syntax: 'method:POST', 'content:verify',
+        'headers.user-agent:curl', 'type:web AND method:POST',
+        'created_at:[now-1h TO now]'. Dates are 'yyyy-MM-dd HH:mm:ss' or
+        expressions like now-7d. Returns pagination.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            validate_page(page, limit)
+            filters = SearchFilters(
+                request_type=request_type,
+                query=query,
+                date_from=date_from,
+                date_to=date_to,
+                sorting=sorting,
+                limit=limit,
+                page=page,
+            )
+            return _app(ctx).requests.search(webhook_token, filters)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=RO)
+    async def get_request(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        request_id: str | None = None,
+        raw: bool = False,
+    ) -> dict[str, Any]:
+        """Return one captured event: the newest by default, or request_id.
+
+        Set raw=true to also get the untouched body (raw_body). Use for a quick
+        peek; prefer wait_for_email after a sign-up, or get_webhook_requests to
+        see history.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            return _app(ctx).requests.get_request(webhook_token, request_id=request_id, raw=raw)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=WRITE_IDEMPOTENT)
+    async def update_request(
+        webhook_token: Token,
+        request_id: str,
+        ctx: Context[AppContext],
+        note: JsonText = None,
+        response_content: JsonText = None,
+        response_status: int | None = None,
+        response_headers: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        """Attach a note to a captured request, or set its dynamic response.
+
+        response_* call the Set Response API; it only reaches the caller when the
+        request is still held by a listen > 0 token with the webhook.site CLI
+        attached. For canned replies use configure_webhook or a modify_response
+        custom action instead.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            note_text = _text(note)
+            body = _text(response_content)
+            if note_text is not None and len(note_text) > 10000:
+                raise ValidationError("note must be at most 10000 characters")
+            if response_status is not None:
+                validate_http_status_code(response_status)
+            if note_text is None and body is None and response_status is None and response_headers is None:
+                raise ValidationError("Pass note and/or response_content / response_status / response_headers")
+            return _app(ctx).requests.update_request(
+                webhook_token,
+                request_id,
+                note=note_text,
+                response_content=body,
+                response_status=response_status,
+                response_headers=response_headers,
+            )
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=RO)
+    async def download_request_file(
+        webhook_token: Token,
+        request_id: str,
+        file_id: str,
+        ctx: Context[AppContext],
+        max_bytes: int = 5_000_000,
+    ) -> dict[str, Any]:
+        """Download an uploaded file or email attachment (base64) by its file_id.
+
+        file_id comes from the attachments list on a request or email.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            validate_positive_int(max_bytes, "max_bytes", min_val=1, max_val=50_000_000)
+            return _app(ctx).requests.download_file(webhook_token, request_id, file_id, max_bytes=max_bytes)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=DESTRUCTIVE)
+    async def delete_request(
+        webhook_token: Token,
+        request_id: str,
+        ctx: Context[AppContext],
+    ) -> dict[str, Any]:
+        """Delete one captured HTTP, email, or DNS event by request id."""
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            return _app(ctx).requests.delete_one(webhook_token, request_id)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=DESTRUCTIVE)
+    async def delete_all_requests(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        date_from: str | None = None,
+        date_to: str | None = None,
+        query: str | None = None,
+    ) -> dict[str, Any]:
+        """Clear captured events on a webhook, optionally by date or search query.
+
+        Use to reset an inbox before a new sign-up or test run. date_to='now-7d'
+        deletes everything older than a week.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            filters = None
+            if any(value is not None for value in (date_from, date_to, query)):
+                filters = DeleteFilters(date_from=date_from, date_to=date_to, query=query)
+            return _app(ctx).requests.delete_all(webhook_token, filters)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=RO)
+    async def export_webhook_data(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        format: ExportFormat = "json",
+        limit: int = 100,
+        query: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        sorting: Literal["newest", "oldest"] = "newest",
+    ) -> dict[str, Any]:
+        """Full dump of captured events with HTML and untruncated bodies, as JSON or CSV.
+
+        Use when list/wait tools omitted HTML or truncated a body. json pages
+        through up to limit events; csv returns the account's CSV export
+        (paid plans, 3 calls per minute). Filters match search_requests.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            validate_positive_int(limit, "limit", min_val=1, max_val=10000)
+            return _app(ctx).requests.export_requests(
+                webhook_token,
+                limit=limit,
+                format=format,
+                query=query,
+                date_from=date_from,
+                date_to=date_to,
+                sorting=sorting,
+            )
+
+        return await _execute(_op)
+
+    # --- waiting ------------------------------------------------------------
+
+    @mcp.tool(annotations=RO)
     async def wait_for_request(
         webhook_token: Token,
         ctx: Context[AppContext],
@@ -369,11 +492,12 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         request_type: RequestType | None = None,
         return_existing: bool = False,
     ) -> dict[str, Any]:
-        """Poll until a new HTTP (or DNS) callback hits the webhook (1-120s).
+        """Wait until a new HTTP (or DNS) callback hits the webhook (1-120s).
 
-        Use after giving a site the webhook URL. Bodies are truncated and HTML
-        is omitted; use export_webhook_data for the full dump. For verification
-        / magic-link / password-reset mail, use wait_for_email instead. Set
+        Use after giving a site the webhook URL. Listens on webhook.site's
+        socket and falls back to polling. Bodies are truncated and HTML is
+        omitted; use export_webhook_data for the full dump. For verification /
+        magic-link / password-reset mail, use wait_for_email instead. Set
         return_existing=true if the request may already be there.
         """
 
@@ -388,7 +512,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
+    @mcp.tool(annotations=RO)
     async def wait_for_email(
         webhook_token: Token,
         ctx: Context[AppContext],
@@ -399,11 +523,12 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         """Wait for a sign-up, verify, magic-link, or password-reset email (1-120s).
 
         Call this after the user (or you) submitted {token}@email.webhook.site
-        on a website. Returns subject, a truncated text preview, extracted
-        confirm / reset / login URLs, and verification_codes (OTP). Next:
-        follow_email_link, or type the code. HTML is omitted; use
-        export_webhook_data for the full message. Set return_existing=true if
-        the email already arrived. If there is no token yet, create_webhook first.
+        on a website. Returns subject, sender, spam/DKIM checks, a truncated
+        text preview, attachments, extracted confirm / reset / login URLs, and
+        verification_codes (OTP). Next: follow_email_link, or type the code.
+        HTML is omitted; use export_webhook_data for the full message. Set
+        return_existing=true if the email already arrived. If there is no token
+        yet, create_webhook first.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -417,7 +542,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
+    @mcp.tool(annotations=FOLLOW)
     async def follow_email_link(
         webhook_token: Token,
         ctx: Context[AppContext],
@@ -426,9 +551,14 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Open the verify / magic-link / reset URL from a captured sign-up email.
 
-        Use after wait_for_email. Only follows http(s) links already in that
-        inbox. Returns status, final URL, and a short page preview. For OTP
-        codes, read verification_codes from wait_for_email instead.
+        Use after wait_for_email. Opens the best-ranked auth link; pass
+        request_id (the email's uuid) to pick a specific email, or url to open
+        another link from that email. Only follows http(s) links already in the
+        inbox, to public hosts unless the server's FOLLOW_EMAIL_LINK_ALLOW_HOSTS
+        allows more. Returns status, final URL, page preview, the ranked
+        auth_links, and blocked_redirect if a redirect was refused after the
+        link itself succeeded. For OTP codes, read verification_codes from
+        wait_for_email.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -441,33 +571,349 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
-    async def generate_ssrf_payload(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        identifier: str | None = None,
-        include_dns: bool = True,
-        include_ip: bool = True,
-    ) -> dict[str, Any]:
-        """Build authorized SSRF callback URLs that ping this webhook.
+    # --- account resources --------------------------------------------------
 
-        Use only on systems you are allowed to test — not for sign-up email.
-        Confirm hits with check_for_callbacks. local_bypass_examples cannot
-        be confirmed here.
+    @mcp.tool(annotations=FAMILY)
+    async def manage_custom_actions(
+        webhook_token: Token,
+        action: ActionAction,
+        ctx: Context[AppContext],
+        action_id: str | None = None,
+        request_id: str | None = None,
+        type: str | None = None,
+        parameters: dict[str, Any] | None = None,
+        order: int | None = None,
+        disabled: bool | None = None,
+        queue: bool | None = None,
+        delay: int | None = None,
+        condition: str | None = None,
+        error_notifications: bool = False,
+    ) -> dict[str, Any]:
+        """Manage the Custom Actions webhook.site runs on every request or email a token receives.
+
+        action: list | create | update | delete | test | execute. create/update
+        take type (e.g. modify_response, http, script, javascript, send_email,
+        extract_jsonpath, extract_regex, condition, rate_limit, log,
+        set_variable, store_global_variable, slack_send_message, ...) with
+        parameters per the webhook.site action-types reference, order, and
+        optionally queue/delay/condition (id of a conditions action). test
+        dry-runs the given action against request_id; execute re-runs all
+        saved actions on request_id. Actions also fire on incoming emails, so
+        guard email-sending actions with a condition on $request.type$.
         """
 
-        def _op() -> ToolResult:
+        def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
-            return _app(ctx).bounty.generate_ssrf_payload(
+            svc = _app(ctx).actions
+            if action == "list":
+                return svc.list(webhook_token)
+            if action == "create":
+                return svc.create(
+                    webhook_token,
+                    type=_require(type, "type", action),
+                    parameters=parameters,
+                    order=order,
+                    disabled=disabled,
+                    queue=queue,
+                    delay=delay,
+                    condition=condition,
+                )
+            if action == "update":
+                return svc.update(
+                    webhook_token,
+                    _require(action_id, "action_id", action),
+                    type=type,
+                    parameters=parameters,
+                    order=order,
+                    disabled=disabled,
+                    queue=queue,
+                    delay=delay,
+                    condition=condition,
+                )
+            if action == "delete":
+                return svc.delete(webhook_token, _require(action_id, "action_id", action))
+            if action == "test":
+                return svc.test(
+                    webhook_token,
+                    type=_require(type, "type", action),
+                    parameters=parameters,
+                    order=order,
+                    request_id=request_id,
+                    action_id=action_id,
+                )
+            return svc.execute(
                 webhook_token,
-                identifier=identifier,
-                include_dns=include_dns,
-                include_ip=include_ip,
+                _require(request_id, "request_id", action),
+                error_notifications=error_notifications,
             )
 
         return await _execute(_op)
 
-    @mcp.tool()
+    @mcp.tool(annotations=FAMILY)
+    async def manage_schedules(
+        action: ScheduleAction,
+        ctx: Context[AppContext],
+        schedule_id: int | None = None,
+        name: str | None = None,
+        interval: str | None = None,
+        cron: str | None = None,
+        request_url: str | None = None,
+        request_method: str | None = None,
+        request_body: JsonText = None,
+        request_headers: str | None = None,
+        timeout: int | None = None,
+        require_body: str | None = None,
+        require_status_min: int | None = None,
+        require_status_max: int | None = None,
+        sorting: Literal["newest", "oldest"] = "newest",
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage Schedules: webhook.site calls request_url on an interval (needs API key).
+
+        action: list | get | create | update | delete | run | logs. interval is
+        monthly, weekly, daily, hourly, 10-minute, 5-minute, 1-minute or cron
+        (then set cron, e.g. '*/5 * * * *'). request_headers are newline
+        separated. require_* raise an error notification when the response does
+        not match. Use for uptime checks or periodic cleanup calls.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).schedules
+            fields = {
+                "name": name,
+                "interval": interval,
+                "cron": cron,
+                "request_url": request_url,
+                "request_method": request_method,
+                "request_body": _text(request_body),
+                "request_headers": request_headers,
+                "timeout": timeout,
+                "require_body": require_body,
+                "require_status_min": require_status_min,
+                "require_status_max": require_status_max,
+            }
+            if timeout is not None:
+                validate_positive_int(timeout, "timeout", min_val=1, max_val=30)
+            if action == "list":
+                validate_page(page)
+                return svc.list(page=page)
+            if action == "create":
+                _require(name, "name", action)
+                _require(interval, "interval", action)
+                _require(request_url, "request_url", action)
+                return svc.create(**fields)
+            sid = _require_id(schedule_id, "schedule_id", action)
+            if action == "get":
+                return svc.get(sid)
+            if action == "update":
+                return svc.update(sid, **fields)
+            if action == "delete":
+                return svc.delete(sid)
+            if action == "run":
+                return svc.run_now(sid)
+            validate_page(page)
+            return svc.logs(sid, sorting=sorting, page=page)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=FAMILY)
+    async def manage_global_variables(
+        action: CrudAction,
+        ctx: Context[AppContext],
+        variable_id: int | None = None,
+        name: str | None = None,
+        value: JsonText = None,
+        search: str | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage Global Variables shared by all URLs, usable as $name$ in Custom Actions and Schedules.
+
+        action: list | create | update | delete. Needs API key.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).account
+            text = _text(value)
+            if action == "list":
+                validate_page(page)
+                return svc.list_variables(search=search, page=page)
+            if action == "create":
+                return svc.create_variable(_require(name, "name", action), _require(text, "value", action))
+            vid = _require_id(variable_id, "variable_id", action)
+            if action == "update":
+                return svc.update_variable(vid, name=name, value=text)
+            return svc.delete_variable(vid)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=FAMILY)
+    async def manage_groups(
+        action: CrudAction,
+        ctx: Context[AppContext],
+        group_id: int | None = None,
+        name: str | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage Groups that organise the account's webhooks (needs API key).
+
+        action: list | create | update | delete. Assign a token to a group with
+        configure_webhook(group_id=...).
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).account
+            if action == "list":
+                validate_page(page)
+                return svc.list_groups(page=page)
+            if action == "create":
+                return svc.create_group(_require(name, "name", action))
+            gid = _require_id(group_id, "group_id", action)
+            if action == "update":
+                return svc.update_group(gid, _require(name, "name", action))
+            return svc.delete_group(gid)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=FAMILY)
+    async def manage_templates(
+        action: CrudAction,
+        ctx: Context[AppContext],
+        template_id: int | None = None,
+        name: str | None = None,
+        actions: list[dict[str, Any]] | None = None,
+        variables: list[dict[str, Any]] | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage Templates: reusable sets of Custom Actions plus predefined variables (needs API key).
+
+        action: list | create | update | delete. actions is a list of action
+        objects (type, order, parameters...); variables is a list of
+        {name, value}. Include a template in a token with a 'template' action.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).account
+            if action == "list":
+                validate_page(page)
+                return svc.list_templates(page=page)
+            if action == "create":
+                return svc.create_template(_require(name, "name", action), actions=actions, variables=variables)
+            tid = _require_id(template_id, "template_id", action)
+            if action == "update":
+                return svc.update_template(tid, name=name, actions=actions, variables=variables)
+            return svc.delete_template(tid)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=FAMILY)
+    async def manage_databases(
+        action: DatabaseAction,
+        ctx: Context[AppContext],
+        database_id: str | None = None,
+        name: str | None = None,
+        plan: Literal["db-s", "db-m", "db-l"] | None = None,
+        group_id: int | None = None,
+        query: str | None = None,
+        params: list[Any] | dict[str, Any] | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage webhook.site Databases and run SQL against them (needs API key).
+
+        action: list | create | update | delete | query. create needs name and
+        plan. query runs SQL with optional positional (?) or named (:name)
+        params and returns up to 1000 rows.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).databases
+            if action == "list":
+                validate_page(page)
+                return svc.list(page=page)
+            if action == "create":
+                return svc.create(_require(name, "name", action), _require(plan, "plan", action), group_id=group_id)
+            did = str(_require(database_id, "database_id", action))
+            if action == "update":
+                return svc.update(did, name=name, group_id=group_id)
+            if action == "delete":
+                return svc.delete(did)
+            return svc.query(did, _require(query, "query", action), params=params)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=FAMILY)
+    async def manage_users(
+        action: UserAction,
+        ctx: Context[AppContext],
+        user_id: int | None = None,
+        name: str | None = None,
+        email: str | None = None,
+        user_type_id: int | None = None,
+        role_id: int | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage team users on an Enterprise account (needs an administrator API key).
+
+        action: list | invite | update | delete. user_type_id: 100 admin, 200
+        member, 300 viewer.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).account
+            if action == "list":
+                validate_page(page)
+                return svc.list_users(page=page)
+            if action == "invite":
+                return svc.invite_user(
+                    _require(name, "name", action),
+                    _require(email, "email", action),
+                    _require(user_type_id, "user_type_id", action),
+                    role_id=role_id,
+                )
+            uid = _require_id(user_id, "user_id", action)
+            if action == "update":
+                return svc.update_user(uid, name=name, email=email, user_type_id=user_type_id, role_id=role_id)
+            return svc.delete_user(uid)
+
+        return await _execute(_op)
+
+    # --- security -------------------------------------------------------------
+
+    @mcp.tool(annotations=RO)
+    async def generate_oob_payloads(
+        webhook_token: Token,
+        kind: PayloadKind,
+        ctx: Context[AppContext],
+        identifier: str | None = None,
+        include_dns: bool = True,
+        include_ip: bool = True,
+        include_cookies: bool = True,
+        include_dom: bool = True,
+        canary_type: CanaryType = "url",
+    ) -> dict[str, Any]:
+        """Build authorized out-of-band payloads that ping this webhook: SSRF URLs, XSS callbacks, or canary tokens.
+
+        Use only on systems you are allowed to test — not for sign-up email.
+        kind='ssrf' (include_dns/include_ip), 'xss' (include_cookies/include_dom),
+        'canary' (canary_type url|dns|email: a tripwire, not an inbox). Confirm
+        hits with check_for_callbacks.
+        """
+
+        def _op() -> ToolResult:
+            validate_webhook_token(webhook_token)
+            return _app(ctx).bounty.generate_oob_payloads(
+                webhook_token,
+                kind,
+                identifier=identifier,
+                include_dns=include_dns,
+                include_ip=include_ip,
+                include_cookies=include_cookies,
+                include_dom=include_dom,
+                canary_type=canary_type,
+            )
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=RO)
     async def check_for_callbacks(
         webhook_token: Token,
         ctx: Context[AppContext],
@@ -476,8 +922,8 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """See if SSRF, XSS, or canary callbacks arrived in the last N minutes.
 
-        Use after generate_ssrf_payload / generate_xss_callback / generate_canary_token.
-        For a website verification email, use wait_for_email.
+        Use after generate_oob_payloads. For a website verification email, use
+        wait_for_email.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -490,54 +936,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
-    async def generate_xss_callback(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        identifier: str | None = None,
-        include_cookies: bool = True,
-        include_dom: bool = True,
-    ) -> dict[str, Any]:
-        """Build authorized XSS payloads that ping this webhook when they run.
-
-        Use only on systems you are allowed to test. Confirm with check_for_callbacks.
-        """
-
-        def _op() -> ToolResult:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).bounty.generate_xss_callback(
-                webhook_token,
-                identifier=identifier,
-                include_cookies=include_cookies,
-                include_dom=include_dom,
-            )
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def generate_canary_token(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        token_type: CanaryType = "url",
-        identifier: str | None = None,
-    ) -> dict[str, Any]:
-        """Make a canary URL, DNS name, or email that alerts when someone opens it.
-
-        Use to mark your own files or systems. token_type='email' is a tripwire,
-        not a sign-up inbox — use create_webhook + wait_for_email for that.
-        """
-
-        def _op() -> ToolResult:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).bounty.generate_canary_token(
-                webhook_token,
-                token_type=token_type,
-                identifier=identifier,
-            )
-
-        return await _execute(_op)
-
-    @mcp.tool()
+    @mcp.tool(annotations=RO)
     async def extract_links_from_request(
         webhook_token: Token,
         ctx: Context[AppContext],
@@ -561,41 +960,41 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         return await _execute(_op)
 
-    @mcp.tool()
-    async def send_multiple_requests(
+    # --- send -----------------------------------------------------------------
+
+    @mcp.tool(annotations=WRITE)
+    async def send_requests(
         webhook_token: Token,
-        payloads: list[dict[str, Any]],
         ctx: Context[AppContext],
+        data: dict[str, Any] | None = None,
+        payloads: list[dict[str, Any]] | None = None,
+        headers: dict[str, str] | None = None,
+        method: str = "POST",
         delay_ms: int = 0,
     ) -> dict[str, Any]:
-        """POST several sample JSON payloads to the webhook, optionally spaced out.
+        """Send one JSON body (data) or several (payloads) to the webhook URL to test capture.
 
-        Use to load-test capture, not to wait for a real site or email.
+        Use when the user wants to send sample payloads or load-test, not when
+        they are waiting for a real site or email. Any HTTP method; delay_ms
+        spaces out multiple payloads.
         """
 
         def _op() -> Awaitable[ToolResult]:
             validate_webhook_token(webhook_token)
+            bodies = list(payloads or [])
+            if data is not None:
+                bodies.insert(0, data)
+            if not bodies:
+                raise ValidationError("Pass data (one body) or payloads (a list of bodies)")
+            validate_positive_int(delay_ms, "delay_ms", min_val=0, max_val=60000)
+            if not method.isalpha():
+                raise ValidationError("method must be an HTTP method name such as POST")
             return _app(ctx).requests.send_multiple(
                 webhook_token,
-                payloads=payloads,
+                payloads=bodies,
                 delay_ms=delay_ms,
+                headers=headers,
+                method=method,
             )
-
-        return await _execute(_op)
-
-    @mcp.tool()
-    async def export_webhook_data(
-        webhook_token: Token,
-        ctx: Context[AppContext],
-        limit: int = 100,
-    ) -> dict[str, Any]:
-        """Full dump of captured HTTP/email/DNS events, including HTML and untruncated bodies.
-
-        Use this when list/wait tools omitted HTML or truncated a body.
-        """
-
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
-            return _app(ctx).requests.export_requests(webhook_token, limit=limit)
 
         return await _execute(_op)

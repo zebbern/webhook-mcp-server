@@ -1,6 +1,6 @@
 [project]
 name = "webhook-mcp-server"
-version = "2.2.2"
+version = "3.0.0"
 description = "MCP Server for webhook.site API integration with layered architecture"
 readme = "README.md"
 license = {text = "MIT"}
@@ -22,7 +22,10 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     "mcp>=2.0.0",
-    "httpx>=0.25.0",
+    "httpx>=0.26.0",
+    "httpcore>=1.0.0",
+    "anyio>=4.0.0",
+    "python-socketio[asyncio_client]>=5.11.0",
 ]
 
 [project.scripts]
@@ -58,4 +61,5 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 markers = [
     "live: tests that call the real webhook.site API",
+    "live_auth: tests that need WEBHOOK_SITE_API_KEY and exercise account features on the real API",
 ]

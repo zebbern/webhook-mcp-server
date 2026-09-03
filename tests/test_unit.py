@@ -58,13 +58,45 @@ async def test_import_server_and_list_tools() -> None:
 
     tools = await server.mcp.list_tools()
     names = [tool.name for tool in tools]
-    assert "create_webhook" in names
-    assert "get_latest_request" in names
-    assert "get_webhook_dns" in names
-    assert "get_webhook_email" in names
-    assert "wait_for_email" in names
-    assert "follow_email_link" in names
-    assert len(names) == 24
+    expected = {
+        "create_webhook",
+        "configure_webhook",
+        "get_webhook_info",
+        "get_webhook_email",
+        "list_webhooks",
+        "delete_webhook",
+        "get_webhook_requests",
+        "search_requests",
+        "get_request",
+        "update_request",
+        "download_request_file",
+        "delete_request",
+        "delete_all_requests",
+        "export_webhook_data",
+        "wait_for_request",
+        "wait_for_email",
+        "follow_email_link",
+        "manage_custom_actions",
+        "manage_schedules",
+        "manage_global_variables",
+        "manage_groups",
+        "manage_templates",
+        "manage_databases",
+        "manage_users",
+        "generate_oob_payloads",
+        "check_for_callbacks",
+        "extract_links_from_request",
+        "send_requests",
+    }
+    assert set(names) == expected
+    assert len(names) == 28
+    for removed in ("get_webhook_url", "get_webhook_dns", "get_latest_request", "generate_ssrf_payload"):
+        assert removed not in names
+    annotated = {tool.name: tool.annotations for tool in tools}
+    assert annotated["delete_webhook"].destructive_hint is True
+    assert annotated["get_webhook_info"].read_only_hint is True
+    assert annotated["manage_schedules"].destructive_hint is True
+    assert all(annotation is not None for annotation in annotated.values())
 
 
 @pytest.mark.asyncio
@@ -100,8 +132,17 @@ async def test_tool_descriptions_cover_signup_and_email() -> None:
     assert "magic" in links or "reset" in links
     assert "verify" in links or "confirm" in links
 
+    configure = tools["configure_webhook"]
+    assert "alias" in configure and "expiry" in configure and "request_limit" in configure
 
-CATALOG_TOKEN_BUDGET = 5000
+    oob = tools["generate_oob_payloads"]
+    assert "ssrf" in oob and "xss" in oob and "canary" in oob
+
+    actions = tools["manage_custom_actions"]
+    assert "$request.type$" in actions
+
+
+CATALOG_TOKEN_BUDGET = 9000
 
 
 @pytest.mark.asyncio
@@ -271,13 +312,13 @@ async def test_wait_for_request_return_existing() -> None:
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_get_url_validate_missing_token_serializes() -> None:
+async def test_get_email_validate_missing_token_serializes() -> None:
     respx.get(f"{WEBHOOK_SITE_API}/token/{TOKEN}").mock(
         return_value=httpx.Response(404, text="not found")
     )
     async with WebhookHttpClient() as client:
         service = WebhookService(client)
-        result = await service.get_url(TOKEN, validate=True)
+        result = await service.get_email(TOKEN, validate=True)
     payload = json.loads(result.to_json())
     assert payload["success"] is False
     assert "not found" in payload["message"].lower()

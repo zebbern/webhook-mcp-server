@@ -21,18 +21,28 @@ class WebhookConfig:
         default_content: Response body content
         default_content_type: Content-Type header value
         timeout: Seconds to wait before responding (0-30)
+        listen: Seconds to wait for a Set Response call (0-10)
         cors: Enable CORS headers
         alias: Custom URL alias (3-32 alphanumeric chars)
         expiry: Seconds until auto-expiration (max 604800)
+        request_limit: Request history size (0 stores nothing, max 10000)
+        actions: Whether Custom Actions run on each request
+        clone_from: Token UUID or alias to copy settings and actions from
+        group_id: Group to add the token to
     """
 
     default_status: int | None = None
     default_content: str | None = None
     default_content_type: str | None = None
     timeout: int | None = None
+    listen: int | None = None
     cors: bool | None = None
     alias: str | None = None
     expiry: int | None = None
+    request_limit: int | None = None
+    actions: bool | None = None
+    clone_from: str | None = None
+    group_id: int | None = None
 
     def to_payload(self) -> dict[str, Any]:
         """Convert to API payload, excluding None values."""
@@ -49,7 +59,8 @@ class SearchFilters:
         date_from: Start date filter (format: yyyy-MM-dd HH:mm:ss)
         date_to: End date filter (format: yyyy-MM-dd HH:mm:ss)
         sorting: Sort order ('newest' or 'oldest')
-        limit: Maximum results to return
+        limit: Maximum results to return per page (max 100)
+        page: Page number (1-based)
     """
 
     request_type: str | None = None
@@ -58,10 +69,11 @@ class SearchFilters:
     date_to: str | None = None
     sorting: str = "newest"
     limit: int = 20
+    page: int = 1
 
     def to_params(self) -> dict[str, Any]:
         """Convert to query parameters."""
-        params = {"per_page": self.limit, "sorting": self.sorting}
+        params: dict[str, Any] = {"per_page": self.limit, "sorting": self.sorting, "page": self.page}
 
         query_parts = []
         if self.request_type:
