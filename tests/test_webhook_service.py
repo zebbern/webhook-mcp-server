@@ -129,7 +129,7 @@ def test_build_webhook_urls():
     assert urls["url"] == "https://webhook.site/test-token-123"
     assert urls["subdomain_url"] == "https://test-token-123.webhook.site"
     assert urls["api_url"] == "https://webhook.site/token/test-token-123"
-    assert urls["email"] == "test-token-123@email.webhook.site"
+    assert urls["email"] == "test-token-123@emailhook.site"
     assert urls["dns"] == "test-token-123.dnshook.site"
     assert build_webhook_urls("test-token-123", alias="my-alias")["url"] == "https://webhook.site/my-alias"
 
@@ -144,7 +144,7 @@ async def test_get_email():
         
         assert result.success is True
         assert result.data["token"] == "test-token-123"
-        assert result.data["email"] == "test-token-123@email.webhook.site"
+        assert result.data["email"] == "test-token-123@emailhook.site"
         assert result.data["url"] == "https://webhook.site/test-token-123"
 
 

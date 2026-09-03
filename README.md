@@ -205,9 +205,9 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 | Tool                | Description                                                                                       |
 | ------------------- | ------------------------------------------------------------------------------------------------- |
 | `create_webhook`    | Start here: disposable URL, temp email, and DNS for sign-up or callbacks                          |
-| `configure_webhook` | Create with, or update to, custom status / body / content type / timeout / CORS, alias, expiry, `request_limit`, `listen`, actions on/off, `clone_from`, `group_id`; DNSHook answers via a JSON `default_content` |
-| `get_webhook_info`  | Settings, expiry, request count and every address (`url`, `subdomain_url`, `api_url`, `email`, `dns`) |
-| `get_webhook_email` | Temp inbox `{token}@email.webhook.site` for sign-up / verify / magic-link / reset                  |
+| `configure_webhook` | Create with, or update to, custom status / body / content type / timeout / CORS, alias (`""` removes it), expiry, `request_limit`, `listen`, actions on/off, `clone_from`, `group_id`, `description`; DNSHook answers via a JSON `default_content` |
+| `get_webhook_info`  | Settings, expiry, request count and every address (`url`, `subdomain_url`, `force_status_url` for `https://webhook.site/{token}/{status}`, `api_url`, `email`, `dns`) |
+| `get_webhook_email` | Temp inbox `{token}@emailhook.site` for sign-up / verify / magic-link / reset                  |
 | `list_webhooks`     | List the account's URLs with aliases, request counts and `latest_request_at` (API key)             |
 | `delete_webhook`    | Delete a webhook and all its data                                                                 |
 
@@ -217,7 +217,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 | ----------------------- | -------------------------------------------------------------------------------------------- |
 | `send_requests`         | Send one body (`data`) or many (`payloads`) to the URL, any HTTP method, optional delay        |
 | `get_webhook_requests`  | List captured events page by page (`page`, `pagination` in the result)                         |
-| `search_requests`       | webhook.site search syntax (`method:POST`, `content:verify`, `type:email AND ...`), dates, pages |
+| `search_requests`       | webhook.site search syntax (`method:POST`, `content:verify`, `-method:GET`, `_exists_:note`, `country_code:DE`, `type:email AND ...`), dates, pages |
 | `get_request`           | Newest event or a specific `request_id`; `raw=true` adds the untouched body                    |
 | `update_request`        | Attach a note, or call Set Response for a request that is still being held (`listen` > 0 and a listener; `respond_to_next_request` does the whole flow) |
 | `download_request_file` | Download an uploaded file or email attachment (base64)                                         |
@@ -238,7 +238,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 | Tool                      | Description                                                                                        |
 | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| `manage_custom_actions`   | list / create / update / delete / test / execute the Custom Actions a token runs on each request or email; `types` and `variables` return the built-in reference (63 action types, each verified against the live API, plus every `$request.*$` variable) and required parameters are checked before the call |
+| `manage_custom_actions`   | list / create / update / delete / test / execute the Custom Actions a token runs on each request or email; `types`, `variables` and `script_reference` return the built-in references (63 action types and 138 WebhookScript functions, each verified against the live API, plus every `$request.*$` variable) and required parameters are checked before the call |
 | `manage_schedules`        | list / get / create / update / delete / run / logs for Schedules that call a URL on an interval or cron |
 | `manage_global_variables` | list / create / update / delete Global Variables usable as `$name$` in actions and schedules          |
 | `manage_groups`           | list / create / update / delete Groups that organise URLs                                            |
@@ -271,7 +271,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ### Sign up on a website
 
-1. `create_webhook` — get `email` (`{token}@email.webhook.site`)
+1. `create_webhook` — get `email` (`{token}@emailhook.site`)
 2. Use that address on the site (sign-up, verify, magic link, or password reset)
 3. `wait_for_email` — receive the message, confirm / login / reset URLs, and any OTP
 4. `follow_email_link` to open a verify link, or type `verification_codes` on the site
@@ -285,7 +285,7 @@ If you already have a token, `get_webhook_email` returns the same inbox.
 {
   "token": "abc123-def456-...",
   "url": "https://webhook.site/abc123-def456-...",
-  "email": "abc123-def456-...@email.webhook.site",
+  "email": "abc123-def456-...@emailhook.site",
   "dns": "abc123-def456-....dnshook.site"
 }
 ```
@@ -325,7 +325,7 @@ If you already have a token, `get_webhook_email` returns the same inbox.
 | ------------- | ------------------------------ | --------------------------- |
 | **HTTP URL**  | `https://webhook.site/{token}` | Capture HTTP/HTTPS requests |
 | **Subdomain** | `https://{token}.webhook.site` | Alternative URL format      |
-| **Email**     | `{token}@email.webhook.site`   | Capture incoming emails     |
+| **Email**     | `{token}@emailhook.site`   | Capture incoming emails     |
 | **DNS**       | `{token}.dnshook.site`         | Capture DNS lookups         |
 
 ---

@@ -650,7 +650,7 @@ class RequestService:
     ) -> ToolResult:
         """Wait for a new email, or optionally return one that already exists.
 
-        The email address format is: {token}@email.webhook.site
+        The email address format is: {token}@emailhook.site
 
         Args:
             webhook_token: The webhook UUID
@@ -696,7 +696,7 @@ class RequestService:
             timeout_data={
                 "timeout": True,
                 "email": None,
-                "email_address": f"{webhook_token}@email.webhook.site",
+                "email_address": f"{webhook_token}@emailhook.site",
             },
         )
 

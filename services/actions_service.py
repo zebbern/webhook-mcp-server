@@ -17,6 +17,7 @@ def _action_payload(
     delay: int | None,
     condition: str | None,
     queue_id: int | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "type": type,
@@ -27,6 +28,7 @@ def _action_payload(
         "delay": delay,
         "condition": condition,
         "queue_id": queue_id,  # Queue Profile to throttle queued runs (verified live)
+        "name": name,  # Label shown in the editor; a PUT without it clears it (seen live)
     }
     return {key: value for key, value in payload.items() if value is not None}
 
@@ -57,8 +59,9 @@ class ActionsService:
         delay: int | None = None,
         condition: str | None = None,
         queue_id: int | None = None,
+        name: str | None = None,
     ) -> ToolResult:
-        payload = _action_payload(type, order, parameters or {}, disabled, queue, delay, condition, queue_id)
+        payload = _action_payload(type, order, parameters or {}, disabled, queue, delay, condition, queue_id, name)
         response = await self._client.post(f"/token/{webhook_token}/actions", json_data=payload)
         action = response.json()
         return ToolResult(
@@ -79,9 +82,11 @@ class ActionsService:
         delay: int | None = None,
         condition: str | None = None,
         queue_id: int | None = None,
+        name: str | None = None,
     ) -> ToolResult:
-        # The API replaces the whole action on PUT (a partial body is a 422), so
-        # merge the requested changes into the saved action first.
+        # The API replaces the whole action on PUT (a partial body is a 422 and
+        # a body without `name` drops the name), so merge the requested changes
+        # into the saved action first.
         current = await self._find(webhook_token, action_id)
         payload = _action_payload(
             type if type is not None else current.get("type"),
@@ -92,6 +97,7 @@ class ActionsService:
             delay if delay is not None else current.get("delay"),
             condition if condition is not None else current.get("condition"),
             queue_id if queue_id is not None else current.get("queue_id"),
+            name if name is not None else current.get("name"),
         )
         action = await self._client.put(f"/token/{webhook_token}/actions/{action_id}", json_data=payload)
         return ToolResult(success=True, message="Custom action updated", data={"action": action})

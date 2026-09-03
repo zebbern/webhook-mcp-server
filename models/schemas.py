@@ -25,7 +25,7 @@ class WebhookConfig:
         cors: Enable CORS headers
         alias: Custom URL alias (3-32 alphanumeric chars)
         expiry: Seconds until auto-expiration (max 604800)
-        request_limit: Request history size (0 stores nothing, max 10000)
+        request_limit: Request history size (0 stores nothing; the plan sets the ceiling, up to 100000)
         actions: Whether Custom Actions run on each request
         clone_from: Token UUID or alias to copy settings and actions from
         group_id: Group to add the token to
@@ -47,8 +47,11 @@ class WebhookConfig:
     description: str | None = None
 
     def to_payload(self) -> dict[str, Any]:
-        """Convert to API payload, excluding None values."""
-        return {k: v for k, v in asdict(self).items() if v is not None}
+        """Convert to API payload, excluding None values (alias="" becomes null to remove it)."""
+        payload = {k: v for k, v in asdict(self).items() if v is not None}
+        if self.alias == "":
+            payload["alias"] = None
+        return payload
 
 
 @dataclass

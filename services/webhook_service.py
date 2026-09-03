@@ -37,14 +37,19 @@ def build_webhook_urls(token: str, alias: str | None = None) -> dict[str, str]:
         alias: Optional custom alias
 
     Returns:
-        Dict with url, subdomain_url, api_url, email, and dns keys
+        Dict with url, subdomain_url, force_status_url, api_url, email, and dns keys
     """
     identifier = alias if alias else token
     return {
         "url": f"{WEBHOOK_SITE_API}/{identifier}",
         "subdomain_url": f"https://{token}.webhook.site",
+        # Appending a status code to the capture URL forces that response status
+        # (POST .../503 answered 503 live); handy for retry-logic tests.
+        "force_status_url": f"{WEBHOOK_SITE_API}/{identifier}/{{status}}",
         "api_url": f"{WEBHOOK_SITE_API}/token/{token}",
-        "email": f"{token}@email.webhook.site",
+        # emailhook.site is the current mail domain (verified delivering live);
+        # the older {token}@email.webhook.site still works.
+        "email": f"{token}@emailhook.site",
         "dns": f"{token}.dnshook.site",
     }
 
@@ -277,7 +282,7 @@ class WebhookService:
             if validation_error:
                 return validation_error
 
-        email = f"{webhook_token}@email.webhook.site"
+        email = f"{webhook_token}@emailhook.site"
         url = f"{WEBHOOK_SITE_API}/{webhook_token}"
 
         return ToolResult(

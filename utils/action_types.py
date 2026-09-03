@@ -39,6 +39,7 @@ BASE_VARIABLES = [
     ("request.content", "all", "Body (web) or raw email"),
     ("request.date", "all", "Created at, Y-m-d H:i:s"),
     ("request.timestamp", "all", "Created at, unix seconds"),
+    ("request.sorting", "all", "Created at, unix microseconds (precise ordering; seen in test-action variables)"),
     ("request.hostname", "all", "Host the request hit"),
     ("request.header.<name>", "all", "One variable per header, lowercase name"),
     ("request.size", "all", "Body size in bytes"),
@@ -76,7 +77,12 @@ def all_types() -> dict[str, dict[str, Any]]:
 
 
 def required_params(entry: dict[str, Any]) -> list[str]:
-    return [name for name, spec in entry["params"].items() if spec.get("required") or spec.get("required_live")]
+    """Top-level required parameters; nested ones (conditions.*.input) are left to the API."""
+    return [
+        name
+        for name, spec in entry["params"].items()
+        if (spec.get("required") or spec.get("required_live")) and "." not in name and "*" not in name
+    ]
 
 
 def summarise(name: str, entry: dict[str, Any]) -> dict[str, Any]:

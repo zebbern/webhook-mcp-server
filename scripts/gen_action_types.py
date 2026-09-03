@@ -73,6 +73,78 @@ LIVE_REQUIRED = {
     ("text_map", "default"): "API answered 'Missing parameter: default' for an empty string",
 }
 
+# Parameter values and parameters missing from the API reference. Sources: the
+# webhook.site frontend bundle (operator/mode maps, default parameter shapes)
+# and live test-action runs on 2026-09-03.
+CONDITION_OPERATORS = ["eq", "neq", "sw", "ew", "ct", "nct", "gt", "gte", "lt", "lte",
+                       "ex", "false", "true", "num", "int", "float", "json", "email", "domain", "url"]
+CONDITIONS_OPERATORS = CONDITION_OPERATORS + ["nex", "null", "nnull", "regex"]
+OPERATOR_MEANINGS = ("eq is equal to, neq is not equal to, sw starts with, ew ends with, ct contains, nct does not "
+                     "contain, gt/gte/lt/lte compare numbers, ex variable exists, nex variable missing, true/false, "
+                     "null/nnull, num/int/float, json, email, domain, url, regex matches a /delimited/ PCRE pattern "
+                     "(value ignored for ex..url)")
+LIVE_ADDITIONS: dict[str, dict] = {
+    "set_variable": {
+        "params": {
+            "mode": {"in": ["text", "random", "random_number", "date", "math"],
+                     "notes": ["math evaluates `value` (+ - * / % ^, round(), min(), if(a > b, x, y) ...): '1 + 2' set 3 live",
+                               "random_number needs random_number.from/to; the API reference omits both modes"]},
+            "random_number": {"required": False, "type": "array", "notes": ["[{\"from\": 1, \"to\": 10}] for mode random_number"]},
+            "random_number.*.from": {"required": False, "type": "int"},
+            "random_number.*.to": {"required": False, "type": "int"},
+        },
+    },
+    "condition": {
+        "note": "Single condition; only these 20 operators (regex, nex, null, nnull answer 'Unknown operator' here). "
+                "Prefer `conditions`, which supports them all. " + OPERATOR_MEANINGS,
+    },
+    "conditions": {
+        "params": {
+            "conditions.*.input": {"required": True, "type": "string", "notes": ["Variables are replaced in input and value"]},
+            "conditions.*.operator": {"required": True, "type": "string", "in": CONDITIONS_OPERATORS},
+            "conditions.*.value": {"required": False, "type": "string", "notes": ["regex values need delimiters: /^[a-z]+$/"]},
+        },
+        "note": "action noop keeps the result for other actions' `condition` link; stop halts when matched; "
+                "continue halts when NOT matched. " + OPERATOR_MEANINGS,
+    },
+    "text_map": {
+        "params": {"operator": {"in": ["eq", "neq", "sw", "ew", "ct", "nct", "gt", "gte", "lt", "lte"],
+                                "notes": ["Compared against each mapping's `from`; ew/ct matched live, spelled-out names do not"]}},
+    },
+    "database": {
+        "params": {
+            "type": {"in": ["whdb", "mysql", "pgsql", "sqlsrv"]},
+            "host": {"required": False, "notes": ["Required for mysql/pgsql/sqlsrv (the API checks), not for whdb"]},
+            "database": {"required": False, "notes": ["Required for mysql/pgsql/sqlsrv, not for whdb"]},
+            "username": {"required": False, "notes": ["Required for mysql/pgsql/sqlsrv, not for whdb"]},
+            "params": {"required": False, "notes": ["Always send it, [] when the statement has no placeholders: whdb fails with 'Undefined array key \"params\"' otherwise"]},
+            "db_id": {"required": False, "type": "int",
+                      "notes": ["Webhook.site Database id (manage_databases) for type whdb; without it the API answers "
+                                "'Undefined array key \"db_id\"'"]},
+        },
+        "note": "type whdb queries a Webhook.site Database (no host/credentials needed); the others need your own server.",
+    },
+    "send_request": {"note": "Legacy: the editor no longer offers it; the API still creates it. Use `http`."},
+    "modify_response": {"note": "The editor does not allow queue=true here (a queued run cannot change the response)."},
+    "dont_save": {"note": "The editor does not allow queue=true here."},
+    "rate_limit": {"note": "The editor does not allow queue=true here. Blocked requests get 429 and are not saved."},
+}
+
+
+def apply_live_additions(types: dict) -> None:
+    for name, extra in LIVE_ADDITIONS.items():
+        entry = types.setdefault(name, {"params": {}, "description": ""})
+        if extra.get("note"):
+            entry["note"] = extra["note"]
+        for param, add in extra.get("params", {}).items():
+            spec = entry["params"].setdefault(param, {"required": False, "type": None})
+            for key, value in add.items():
+                if key == "notes":
+                    spec["notes"] = list(dict.fromkeys(spec.get("notes", []) + value))
+                else:
+                    spec[key] = value
+
+
 # Types the product docs describe but the API reference page omits; verified live.
 EXTRA_TYPES = {
     "mock": {
@@ -153,6 +225,7 @@ def parse(markdown: str) -> dict[str, dict]:
         if spec is not None:
             spec["required_live"] = True
             spec["live_note"] = reason
+    apply_live_additions(types)
     return types
 
 

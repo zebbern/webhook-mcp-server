@@ -1,0 +1,1707 @@
+{
+ "source": "https://docs.webhook.site/webhookscript/functions/",
+ "verified_at": "2026-09-03",
+ "language_notes": [
+  "Custom Action variables are NOT substituted inside a script: read them with var('request.content') (the $ signs are optional).",
+  "set(name, value) exports a variable to later actions; store(name, value) writes a permanent Global Variable.",
+  "Strict typing: 5 + \"4\" is an error. Convert with to_string()/to_number() or build strings with string_format('{} items', n).",
+  "Strings: + concatenates, - removes a substring (or every regex match), 2 * \"ab\" repeats.",
+  "Regex literal r\"...\" (PCRE, unicode); \"hello\" == r\"l{2}\" is a match test; string_replace supports $1 back-references.",
+  "Arrays are ordered maps: ['a', 'b', 'k': 1]; ranges 1..5 and 1..2..9 build arrays; keys are 0-based.",
+  "Any function can be called method-style: value.string_upper() == string_upper(value); the type prefix may be dropped (\"x\".upper() is NOT valid, \"x\".length() is, via string_length).",
+  "Control flow: if/else, for (item in array_or_string), while, break, continue; functions are first-class and capture scope.",
+  "respond(content, status, headers) stops execution and answers the request; set_response/set_content/set_status/set_header change the response and continue.",
+  "echo()/dump() write to the action output shown on the request; dd() dumps and stops.",
+  "Undocumented names that exist live: get() and get_variable() (same as var), length(), base64url_encode(). Documented but NOT defined live: base64_urlencode (use base64url_encode), number_length. Also undefined: file_contents, array_slice, match.",
+  "Timeouts: the whole action chain must answer within 30 s (queued actions get 120 s); http()/request() default to a 5 s timeout."
+ ],
+ "extra_functions": {
+  "get": {
+   "group": "variables",
+   "signatures": [
+    "get(string variable_name, any default) : any"
+   ],
+   "summary": "Alias of var() used in official examples (undocumented)."
+  },
+  "get_variable": {
+   "group": "variables",
+   "signatures": [
+    "get_variable(string variable_name) : any"
+   ],
+   "summary": "Alias of var() (undocumented)."
+  },
+  "base64url_encode": {
+   "group": "string",
+   "signatures": [
+    "base64url_encode(string value) : string"
+   ],
+   "summary": "URL-safe base64, same as base64_urlencode (undocumented alias)."
+  },
+  "length": {
+   "group": "general",
+   "signatures": [
+    "length(string/array value) : number"
+   ],
+   "summary": "Length of a string or array (undocumented alias)."
+  }
+ },
+ "functions": {
+  "abs": {
+   "group": "math",
+   "signatures": [
+    "abs(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "action": {
+   "group": "flow",
+   "signatures": [
+    "action(string action_type, array parameters) : array"
+   ],
+   "summary": "Runs Custom Actions in WebhookScript. Can be used to loop over items in a way that not possible using the visual Custom Actions editor.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "array_chunk": {
+   "group": "array",
+   "signatures": [
+    "array_chunk(array array, number count, bool preserve_keys = false) : array"
+   ],
+   "summary": "Splits a single array into chunks of count. When preserve_keys is set to true, the array keys are preserved.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 11"
+   }
+  },
+  "array_contains": {
+   "group": "array",
+   "signatures": [
+    "array_contains(array array, string/number needle) : bool"
+   ],
+   "summary": "Returns true or false depending on whether array contains a value equal to needle.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 14"
+   }
+  },
+  "array_copy": {
+   "group": "array",
+   "signatures": [
+    "array_copy(array array) : array"
+   ],
+   "summary": "Returns a copy of array",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "array_diff": {
+   "group": "array",
+   "signatures": [
+    "array_diff(array array1, array array2) : array"
+   ],
+   "summary": "Returns the items of array1 that are not present in array2 while keeping the array indices.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 10"
+   }
+  },
+  "array_get": {
+   "group": "array",
+   "signatures": [
+    "array_get(array array, string/number index, any default) : any"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 9"
+   }
+  },
+  "array_has": {
+   "group": "array",
+   "signatures": [
+    "array_has(array array, string/number key) : bool"
+   ],
+   "summary": "Returns true if array contains key, and false if it does not.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 9"
+   }
+  },
+  "array_join": {
+   "group": "array",
+   "signatures": [
+    "array_join(array array, string joiner) : string"
+   ],
+   "summary": "Returns a string where all the values are joined by joiner.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 10"
+   }
+  },
+  "array_keys": {
+   "group": "array",
+   "signatures": [
+    "array_keys(array array) : array"
+   ],
+   "summary": "Returns the keys of an array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "array_length": {
+   "group": "array",
+   "signatures": [
+    "array_length(array array) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "array_map": {
+   "group": "array",
+   "signatures": [
+    "array_map(array array, func function)"
+   ],
+   "summary": "Runs function with each array value, and returns array with key as result.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 9"
+   }
+  },
+  "array_merge": {
+   "group": "array",
+   "signatures": [
+    "array_merge(array array1, array array2) : array"
+   ],
+   "summary": "Merges 2 arrays into a single array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 11"
+   }
+  },
+  "array_number_of": {
+   "group": "array",
+   "signatures": [
+    "array_number_of(array, string/number value) : number"
+   ],
+   "summary": "Returns amount of value",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 15"
+   }
+  },
+  "array_pop": {
+   "group": "array",
+   "signatures": [
+    "array_pop(array array) : any"
+   ],
+   "summary": "Pop element off end of array",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 9"
+   }
+  },
+  "array_push": {
+   "group": "array",
+   "signatures": [
+    "array_push(array array, any value) : any"
+   ],
+   "summary": "Adds value to end of array and returns value",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 10"
+   }
+  },
+  "array_random": {
+   "group": "array",
+   "signatures": [
+    "array_random(array array) : any"
+   ],
+   "summary": "Returns random value of array",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "array_range": {
+   "group": "array",
+   "signatures": [
+    "array_range(array array, int offset, ?int length = 0, ?bool preserve_keys = false) : array"
+   ],
+   "summary": "Returns a range of array, starting from offset, and returns the amount specified in length if set (otherwise until the end of the array.)",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 11"
+   }
+  },
+  "array_reverse": {
+   "group": "array",
+   "signatures": [
+    "array_reverse(array array) : array"
+   ],
+   "summary": "Returns array in reverse order",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "array_shuffle": {
+   "group": "array",
+   "signatures": [
+    "array_shuffle(array array) : array"
+   ],
+   "summary": "Returns shuffled version of array",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "array_sort": {
+   "group": "array",
+   "signatures": [
+    "array_sort(array array) : array"
+   ],
+   "summary": "Sorts array by its values. Keys are kept as-is.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "array_splice": {
+   "group": "array",
+   "signatures": [
+    "array_splice(array array, int offset, ?int length, array replacement) : array"
+   ],
+   "summary": "Removes length amount of values from array, starting from offset (if offset is negative, starts from the end of the array.)",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 12"
+   }
+  },
+  "array_values": {
+   "group": "array",
+   "signatures": [
+    "array_values(array array) : array"
+   ],
+   "summary": "Returns the values of an array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "atan": {
+   "group": "math",
+   "signatures": [
+    "atan(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 4"
+   }
+  },
+  "base64_decode": {
+   "group": "string",
+   "signatures": [
+    "base64_decode(string string) : string"
+   ],
+   "summary": "Returns a base64-decoded string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "base64_encode": {
+   "group": "string",
+   "signatures": [
+    "base64_encode(string string) : string"
+   ],
+   "summary": "Returns base64-encoded string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "base64_urldecode": {
+   "group": "string",
+   "signatures": [
+    "base64_urldecode(string string) : string"
+   ],
+   "summary": "Returns a base64url-decoded string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 16"
+   }
+  },
+  "base64_urlencode": {
+   "group": "string",
+   "signatures": [
+    "base64_urlencode(string string) : string"
+   ],
+   "summary": "Returns a URL-friendly base64url-encoded string, where characters +, / have been replaced by - and _, and any = padding characters have been removed.",
+   "verified": {
+    "exists": false,
+    "checked_at": "2026-09-03",
+    "message": "Undefined variable 'base64_urlencode' @ line 1, position 0"
+   }
+  },
+  "base64url_encode": {
+   "group": "string",
+   "signatures": [
+    "base64url_encode(string value) : string"
+   ],
+   "summary": "URL-safe base64, same as base64_urlencode (undocumented alias).",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 16"
+   }
+  },
+  "bin2hex": {
+   "group": "math",
+   "signatures": [
+    "bin2hex(string data) : string"
+   ],
+   "summary": "Converts a binary tring to a hexadecimal representation.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "bool_and": {
+   "group": "bool",
+   "signatures": [
+    "bool_and(bool value1, bool value2) : bool"
+   ],
+   "summary": "Returns value1 && value2",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 8"
+   }
+  },
+  "bool_not": {
+   "group": "bool",
+   "signatures": [
+    "bool_not(bool value) : bool"
+   ],
+   "summary": "Returns !value",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 8"
+   }
+  },
+  "ceil": {
+   "group": "math",
+   "signatures": [
+    "ceil(number number) : number"
+   ],
+   "summary": "Rounds a number up to nearest integer.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 4"
+   }
+  },
+  "convert_kana": {
+   "group": "string",
+   "signatures": [
+    "convert_kana(string, mode) : string"
+   ],
+   "summary": "Performs a \"han-kaku\" - \"zen-kaku\" conversion for string string. This function is only useful for Japanese. See here for more info.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "cos": {
+   "group": "math",
+   "signatures": [
+    "cos(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "csv_to_array": {
+   "group": "string",
+   "signatures": [
+    "csv_to_array(string content, string delimiter, ?int header_offset, string enclosure, string escape) : array"
+   ],
+   "summary": "Takes a CSV string and outputs to an array, with each row being an item in the array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "date_format": {
+   "group": "date",
+   "signatures": [
+    "date_format(string date, ?string format, ?string locale, ?string timezone) : string"
+   ],
+   "summary": "Returns a date converted to the format specified in format. date is automatically parsed and can be a date string (ISO-8601 recommended) or one of the recognized date formats.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "date_interval": {
+   "group": "date",
+   "signatures": [
+    "date_interval(string date1, ?string date2, ?string format) : string/int"
+   ],
+   "summary": "Calculates the interval between date1 and date2. When date2 is unspecified/null, now is used.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "date_interval_human": {
+   "group": "date",
+   "signatures": [
+    "date_interval_human(string date1, ?string date2, ?string locale) : string/int"
+   ],
+   "summary": "Formats the difference between 2 dates in a way that's easy to read for humans.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 19"
+   }
+  },
+  "date_to_array": {
+   "group": "date",
+   "signatures": [
+    "date_to_array(string) : array"
+   ],
+   "summary": "Returns an array containing all the components of a given date.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "db": {
+   "group": "database",
+   "signatures": [
+    "db(string/int db_id) : function"
+   ],
+   "summary": "The db_id parameter must either be the name or ID of a Webhook.site Database instance.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "dd": {
+   "group": "general",
+   "signatures": [
+    "dd(...any value)"
+   ],
+   "summary": "Stops Custom Action execution and adds value to script debug output.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "decrypt": {
+   "group": "string",
+   "signatures": [
+    "decrypt(string value, string password) : string"
+   ],
+   "summary": "Decrypts a value encrypted by the encrypt() function.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 7"
+   }
+  },
+  "delete": {
+   "group": "variables",
+   "signatures": [
+    "delete(string global_variable_name)"
+   ],
+   "summary": "Deletes a global variable.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "digest": {
+   "group": "string",
+   "signatures": [
+    "digest(string value, string algo) : false/string"
+   ],
+   "summary": "Returns a cryptographic digest of value using algo. Returns false on failure.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 6"
+   }
+  },
+  "dont_save": {
+   "group": "flow",
+   "signatures": [
+    "dont_save()"
+   ],
+   "summary": "Marks the request so it is not saved in Webhook.site, which is useful when receiving a large amount of requests. The request can still be seen when it comes in, but will not be available through through the app later, or through the API. The action is useful in cases where e.g. a URL receive a large amount of requests.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "dump": {
+   "group": "general",
+   "signatures": [
+    "dump(...any value)"
+   ],
+   "summary": "Adds value as a decoded string to script debug output.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "echo": {
+   "group": "general",
+   "signatures": [
+    "echo(...string string)"
+   ],
+   "summary": "Adds string to script debug output.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "encrypt": {
+   "group": "string",
+   "signatures": [
+    "encrypt(string value, string password) : string"
+   ],
+   "summary": "Encrypts value using password. Uses military-grade, industry standard encryption with the XSalsa20 stream cipher and Poly1305 MAC for authentication.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 7"
+   }
+  },
+  "exec": {
+   "group": "flow",
+   "signatures": [
+    "exec(string code) : any"
+   ],
+   "summary": "Executes code in code and returns the result. The code will inherit the execution scope.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "file_content": {
+   "group": "files",
+   "signatures": [
+    "file_content(string fileId) : string"
+   ],
+   "summary": "Returns the content of a specific file, using the id key from the files() function above.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "files": {
+   "group": "files",
+   "signatures": [
+    "files(string name) : array"
+   ],
+   "summary": "Returns an array of files, with the following keys:",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "floor": {
+   "group": "math",
+   "signatures": [
+    "floor(number number) : number"
+   ],
+   "summary": "Rounds a number down to nearest integer.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 5"
+   }
+  },
+  "get": {
+   "group": "variables",
+   "signatures": [
+    "get(string variable_name, any default) : any"
+   ],
+   "summary": "Alias of var() used in official examples (undocumented).",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "get_variable": {
+   "group": "variables",
+   "signatures": [
+    "get_variable(string variable_name) : any"
+   ],
+   "summary": "Alias of var() (undocumented).",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "hash": {
+   "group": "string",
+   "signatures": [
+    "hash(string/number value, string algo) : string"
+   ],
+   "summary": "Returns a hashed version of value using the algo algorithm.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 4"
+   }
+  },
+  "hex2bin": {
+   "group": "math",
+   "signatures": [
+    "hex2bin(string hex_string) : ?string"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "hex2num": {
+   "group": "math",
+   "signatures": [
+    "hex2num(string hex_string) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "hmac": {
+   "group": "string",
+   "signatures": [
+    "hmac(string value, string algo, string secret) : string"
+   ],
+   "summary": "Returns the calculated message digest/hash in a hexadecimal formatted as a string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 3 arguments (got 0) @ line 1, position 4"
+   }
+  },
+  "html_decode": {
+   "group": "string",
+   "signatures": [
+    "html_decode(string string) : string"
+   ],
+   "summary": "Decodes all HTML entities (for example, &nbsp;) to normal characters.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "html_encode": {
+   "group": "string",
+   "signatures": [
+    "html_encode(string string) : string"
+   ],
+   "summary": "Replaces characters in a string with HTML encoded versions.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "html_strip_tags": {
+   "group": "string",
+   "signatures": [
+    "html_strip_tags(string string) : string"
+   ],
+   "summary": "Returns a string with all HTML tags removed.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 15"
+   }
+  },
+  "html_to_text": {
+   "group": "string",
+   "signatures": [
+    "html_to_text(string string) : string"
+   ],
+   "summary": "Converts HTML to plaintext. A more aggressive version of html_strip_tags.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "http": {
+   "group": "network",
+   "signatures": [
+    "http(string url, array options) : array"
+   ],
+   "summary": "Sends a HTTP request and returns an array with the following keys containing response data:",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "import": {
+   "group": "flow",
+   "signatures": [
+    "import(string url) : any"
+   ],
+   "summary": "Downloads code located at url and returns the result. The code will inherit the execution scope.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "is_empty": {
+   "group": "bool",
+   "signatures": [
+    "is_empty(any value) : bool"
+   ],
+   "summary": "Returns true if:",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 8"
+   }
+  },
+  "is_json": {
+   "group": "string",
+   "signatures": [
+    "is_json(any value) : bool"
+   ],
+   "summary": "Returns true if value is a valid JSON string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "is_null": {
+   "group": "bool",
+   "signatures": [
+    "is_null(any value) : bool"
+   ],
+   "summary": "Returns true if value is null. An alternative to if (value == null) that won't break when value isn't null due to type checking.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "is_numeric": {
+   "group": "math",
+   "signatures": [
+    "is_numeric(any value) : bool"
+   ],
+   "summary": "Returns true if value is numeric.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "json_decode": {
+   "group": "string",
+   "signatures": [
+    "json_decode(string json) : array"
+   ],
+   "summary": "Decodes json and returns an array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "json_encode": {
+   "group": "string",
+   "signatures": [
+    "json_encode(array array, bool format = true) : string"
+   ],
+   "summary": "Takes an array and encodes it as a JSON string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "json_escape": {
+   "group": "string",
+   "signatures": [
+    "json_escape(string json) : string"
+   ],
+   "summary": "JSON-escapes all special JSON characters like double quotes, newlines, etc.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "json_path": {
+   "group": "string",
+   "signatures": [
+    "json_path(string json, string jsonpath, bool return_first = true) : string"
+   ],
+   "summary": "Returns the result of a json string parsed using the JSONPath functionality.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 9"
+   }
+  },
+  "length": {
+   "group": "general",
+   "signatures": [
+    "length(string/array value) : number"
+   ],
+   "summary": "Length of a string or array (undocumented alias).",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 6"
+   }
+  },
+  "markdown_to_html": {
+   "group": "string",
+   "signatures": [
+    "markdown_to_html(string string, bool safe_mode = false) : string"
+   ],
+   "summary": "Converts a Markdown string to HTML.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 16"
+   }
+  },
+  "max": {
+   "group": "math",
+   "signatures": [
+    "max(array numbers) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "min": {
+   "group": "math",
+   "signatures": [
+    "min(array numbers) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "mod": {
+   "group": "math",
+   "signatures": [
+    "mod(number number, number divisor) : number"
+   ],
+   "summary": "Returns the remainder after number is divided by divisor.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 3"
+   }
+  },
+  "multipart": {
+   "group": "network",
+   "signatures": [
+    "multipart(string url, array items, string method = 'POST', array headers, num timeout) : array"
+   ],
+   "summary": "Sends a HTTP Multipart request, e.g. for uploading files.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "note": {
+   "group": "flow",
+   "signatures": [
+    "note(string note)"
+   ],
+   "summary": "Sets the request note field, visible in the frontend. Useful for storing status or debug information that should also be able to be retrieved quickly using the Get Requests API.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 4"
+   }
+  },
+  "now": {
+   "group": "date",
+   "signatures": [
+    "now(?string timezone) : string"
+   ],
+   "summary": "Returns the current date in ISO-8601 format, using timezone, if specified.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "num2hex": {
+   "group": "math",
+   "signatures": [
+    "num2hex(number number) : string"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "number_length": {
+   "group": "math",
+   "signatures": [
+    "number_length(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": false,
+    "checked_at": "2026-09-03",
+    "message": "Undefined variable 'number_length' @ line 1, position 0"
+   }
+  },
+  "pi": {
+   "group": "math",
+   "signatures": [
+    "pi() : number"
+   ],
+   "summary": "Returns the value of Pi.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "pow": {
+   "group": "math",
+   "signatures": [
+    "pow(number number, number power) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "preg_match": {
+   "group": "string",
+   "signatures": [
+    "preg_match(string regex, string subject) : array/false"
+   ],
+   "summary": "Returns the matching values as an array, or false if the regex did not match. Supports regex pattern modifiers.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 10"
+   }
+  },
+  "query": {
+   "group": "network",
+   "signatures": [
+    "query(array form_values) : string"
+   ],
+   "summary": "Converts an associative array into a form-style string, used for e.g. application/x-www-form-urlencoded requests or HTTP query strings.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 5"
+   }
+  },
+  "rand": {
+   "group": "math",
+   "signatures": [
+    "rand(number min, number max) : number"
+   ],
+   "summary": "Returns a random number between min and max.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 4"
+   }
+  },
+  "regex_extract": {
+   "group": "string",
+   "signatures": [
+    "regex_extract(regex regex, string subject) : array/false"
+   ],
+   "summary": "Returns the matching string and all match groups as an array, and false on failure.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 13"
+   }
+  },
+  "regex_extract_first": {
+   "group": "string",
+   "signatures": [
+    "regex_extract_first(regex regex, string subject, any default) : string/false"
+   ],
+   "summary": "Returns the first match group of a regex, and false (or default, if set) on failure.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 19"
+   }
+  },
+  "regex_match": {
+   "group": "string",
+   "signatures": [
+    "regex_match(regex regex, string subject) : string/false"
+   ],
+   "summary": "Returns the first matching string, otherwise false.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 11"
+   }
+  },
+  "regex_to_string": {
+   "group": "string",
+   "signatures": [
+    "regex_to_string(regex regex) : string"
+   ],
+   "summary": "Returns the regex converted to a string",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 15"
+   }
+  },
+  "request": {
+   "group": "network",
+   "signatures": [
+    "request(string url, string body, string method = 'GET', array headers, bool override = false, timeout = 5) : array"
+   ],
+   "summary": "Sends a HTTP request and returns an array with the following keys containing response data:",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "respond": {
+   "group": "flow",
+   "signatures": [
+    "respond(string content, int status, array headers)"
+   ],
+   "summary": "Stops Custom Action execution and return a response immediately.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "round": {
+   "group": "math",
+   "signatures": [
+    "round(number number, number precision) : number"
+   ],
+   "summary": "Rounds a number up with specified precision (number of digits after decimal point.)",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 5"
+   }
+  },
+  "set": {
+   "group": "variables",
+   "signatures": [
+    "set(string variable_name, string variable_value)"
+   ],
+   "summary": "Exports a Variable for use in downstream actions, like the Set Runtime Variable action.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 3"
+   }
+  },
+  "set_content": {
+   "group": "flow",
+   "signatures": [
+    "set_content(string content)"
+   ],
+   "summary": "Sets or overwrites the response content of the URL. Script execution continues.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 11"
+   }
+  },
+  "set_header": {
+   "group": "flow",
+   "signatures": [
+    "set_header(string header_name, string header_value)"
+   ],
+   "summary": "Sets or overwrites a response header of the URL. Script execution continues.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 10"
+   }
+  },
+  "set_response": {
+   "group": "flow",
+   "signatures": [
+    "set_response(string content, int status, array headers)"
+   ],
+   "summary": "Sets or overwrites response content, status and headers in single function. Script execution continues.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "set_status": {
+   "group": "flow",
+   "signatures": [
+    "set_status(number status)"
+   ],
+   "summary": "Sets or overwrites the HTTP response status of the current URL. Script execution continues.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "sign": {
+   "group": "string",
+   "signatures": [
+    "sign(string value, string private_key, string algo) : false/string"
+   ],
+   "summary": "Signs value using private_key and algo. Returns signature on success, false on failure.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 3 arguments (got 0) @ line 1, position 4"
+   }
+  },
+  "sin": {
+   "group": "math",
+   "signatures": [
+    "sin(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "sqrt": {
+   "group": "math",
+   "signatures": [
+    "sqrt(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 4"
+   }
+  },
+  "stop": {
+   "group": "flow",
+   "signatures": [
+    "stop()"
+   ],
+   "summary": "Stops Custom Action execution.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "store": {
+   "group": "variables",
+   "signatures": [
+    "store(string global_variable_name, any value) : any"
+   ],
+   "summary": "Permanently creates or updates a Global Variable (as defined in Control Panel.)",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "function"
+   }
+  },
+  "string_contains": {
+   "group": "string",
+   "signatures": [
+    "string_contains(string subject, number/string/regex value) : bool"
+   ],
+   "summary": "Returns boolean if subject contains value",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 15"
+   }
+  },
+  "string_find_first": {
+   "group": "string",
+   "signatures": [
+    "string_find_first(string subject, number/string value) : number"
+   ],
+   "summary": "Returns position of value in subject, or false if not found",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 17"
+   }
+  },
+  "string_find_last": {
+   "group": "string",
+   "signatures": [
+    "string_find_last(string subject, number/string value) : number"
+   ],
+   "summary": "Returns position of value in subject, or false if not found",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 16"
+   }
+  },
+  "string_format": {
+   "group": "string",
+   "signatures": [
+    "string_format(string formatString, ...any items) : string"
+   ],
+   "summary": "Sprintf-like formatting of formatString with items, see PHP sprintf docs.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "string_length": {
+   "group": "string",
+   "signatures": [
+    "string_length(string string) : number"
+   ],
+   "summary": "Returns length of string (multibyte-aware)",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "string_lower": {
+   "group": "string",
+   "signatures": [
+    "string_lower(string string) : string"
+   ],
+   "summary": "Converts string to lowercase (multibyte-aware)",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "string_number_of": {
+   "group": "string",
+   "signatures": [
+    "string_number_of(string string) : number"
+   ],
+   "summary": "Returns number value of string",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 16"
+   }
+  },
+  "string_random": {
+   "group": "string",
+   "signatures": [
+    "string_random(number length) : string"
+   ],
+   "summary": "Returns a random string of length using the A–Z,a–z,0–9 alphabet.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 13"
+   }
+  },
+  "string_replace": {
+   "group": "string",
+   "signatures": [
+    "string_replace(string subject, string/regex/array search, string replace) : string",
+    "string_replace(string subject, array replace_pairs) : string"
+   ],
+   "summary": "Replaces string search with replace found in subject.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 14"
+   }
+  },
+  "string_reverse": {
+   "group": "string",
+   "signatures": [
+    "string_reverse(string subject) : string"
+   ],
+   "summary": "Reverses string subject",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 14"
+   }
+  },
+  "string_shuffle": {
+   "group": "string",
+   "signatures": [
+    "string_shuffle(string string) : string"
+   ],
+   "summary": "Returns string where the individual characters has been shuffled.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 14"
+   }
+  },
+  "string_slice": {
+   "group": "string",
+   "signatures": [
+    "string_slice(string subject, number from, number to = null) : string"
+   ],
+   "summary": "Extracts a segment of a string. Multibyte-aware.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 12"
+   }
+  },
+  "string_split": {
+   "group": "string",
+   "signatures": [
+    "string_split(string subject, string/regex delimiter) : array"
+   ],
+   "summary": "Returns array of split string subject with delimiter",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 12"
+   }
+  },
+  "string_title": {
+   "group": "string",
+   "signatures": [
+    "string_title(string string) : string"
+   ],
+   "summary": "Returns string converted to title case.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "string_upper": {
+   "group": "string",
+   "signatures": [
+    "string_upper(string string) : string"
+   ],
+   "summary": "Converts string to UPPERCASE (multibyte-aware).",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 12"
+   }
+  },
+  "tan": {
+   "group": "math",
+   "signatures": [
+    "tan(number number) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "to_array": {
+   "group": "array",
+   "signatures": [
+    "to_array(array array) : array"
+   ],
+   "summary": "Returns array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 8"
+   }
+  },
+  "to_bool": {
+   "group": "bool",
+   "signatures": [
+    "to_bool(string/number/array/bool value) : bool"
+   ],
+   "summary": "Casts value to a bool.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "to_date": {
+   "group": "date",
+   "signatures": [
+    "to_date(string date, ?string input_format, ?locale locale, ?string timezone, bool keep_timezone = false) : ?string"
+   ],
+   "summary": "Returns a ISO-8601 formatted date string in UTC time from the provided date string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 7"
+   }
+  },
+  "to_number": {
+   "group": "math",
+   "signatures": [
+    "to_number(any value) : number"
+   ],
+   "summary": "",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 9"
+   }
+  },
+  "to_regex": {
+   "group": "string",
+   "signatures": [
+    "to_regex(string regex) : regex"
+   ],
+   "summary": "Converts a regex string to a regex type",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 8"
+   }
+  },
+  "to_string": {
+   "group": "string",
+   "signatures": [
+    "to_string(string/number/bool value) : string"
+   ],
+   "summary": "Returns value as string",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 9"
+   }
+  },
+  "trim": {
+   "group": "string",
+   "signatures": [
+    "trim(string string) : string"
+   ],
+   "summary": "Returns string with space, tab and newline characters removed from the beginning and end of the string.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 4"
+   }
+  },
+  "type": {
+   "group": "general",
+   "signatures": [
+    "type(any value) : string"
+   ],
+   "summary": "Returns the type name of a value, e.g. \"string\".",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 4"
+   }
+  },
+  "url_decode": {
+   "group": "network",
+   "signatures": [
+    "url_decode(string value) : string"
+   ],
+   "summary": "Returns an URL-decoded version of value.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "url_encode": {
+   "group": "network",
+   "signatures": [
+    "url_encode(string value) : string"
+   ],
+   "summary": "Returns an URL-encoded version of value.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 10"
+   }
+  },
+  "uuid": {
+   "group": "string",
+   "signatures": [
+    "uuid() : string"
+   ],
+   "summary": "Returns a random v4 UUID.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": ""
+   }
+  },
+  "var": {
+   "group": "variables",
+   "signatures": [
+    "var(string variable_name, ?string/number default) : mixed"
+   ],
+   "summary": "Retrieves the value of a Variable or Global Variable (defined in the Control Panel). The surrounding dollar signs are not mandatory.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 3"
+   }
+  },
+  "variables": {
+   "group": "variables",
+   "signatures": [
+    "variables : array"
+   ],
+   "summary": "A variable (not a function) containing an associative array with all available Webhook.site variables.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Trying to invoke a non-function 'array' @ line 1, position 9"
+   }
+  },
+  "verify": {
+   "group": "string",
+   "signatures": [
+    "verify(string value, string signature, string public_key, string algo) : true/false"
+   ],
+   "summary": "Verifies value using signature, public_key and algo",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 4 arguments (got 0) @ line 1, position 6"
+   }
+  },
+  "xml2array": {
+   "group": "string",
+   "signatures": [
+    "xml2array(string xml) : array"
+   ],
+   "summary": "Converts XML to a WebhookScript array. This can be useful for parsing XML, or e.g. converting XML to JSON.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 1 argument (got 0) @ line 1, position 9"
+   }
+  },
+  "xpath": {
+   "group": "string",
+   "signatures": [
+    "xpath(string xpath, string input) : string/null"
+   ],
+   "summary": "Returns the first result of an XPath query on XML document input.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 5"
+   }
+  },
+  "xpath_all": {
+   "group": "string",
+   "signatures": [
+    "xpath_all(string xpath, string input) : string/null"
+   ],
+   "summary": "Returns the results of an XPath query on XML document input as an array.",
+   "verified": {
+    "exists": true,
+    "checked_at": "2026-09-03",
+    "message": "Function expects 2 arguments (got 0) @ line 1, position 9"
+   }
+  }
+ }
+}

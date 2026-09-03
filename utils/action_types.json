@@ -255,6 +255,7 @@
         }
       },
       "description": "Compare `input` with `value` using `operator`; `action` stop/continue/noop decides what happens when it passes.",
+      "note": "Single condition; only these 20 operators (regex, nex, null, nnull answer 'Unknown operator' here). Prefer `conditions`, which supports them all. eq is equal to, neq is not equal to, sw starts with, ew ends with, ct contains, nct does not contain, gt/gte/lt/lte compare numbers, ex variable exists, nex variable missing, true/false, null/nnull, num/int/float, json, email, domain, url, regex matches a /delimited/ PCRE pattern (value ignored for ex..url)",
       "verified": {
         "status": "ok",
         "message": "Condition \"{\"a\":1,\"probe\":true}\" is equal to \"POST\" evaluated to NO: Execution continued.",
@@ -289,9 +290,54 @@
             "continue",
             "noop"
           ]
+        },
+        "conditions.*.input": {
+          "required": true,
+          "type": "string",
+          "notes": [
+            "Variables are replaced in input and value"
+          ]
+        },
+        "conditions.*.operator": {
+          "required": true,
+          "type": "string",
+          "in": [
+            "eq",
+            "neq",
+            "sw",
+            "ew",
+            "ct",
+            "nct",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "ex",
+            "false",
+            "true",
+            "num",
+            "int",
+            "float",
+            "json",
+            "email",
+            "domain",
+            "url",
+            "nex",
+            "null",
+            "nnull",
+            "regex"
+          ]
+        },
+        "conditions.*.value": {
+          "required": false,
+          "type": "string",
+          "notes": [
+            "regex values need delimiters: /^[a-z]+$/"
+          ]
         }
       },
       "description": "Several conditions with mode one/all/none; `action` stop/continue/noop when they pass.",
+      "note": "action noop keeps the result for other actions' `condition` link; stop halts when matched; continue halts when NOT matched. eq is equal to, neq is not equal to, sw starts with, ew ends with, ct contains, nct does not contain, gt/gte/lt/lte compare numbers, ex variable exists, nex variable missing, true/false, null/nnull, num/int/float, json, email, domain, url, regex matches a /delimited/ PCRE pattern (value ignored for ex..url)",
       "verified": {
         "status": "ok",
         "message": "1 of 1 conditions matched. Result: YES. Action: None",
@@ -315,14 +361,18 @@
           "required": true,
           "type": null,
           "in": [
+            "whdb",
             "mysql",
             "pgsql",
             "sqlsrv"
           ]
         },
         "host": {
-          "required": true,
-          "type": "string"
+          "required": false,
+          "type": "string",
+          "notes": [
+            "Required for mysql/pgsql/sqlsrv (the API checks), not for whdb"
+          ]
         },
         "port": {
           "required": false,
@@ -331,16 +381,22 @@
           "max": 65535
         },
         "database": {
-          "required": true,
-          "type": "string"
+          "required": false,
+          "type": "string",
+          "notes": [
+            "Required for mysql/pgsql/sqlsrv, not for whdb"
+          ]
         },
         "password": {
           "required": false,
           "type": "string"
         },
         "username": {
-          "required": true,
-          "type": "string"
+          "required": false,
+          "type": "string",
+          "notes": [
+            "Required for mysql/pgsql/sqlsrv, not for whdb"
+          ]
         },
         "statement": {
           "required": true,
@@ -348,7 +404,10 @@
         },
         "params": {
           "required": false,
-          "type": "array"
+          "type": "array",
+          "notes": [
+            "Always send it, [] when the statement has no placeholders: whdb fails with 'Undefined array key \"params\"' otherwise"
+          ]
         },
         "variable_name": {
           "required": false,
@@ -357,9 +416,17 @@
         "charset": {
           "required": false,
           "type": "string"
+        },
+        "db_id": {
+          "required": false,
+          "type": "int",
+          "notes": [
+            "Webhook.site Database id (manage_databases) for type whdb; without it the API answers 'Undefined array key \"db_id\"'"
+          ]
         }
       },
       "description": "Run SQL on your own MySQL/Postgres/SQL Server.",
+      "note": "type whdb queries a Webhook.site Database (no host/credentials needed); the others need your own server.",
       "verified": {
         "status": "runtime_error",
         "message": "Database error: [2002] php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known",
@@ -416,6 +483,7 @@
     "dont_save": {
       "params": {},
       "description": "Do not store this request in the history.",
+      "note": "The editor does not allow queue=true here.",
       "verified": {
         "status": "ok",
         "message": "Marked request as Don't Save.",
@@ -1267,6 +1335,7 @@
         }
       },
       "description": "Set the HTTP response (body, status, headers) the URL returns for this request; `stop` ends the chain.",
+      "note": "The editor does not allow queue=true here (a queued run cannot change the response).",
       "verified": {
         "status": "ok",
         "message": "Response modified (default status):\nprobe",
@@ -1493,6 +1562,7 @@
         }
       },
       "description": "Reject requests beyond `count` per `period` seconds (optionally per `key`).",
+      "note": "The editor does not allow queue=true here. Blocked requests get 429 and are not saved.",
       "verified": {
         "status": "ok",
         "message": "",
@@ -1666,6 +1736,7 @@
         }
       },
       "description": "Simpler HTTP request action (legacy); prefer `http`.",
+      "note": "Legacy: the editor no longer offers it; the API still creates it. Use `http`.",
       "verified": {
         "status": "ok",
         "message": "Successfully sent request to https://example.com/; status: 405",
@@ -1693,7 +1764,13 @@
           "in": [
             "text",
             "random",
-            "date"
+            "random_number",
+            "date",
+            "math"
+          ],
+          "notes": [
+            "math evaluates `value` (+ - * / % ^, round(), min(), if(a > b, x, y) ...): '1 + 2' set 3 live",
+            "random_number needs random_number.from/to; the API reference omits both modes"
           ]
         },
         "random": {
@@ -1743,6 +1820,21 @@
         "date.*.user_format": {
           "required": false,
           "type": "string"
+        },
+        "random_number": {
+          "required": false,
+          "type": "array",
+          "notes": [
+            "[{\"from\": 1, \"to\": 10}] for mode random_number"
+          ]
+        },
+        "random_number.*.from": {
+          "required": false,
+          "type": "int"
+        },
+        "random_number.*.to": {
+          "required": false,
+          "type": "int"
         }
       },
       "description": "Set a runtime variable (text, random string, or formatted date).",
@@ -2037,7 +2129,22 @@
         },
         "operator": {
           "required": true,
-          "type": "string"
+          "type": "string",
+          "in": [
+            "eq",
+            "neq",
+            "sw",
+            "ew",
+            "ct",
+            "nct",
+            "gt",
+            "gte",
+            "lt",
+            "lte"
+          ],
+          "notes": [
+            "Compared against each mapping's `from`; ew/ct matched live, spelled-out names do not"
+          ]
         },
         "variable_name": {
           "required": true,

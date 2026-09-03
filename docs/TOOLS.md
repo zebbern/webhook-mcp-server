@@ -30,8 +30,8 @@ update_request response), actions on/off, clone_from another token, a
 group_id, or a description (label shown in the Control Panel).
 default_content can be a JSON array of DNS records
 ([{"type":"a","value":"..."}]) to answer DNSHook lookups. Updates keep
-every setting you do not mention. For a plain sign-up inbox use
-create_webhook.
+every setting you do not mention; alias="" removes the alias. For a
+plain sign-up inbox use create_webhook.
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ Create a disposable inbox to sign up on a website: HTTP URL, temp email, DNS.
 
 Use this first when the user wants to sign up, receive a verification /
 magic-link / password-reset email, catch a webhook callback, or get a
-one-off URL. Returns token, url, email ({token}@email.webhook.site),
+one-off URL. Returns token, url, email ({token}@emailhook.site),
 and dns. Next: give the email or URL to the site, then wait_for_email,
 then follow_email_link or use the OTP. With an API key the URL is
 permanent (premium) unless WEBHOOK_SITE_DEFAULT_EXPIRY is set; use
@@ -215,7 +215,7 @@ see history.
 
 Return the temp inbox to sign up, verify, magic-link, or reset a password.
 
-Address is {token}@email.webhook.site. Use when the user already has a
+Address is {token}@emailhook.site. Use when the user already has a
 token. If they do not, call create_webhook first — it also returns
 email. After the site sends mail, call wait_for_email.
 
@@ -230,7 +230,8 @@ email. After the site sends mail, call wait_for_email.
 
 Show a webhook's settings, expiry, request count and every address.
 
-Returns url, subdomain_url, api_url, email and dns for the token, plus
+Returns url, subdomain_url, force_status_url (append a status code to
+make the URL answer with it), api_url, email and dns for the token, plus
 premium / expires_at / alias / request_limit. Use when the user asks if a
 token is still valid, how it is configured, or needs its callback URL or
 DNSHook domain.
@@ -283,20 +284,22 @@ Manage the Custom Actions webhook.site runs on every request or email a token re
 
 action: types (reference of all 63 action types; pass type= for one
 type's parameters, live-verified status and example) | variables
-($request.*$ variables and modifiers) | list | create | update |
-delete | test | execute. create/update take type (modify_response,
-http, script, javascript, send_email, extract_jsonpath, condition,
-rate_limit, log, set_variable, mock, ...) with parameters, order, and
-optionally queue/delay/condition (id of a conditions action) and
-queue_id (a Queue Profile from manage_queues to throttle queued runs).
-test dry-runs the given action against request_id; execute re-runs all
-saved actions on request_id. Actions also fire on incoming emails, so
-guard email-sending actions with a condition on $request.type$. Never
-point http/send_request at a webhook.site URL (recursion is disabled).
+($request.*$ variables and modifiers) | script_reference (every
+WebhookScript function with its signature, for type=script) | list |
+create | update | delete | test | execute. create/update take type
+(modify_response, http, script, javascript, send_email,
+extract_jsonpath, conditions, rate_limit, log, set_variable, mock,
+...) with parameters, order, and optionally name (label), queue/delay/
+condition (id of a conditions action) and queue_id (a Queue Profile
+from manage_queues). test dry-runs the given action against request_id
+without changing saved actions; execute re-runs all saved actions on
+request_id. Actions also fire on incoming emails, so guard
+email-sending actions with a condition on $request.type$. Never point
+http/send_request at a webhook.site URL (recursion is disabled).
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |
-| `action` | `list` | `create` | `update` | `delete` | `test` | `execute` | `types` | `variables` | yes |  |
+| `action` | `list` | `create` | `update` | `delete` | `test` | `execute` | `types` | `variables` | `script_reference` | yes |  |
 | `webhook_token` | string |  |  |
 | `action_id` | string |  |  |
 | `request_id` | string |  |  |
@@ -308,6 +311,8 @@ point http/send_request at a webhook.site URL (recursion is disabled).
 | `delay` | integer |  |  |
 | `condition` | string |  |  |
 | `queue_id` | integer |  |  |
+| `name` | string |  |  |
+| `search` | string |  |  |
 | `error_notifications` | boolean |  | `False` |
 
 ## `manage_databases`
@@ -397,7 +402,9 @@ action: list | get | create | update | delete | run | logs. interval is
 monthly, weekly, daily, hourly, 10-minute, 5-minute, 1-minute or cron
 (then set cron, e.g. '*/5 * * * *'). request_headers are newline
 separated. require_* raise an error notification when the response does
-not match. Use for uptime checks or periodic cleanup calls.
+not match; require_cert_expiry alerts when the HTTPS certificate expires
+in fewer than that many days. Use for uptime checks or periodic cleanup
+calls (e.g. DELETE .../token/{id}/request?date_to=now-7d with Api-Key).
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |
@@ -414,6 +421,7 @@ not match. Use for uptime checks or periodic cleanup calls.
 | `require_body` | string |  |  |
 | `require_status_min` | integer |  |  |
 | `require_status_max` | integer |  |  |
+| `require_cert_expiry` | integer |  |  |
 | `sorting` | `newest` | `oldest` |  | `newest` |
 | `page` | integer |  | `1` |
 
@@ -483,9 +491,10 @@ Search captured events by method, body text, headers, type, or date.
 
 Use when the user asks to find POSTs, a keyword, or only emails/DNS.
 query uses webhook.site search syntax: 'method:POST', 'content:verify',
-'headers.user-agent:curl', 'type:web AND method:POST',
-'created_at:[now-1h TO now]'. Dates are 'yyyy-MM-dd HH:mm:ss' or
-expressions like now-7d. Returns pagination.
+'headers.user-agent:curl', 'type:web AND method:POST', '-method:GET'
+(exclude), '_exists_:custom_action_errors', 'note:todo*',
+'country_code:DE', 'created_at:[now-1h TO now]'. Dates are
+'yyyy-MM-dd HH:mm:ss' or expressions like now-7d. Returns pagination.
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |
@@ -554,7 +563,7 @@ use configure_webhook or a modify_response custom action instead.
 
 Wait for a sign-up, verify, magic-link, or password-reset email (1-120s).
 
-Call this after the user (or you) submitted {token}@email.webhook.site
+Call this after the user (or you) submitted {token}@emailhook.site
 on a website. Returns subject, sender, spam/DKIM checks, a truncated
 text preview, attachments, extracted confirm / reset / login URLs, and
 verification_codes (OTP). Next: follow_email_link, or type the code.

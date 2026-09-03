@@ -15,7 +15,7 @@ from pydantic import Field
 
 from models.app_context import AppContext
 from models.schemas import DeleteFilters, SearchFilters, ToolResult, WebhookConfig
-from utils import action_types, recorder
+from utils import action_types, recorder, webhookscript
 from utils.http_client import WebhookApiError
 from utils.logger import setup_logger
 from utils.validation import (
@@ -25,6 +25,7 @@ from utils.validation import (
     validate_http_status_code,
     validate_int_id,
     validate_listen,
+    validate_note,
     validate_page,
     validate_positive_int,
     validate_request_limit,
@@ -38,7 +39,7 @@ CanaryType = Literal["url", "dns", "email"]
 PayloadKind = Literal["ssrf", "xss", "canary"]
 ExportFormat = Literal["json", "csv"]
 CrudAction = Literal["list", "create", "update", "delete"]
-ActionAction = Literal["list", "create", "update", "delete", "test", "execute", "types", "variables"]
+ActionAction = Literal["list", "create", "update", "delete", "test", "execute", "types", "variables", "script_reference"]
 ScheduleAction = Literal["list", "get", "create", "update", "delete", "run", "logs"]
 DatabaseAction = Literal["list", "create", "update", "delete", "query"]
 UserAction = Literal["list", "invite", "update", "delete"]
@@ -141,7 +142,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         Use this first when the user wants to sign up, receive a verification /
         magic-link / password-reset email, catch a webhook callback, or get a
-        one-off URL. Returns token, url, email ({token}@email.webhook.site),
+        one-off URL. Returns token, url, email ({token}@emailhook.site),
         and dns. Next: give the email or URL to the site, then wait_for_email,
         then follow_email_link or use the OTP. With an API key the URL is
         permanent (premium) unless WEBHOOK_SITE_DEFAULT_EXPIRY is set; use
@@ -176,8 +177,8 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         group_id, or a description (label shown in the Control Panel).
         default_content can be a JSON array of DNS records
         ([{"type":"a","value":"..."}]) to answer DNSHook lookups. Updates keep
-        every setting you do not mention. For a plain sign-up inbox use
-        create_webhook.
+        every setting you do not mention; alias="" removes the alias. For a
+        plain sign-up inbox use create_webhook.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -189,7 +190,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 validate_positive_int(timeout, "timeout", min_val=0, max_val=30)
             if listen is not None:
                 validate_listen(listen)
-            if alias is not None:
+            if alias:  # "" clears the alias (PUT alias=null, verified live)
                 validate_alias(alias)
             if expiry is not None:
                 validate_expiry(expiry)
@@ -223,7 +224,8 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Show a webhook's settings, expiry, request count and every address.
 
-        Returns url, subdomain_url, api_url, email and dns for the token, plus
+        Returns url, subdomain_url, force_status_url (append a status code to
+        make the URL answer with it), api_url, email and dns for the token, plus
         premium / expires_at / alias / request_limit. Use when the user asks if a
         token is still valid, how it is configured, or needs its callback URL or
         DNSHook domain.
@@ -243,7 +245,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Return the temp inbox to sign up, verify, magic-link, or reset a password.
 
-        Address is {token}@email.webhook.site. Use when the user already has a
+        Address is {token}@emailhook.site. Use when the user already has a
         token. If they do not, call create_webhook first — it also returns
         email. After the site sends mail, call wait_for_email.
         """
@@ -340,9 +342,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
 
         Use when the user asks to find POSTs, a keyword, or only emails/DNS.
         query uses webhook.site search syntax: 'method:POST', 'content:verify',
-        'headers.user-agent:curl', 'type:web AND method:POST',
-        'created_at:[now-1h TO now]'. Dates are 'yyyy-MM-dd HH:mm:ss' or
-        expressions like now-7d. Returns pagination.
+        'headers.user-agent:curl', 'type:web AND method:POST', '-method:GET'
+        (exclude), '_exists_:custom_action_errors', 'note:todo*',
+        'country_code:DE', 'created_at:[now-1h TO now]'. Dates are
+        'yyyy-MM-dd HH:mm:ss' or expressions like now-7d. Returns pagination.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -403,8 +406,8 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
             validate_webhook_token(webhook_token)
             note_text = _text(note)
             body = _text(response_content)
-            if note_text is not None and len(note_text) > 10000:
-                raise ValidationError("note must be at most 10000 characters")
+            if note_text is not None:
+                validate_note(note_text)
             if response_status is not None:
                 validate_http_status_code(response_status)
             if note_text is None and body is None and response_status is None and response_headers is None:
@@ -550,7 +553,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Wait for a sign-up, verify, magic-link, or password-reset email (1-120s).
 
-        Call this after the user (or you) submitted {token}@email.webhook.site
+        Call this after the user (or you) submitted {token}@emailhook.site
         on a website. Returns subject, sender, spam/DKIM checks, a truncated
         text preview, attachments, extracted confirm / reset / login URLs, and
         verification_codes (OTP). Next: follow_email_link, or type the code.
@@ -651,22 +654,26 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         delay: int | None = None,
         condition: str | None = None,
         queue_id: int | None = None,
+        name: str | None = None,
+        search: str | None = None,
         error_notifications: bool = False,
     ) -> dict[str, Any]:
         """Manage the Custom Actions webhook.site runs on every request or email a token receives.
 
         action: types (reference of all 63 action types; pass type= for one
         type's parameters, live-verified status and example) | variables
-        ($request.*$ variables and modifiers) | list | create | update |
-        delete | test | execute. create/update take type (modify_response,
-        http, script, javascript, send_email, extract_jsonpath, condition,
-        rate_limit, log, set_variable, mock, ...) with parameters, order, and
-        optionally queue/delay/condition (id of a conditions action) and
-        queue_id (a Queue Profile from manage_queues to throttle queued runs).
-        test dry-runs the given action against request_id; execute re-runs all
-        saved actions on request_id. Actions also fire on incoming emails, so
-        guard email-sending actions with a condition on $request.type$. Never
-        point http/send_request at a webhook.site URL (recursion is disabled).
+        ($request.*$ variables and modifiers) | script_reference (every
+        WebhookScript function with its signature, for type=script) | list |
+        create | update | delete | test | execute. create/update take type
+        (modify_response, http, script, javascript, send_email,
+        extract_jsonpath, conditions, rate_limit, log, set_variable, mock,
+        ...) with parameters, order, and optionally name (label), queue/delay/
+        condition (id of a conditions action) and queue_id (a Queue Profile
+        from manage_queues). test dry-runs the given action against request_id
+        without changing saved actions; execute re-runs all saved actions on
+        request_id. Actions also fire on incoming emails, so guard
+        email-sending actions with a condition on $request.type$. Never point
+        http/send_request at a webhook.site URL (recursion is disabled).
         """
 
         def _op() -> Awaitable[ToolResult] | ToolResult:
@@ -678,6 +685,13 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     success=True,
                     message=f"{len(catalogue)} action types (verified {action_types.load().get('verified_at')})",
                     data={"types": catalogue},
+                )
+            if action == "script_reference":
+                reference = webhookscript.reference(search=search)
+                return ToolResult(
+                    success=True,
+                    message=f"{reference['count']} WebhookScript functions (names verified live {reference['verified_at']})",
+                    data=reference,
                 )
             if action == "variables":
 
@@ -706,6 +720,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     delay=delay,
                     condition=condition,
                     queue_id=queue_id,
+                    name=name,
                 )
             if action == "update":
                 return svc.update(
@@ -719,6 +734,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     delay=delay,
                     condition=condition,
                     queue_id=queue_id,
+                    name=name,
                 )
             if action == "delete":
                 return svc.delete(webhook_token, _require(action_id, "action_id", action))
@@ -755,6 +771,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         require_body: str | None = None,
         require_status_min: int | None = None,
         require_status_max: int | None = None,
+        require_cert_expiry: int | None = None,
         sorting: Literal["newest", "oldest"] = "newest",
         page: int = 1,
     ) -> dict[str, Any]:
@@ -764,7 +781,9 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         monthly, weekly, daily, hourly, 10-minute, 5-minute, 1-minute or cron
         (then set cron, e.g. '*/5 * * * *'). request_headers are newline
         separated. require_* raise an error notification when the response does
-        not match. Use for uptime checks or periodic cleanup calls.
+        not match; require_cert_expiry alerts when the HTTPS certificate expires
+        in fewer than that many days. Use for uptime checks or periodic cleanup
+        calls (e.g. DELETE .../token/{id}/request?date_to=now-7d with Api-Key).
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -781,6 +800,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 "require_body": require_body,
                 "require_status_min": require_status_min,
                 "require_status_max": require_status_max,
+                "require_cert_expiry": require_cert_expiry,
             }
             if timeout is not None:
                 validate_positive_int(timeout, "timeout", min_val=1, max_val=30)

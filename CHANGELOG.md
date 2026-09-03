@@ -24,9 +24,15 @@ Full coverage of the documented webhook.site API. With `WEBHOOK_SITE_API_KEY` se
 - `FOLLOW_EMAIL_LINK_ALLOW_HOSTS`: operator-configured hosts, `*.suffixes`, IPs or networks that `follow_email_link` may open although they are local or private (for testing your own sign-up flow on `localhost` or an intranet)
 - `follow_email_link` honours `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY`; proxied targets are checked before the request since the proxy makes the connection
 - `follow_email_link` reports a refused redirect after a successful public hop as `blocked_redirect` on a successful result, instead of failing the whole call
+- `manage_custom_actions(action="script_reference")`: every WebhookScript function with its signature and summary, generated from the docs and checked name-by-name against the live engine (two documented names do not exist there), plus language notes (`var()` is required, strict typing, regex literals)
+- Action-type reference corrections found in the frontend bundle and confirmed live: `set_variable` modes `math` and `random_number`, `conditions` operators `regex`/`nex`/`null`/`nnull` (the singular `condition` rejects them), `text_map` operator codes, `database` type `whdb` with `db_id`, the editor's no-queue types
+- Custom actions carry a `name`; updates keep it (the API drops it on a bare PUT). Schedules accept `require_cert_expiry` (days before the HTTPS certificate expires)
+- `configure_webhook(alias="")` removes an alias; `get_webhook_info` returns `force_status_url` (`https://webhook.site/{token}/{status}` answers with that status); `search_requests` documents exclusion (`-method:GET`), `_exists_:`, `note:` and geo fields
 
 ### Changed
 
+- Email addresses use the current `{token}@emailhook.site` domain (the old `email.webhook.site` form still delivers)
+- `request_limit` is no longer capped client-side at 10000; the API enforces the plan's ceiling (up to 100000 on Enterprise)
 - Tool merges (no capability removed): `create_webhook_with_config` + `update_webhook` -> `configure_webhook`; `get_webhook_url` + `get_webhook_dns` -> fields of `get_webhook_info`; `get_latest_request` -> `get_request`; `send_to_webhook` + `send_multiple_requests` -> `send_requests`; `generate_ssrf_payload` + `generate_xss_callback` + `generate_canary_token` -> `generate_oob_payloads`
 - Tokens created with an API key are permanent by default (pass `expiry` or set `WEBHOOK_SITE_DEFAULT_EXPIRY` to change that)
 - The HTTP client now raises `WebhookApiError` on failed DELETEs like every other verb, and every API error carries webhook.site's own validation message

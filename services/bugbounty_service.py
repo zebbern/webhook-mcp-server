@@ -315,8 +315,8 @@ class BugBountyService:
                 "Embed in hostnames, SSRF payloads, or config files",
             ]
         elif token_type == "email":
-            canary["token"] = f"{webhook_token}@email.webhook.site"
-            canary["display_format"] = f"Confidential <{webhook_token}@email.webhook.site>"
+            canary["token"] = f"{webhook_token}@emailhook.site"
+            canary["display_format"] = f"Confidential <{webhook_token}@emailhook.site>"
             instructions = [
                 "Any email to this address will be captured",
                 "Use as a fake 'internal' contact in leaked documents",

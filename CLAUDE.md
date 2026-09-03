@@ -24,6 +24,10 @@ MCP server for webhook.site. 28 tools in `handlers/tools.py`, services in `servi
 - Free-text tool fields that may carry JSON must be typed `JsonText` (the MCP SDK pre-parses JSON-looking strings).
 - The API replaces records on PUT. Every update merges into the saved record first.
 - `POST /token` ignores `listen`; only PUT sets it. Set Response (`PUT /request/{id}/response`) returns `{"status": 3}` when it reached a waiting caller and `2` when nothing was waiting; a request is only held while `listen > 0` and a socket listener is subscribed (see `respond_to_next_request` and the open-source `whcli`).
+- Custom action `name` is real but a PUT without it clears it: merge it like every other field. `test-action?action_id=` does not change the saved action.
+- `conditions` (plural) accepts regex/nex/null/nnull; the singular `condition` answers "Unknown operator" for them. set_variable has modes math and random_number. `database` accepts type whdb + db_id. These came from the frontend bundle (`e.actionConditionOperators`, the action default map) and were confirmed with test-action; keep such findings in `LIVE_ADDITIONS` in `scripts/gen_action_types.py` so a regen does not lose them.
+- The current mail domain is `{token}@emailhook.site` (verified delivering); `email.webhook.site` still works. `POST /{token}/{status}` forces that status. `alias: null` on PUT removes an alias. Notes are capped at 10000 characters. request_limit above 10000 is accepted where the plan allows it (20000 on Pro).
+- WebhookScript names: `utils/webhookscript.json` is generated from `../docs/webhookscript` and every name is called live by `scripts/verify_webhookscript.py`; the docs' `base64_urlencode` and `number_length` do not exist, `base64url_encode`, `get`, `get_variable`, `length` do.
 - Keep the catalog under the token budget in `tests/test_unit.py` and keep every description honest about what the tool actually does (see `update_request`'s Set Response note).
 
 ## Docs

@@ -16,6 +16,9 @@ from typing import Any
 import httpx
 
 from utils import recorder
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 # API Configuration
 WEBHOOK_SITE_API = "https://webhook.site"
@@ -260,8 +263,21 @@ class WebhookHttpClient:
         return {"Accept": accept} if accept else None
 
     async def _send(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
-        """Send a request; on a short 429 wait as told and retry once."""
-        response = await self.client.request(method, url, **kwargs)
+        """Send a request; on a short 429 wait as told and retry once.
+
+        Idempotent calls (GET, HEAD, PUT, DELETE) are also retried once when the
+        connection drops before a response arrives ("Server disconnected without
+        sending a response" happened once in 108 live calls). POST is never
+        replayed: it could create a second token or action.
+        """
+        try:
+            response = await self.client.request(method, url, **kwargs)
+        except (httpx.RemoteProtocolError, httpx.ReadError, httpx.ConnectError) as exc:
+            if method.upper() not in ("GET", "HEAD", "PUT", "DELETE"):
+                raise
+            logger.warning("Transient %s on %s %s, retrying once", type(exc).__name__, method, url)
+            await asyncio.sleep(0.5)
+            response = await self.client.request(method, url, **kwargs)
         if response.status_code == 429:
             wait = retry_after_seconds(response)
             if wait is not None and wait <= self.rate_limit_max_wait:

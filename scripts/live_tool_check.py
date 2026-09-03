@@ -119,9 +119,13 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             c.expect(info_b.get("description") == "live tool check", "configure_webhook description (undocumented field) persists", str(info_b.get("description")))
             captured = httpx.get(f"{SITE}/{alias}", timeout=30)
             c.expect(captured.status_code == 203, "alias URL answers with configured status", f"{captured.status_code}")
+            forced = httpx.post(f"{SITE}/{token_b}/503", content="retry me", timeout=30)
+            c.expect(forced.status_code == 503, "capture URL with a status suffix answers that status (force_status_url)", str(forced.status_code))
+            cleared = await c.call("configure_webhook", webhook_token=token_b, alias="")
+            c.expect(cleared.get("alias") is None and cleared.get("default_status") == 203, "configure_webhook alias='' removes the alias and keeps other settings", f"alias={cleared.get('alias')} status={cleared.get('default_status')}")
 
             email = await c.call("get_webhook_email", webhook_token=token_a, validate=True)
-            c.expect(email.get("email") == f"{token_a}@email.webhook.site", "get_webhook_email", email.get("email", ""))
+            c.expect(email.get("email") == f"{token_a}@emailhook.site", "get_webhook_email", email.get("email", ""))
 
             listed = await c.call("list_webhooks", per_page=100, max_items=500)
             ids = {hook["token"] for hook in listed.get("webhooks", [])}
@@ -205,7 +209,8 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             rejected = await c.call("manage_custom_actions", expect_success=False, webhook_token=token_a, action="create", type="http", parameters={})
             c.expect("url" in rejected.get("message", ""), "manage_custom_actions validates required params before calling the API", rejected.get("message", "")[:80])
             guard = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="condition", order=1, parameters={"input": "$request.type$", "operator": "neq", "value": "web", "action": "stop"})
-            log_action = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="log", order=2, parameters={"text": "seen $request.method$"})
+            log_action = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="log", order=2, parameters={"text": "seen $request.method$"}, name="live check log")
+            c.expect(log_action.get("action", {}).get("name") == "live check log", "manage_custom_actions create stores the name", str(log_action.get("action", {}).get("name")))
             log_id = log_action.get("action", {}).get("uuid")
             actions = await c.call("manage_custom_actions", webhook_token=token_a, action="list")
             # guard + log + the queued log action attached to the queue profile above
@@ -213,12 +218,21 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             tested = await c.call("manage_custom_actions", webhook_token=token_a, action="test", type="script", parameters={"script": "echo('live check')"}, request_id=file_req["uuid"])
             c.expect("live check" in json.dumps(tested.get("result", {})), "manage_custom_actions test ran the script", "")
             await c.call("manage_custom_actions", webhook_token=token_a, action="update", action_id=log_id, parameters={"text": "updated $request.method$"})
+            after_update = await c.call("manage_custom_actions", webhook_token=token_a, action="list")
+            renamed = next((a for a in after_update.get("actions", []) if a.get("uuid") == log_id), {})
+            c.expect(renamed.get("name") == "live check log", "manage_custom_actions update keeps the name (a bare PUT drops it)", str(renamed.get("name")))
+            regex_cond = await c.call("manage_custom_actions", webhook_token=token_a, action="test", type="conditions", parameters={"conditions": [{"input": "abc123", "operator": "regex", "value": "/^[a-z]+\\d+$/"}], "mode": "all", "action": "noop"}, request_id=file_req["uuid"])
+            c.expect("1 of 1 conditions matched" in json.dumps(regex_cond.get("result", {})), "conditions action accepts the regex operator", json.dumps(regex_cond.get("result", {}))[:80])
+            math_var = await c.call("manage_custom_actions", webhook_token=token_a, action="test", type="set_variable", parameters={"name": "m", "value": "round(1 + 2.5, 0)", "mode": "math"}, request_id=file_req["uuid"])
+            c.expect('set to \\"4\\"' in json.dumps(math_var.get("result", {})), "set_variable math mode evaluates the expression", json.dumps(math_var.get("result", {}))[:80])
+            script_ref = await c.call("manage_custom_actions", action="script_reference", search="json")
+            c.expect(script_ref.get("count", 0) >= 5 and all(f.get("exists_live") for f in script_ref.get("functions", [])), "manage_custom_actions script_reference (names verified live)", f"{script_ref.get('count')} functions")
             executed = await c.call("manage_custom_actions", webhook_token=token_a, action="execute", request_id=file_req["uuid"])
             c.expect("updated" in json.dumps(executed.get("result", {})), "manage_custom_actions execute used the updated action", "")
 
             mail_action = await c.call(
                 "manage_custom_actions", webhook_token=token_a, action="create", type="send_email", order=3,
-                parameters={"recipient": f"{token_a}@email.webhook.site", "subject": "Verify your account", "is_html": True,
+                parameters={"recipient": f"{token_a}@emailhook.site", "subject": "Verify your account", "is_html": True,
                             "content": '<p>Your verification code is 847291.</p><p><a href="https://example.com/verify?token=abc&amp;u=1">Verify your email</a></p>'},
             )
 
@@ -344,7 +358,8 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
                 mine = next((t for t in tpls.get("templates", []) if t.get("id") == tpl_id), {})
                 c.expect(mine.get("name", "").endswith("-2") and len(mine.get("actions") or []) == 1, "manage_templates update kept name and actions", f"name={mine.get('name')} actions={len(mine.get('actions') or [])}")
 
-            sched = await c.call("manage_schedules", action="create", name=f"mcp-check-{token_a[:6]}", interval="daily", request_url=f"{SITE}/{token_b}", request_method="GET", timeout=10)
+            sched = await c.call("manage_schedules", action="create", name=f"mcp-check-{token_a[:6]}", interval="daily", request_url=f"{SITE}/{token_b}", request_method="GET", timeout=10, require_cert_expiry=30)
+            c.expect(sched.get("schedule", {}).get("require_cert_expiry") == 30, "manage_schedules require_cert_expiry (undocumented field) persists", str(sched.get("schedule", {}).get("require_cert_expiry")))
             sched_id = sched.get("schedule", {}).get("id")
             if sched_id:
                 cleanup.append(("manage_schedules", {"action": "delete", "schedule_id": sched_id}))
@@ -365,6 +380,10 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
                 q = await c.call("manage_databases", action="query", database_id=str(db_id), query="select 1 as one")
                 c.expect(q.get("result") == [{"one": 1}], "manage_databases query", str(q.get("result")))
                 await c.call("manage_databases", action="update", database_id=str(db_id), name=f"mcp-check-{token_a[:6]}-2")
+                whdb = await c.call("manage_custom_actions", webhook_token=token_a, action="test", type="database", parameters={"type": "whdb", "db_id": db_id, "statement": "select 1 as one", "params": [], "variable_name": "db"}, request_id=file_req["uuid"])
+                whdb_out = " ".join(whdb.get("result", {}).get("output", {}).get("00000000-0000-4000-0000-000000000000", []))
+                whdb_vars = whdb.get("result", {}).get("variables", {})
+                c.expect("Statement executed" in whdb_out and whdb_vars.get("db.0.one") == 1, "database action type=whdb queries a Webhook.site Database", f"{whdb_out[:60]} db.0.one={whdb_vars.get('db.0.one')}")
             else:
                 c.expect(True, "manage_databases create not available on this plan (reported, not failed)", db.get("message", "")[:80])
 

@@ -201,7 +201,7 @@ async def main() -> int:
         token = (await webhooks.create()).data["token"]
         ctx = {
             "self_url": f"https://webhook.site/{token}",
-            "self_email": f"{token}@email.webhook.site",
+            "self_email": f"{token}@emailhook.site",
             "self_token": token,
         }
         try:

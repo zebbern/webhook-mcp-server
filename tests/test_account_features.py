@@ -113,7 +113,7 @@ async def test_configure_creates_with_default_expiry_when_unset() -> None:
     assert created.data["applied_settings"] == {"default_status": 201, "request_limit": 0, "expiry": 600}
     assert json.loads(route.calls[1].request.content)["expiry"] == 60
     assert json.loads(route.calls[2].request.content) == {"expiry": 600}
-    assert plain.data["premium"] is True and plain.data["email"].endswith("@email.webhook.site")
+    assert plain.data["premium"] is True and plain.data["email"].endswith("@emailhook.site")
 
 
 @pytest.mark.asyncio

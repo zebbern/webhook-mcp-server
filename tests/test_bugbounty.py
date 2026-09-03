@@ -90,7 +90,7 @@ class TestBugBountyTools:
         bounty, token, _url = bounty_and_token
         result = bounty.generate_canary_token(token, token_type="email")
         assert result.success is True
-        assert "@email.webhook.site" in result.data["canary"]["token"]
+        assert "@emailhook.site" in result.data["canary"]["token"]
 
 
 class TestExtractLinksFromRequest:

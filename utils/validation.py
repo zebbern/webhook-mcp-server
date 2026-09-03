@@ -136,8 +136,21 @@ def validate_expiry(expiry: int) -> None:
 
 
 def validate_request_limit(request_limit: int) -> None:
-    """Validate a token's request history size (0 stores nothing, max 10000)."""
-    validate_positive_int(request_limit, "request_limit", min_val=0, max_val=10000)
+    """Validate a token's request history size (0 stores nothing).
+
+    The API accepted 20000 on a Pro account live, and Enterprise plans go up to
+    100000, so only the plan's real ceiling (enforced by the API) applies.
+    """
+    validate_positive_int(request_limit, "request_limit", min_val=0, max_val=100000)
+
+
+MAX_NOTE_LENGTH = 10000
+
+
+def validate_note(note: str) -> None:
+    """Request notes are capped at 10000 characters (API validation, seen live)."""
+    if len(note) > MAX_NOTE_LENGTH:
+        raise ValidationError(f"note may not be longer than {MAX_NOTE_LENGTH} characters, got {len(note)}")
 
 
 def validate_listen(listen: int) -> None:

@@ -19,6 +19,7 @@ SCHEDULE_FIELDS = (
     "require_body",
     "require_status_min",
     "require_status_max",
+    "require_cert_expiry",  # days; undocumented in the API reference, accepted live
 )
 
 

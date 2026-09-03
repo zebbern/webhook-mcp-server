@@ -64,7 +64,7 @@ async def test_signup_flow_end_to_end(client: WebhookHttpClient, token: str) -> 
     """create -> guarded send_email action -> trigger -> wait_for_email -> follow_email_link."""
     actions = ActionsService(client)
     requests = RequestService(client)
-    inbox = f"{token}@email.webhook.site"
+    inbox = f"{token}@emailhook.site"
 
     # Stop the chain for anything that is not a web request, so the email the
     # send_email action delivers to this same inbox cannot re-trigger it.
