@@ -192,7 +192,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ## Tools Reference
 
-31 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan. The full parameter reference, generated from the server itself, is in [docs/TOOLS.md](docs/TOOLS.md).
+31 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan. The full parameter reference, generated from the server itself, is in [docs/TOOLS.md](docs/TOOLS.md). Every `webhook_token` accepts the UUID, an alias, a pasted `https://webhook.site/...` URL or the inbox address.
 
 ### Diagnostics
 
@@ -217,7 +217,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 | ----------------------- | -------------------------------------------------------------------------------------------- |
 | `send_requests`         | Send one body (`data`) or many (`payloads`) to the URL, any HTTP method, optional delay        |
 | `get_webhook_requests`  | List captured events page by page (`page`, `pagination` in the result)                         |
-| `search_requests`       | webhook.site search syntax (`method:POST`, `content:verify`, `-method:GET`, `_exists_:note`, `country_code:DE`, `type:email AND ...`), dates, pages |
+| `search_requests`       | `since` cursor plus webhook.site search syntax (`method:POST`, `content:verify`, `-method:GET`, `_exists_:note`, `country_code:DE`, `type:email AND ...`), dates, pages |
 | `get_request`           | Newest event or a specific `request_id`; `raw=true` adds the untouched body                    |
 | `update_request`        | Attach a note, or call Set Response for a request that is still being held (`listen` > 0 and a listener; `respond_to_next_request` does the whole flow) |
 | `download_request_file` | Download an uploaded file or email attachment (base64)                                         |

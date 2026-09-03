@@ -27,9 +27,14 @@ Full coverage of the documented webhook.site API. With `WEBHOOK_SITE_API_KEY` se
 - `manage_custom_actions(action="script_reference")`: every WebhookScript function with its signature and summary, generated from the docs and checked name-by-name against the live engine (two documented names do not exist there), plus language notes (`var()` is required, strict typing, regex literals)
 - Action-type reference corrections found in the frontend bundle and confirmed live: `set_variable` modes `math` and `random_number`, `conditions` operators `regex`/`nex`/`null`/`nnull` (the singular `condition` rejects them), `text_map` operator codes, `database` type `whdb` with `db_id`, the editor's no-queue types
 - Custom actions carry a `name`; updates keep it (the API drops it on a bare PUT). Schedules accept `require_cert_expiry` (days before the HTTPS certificate expires)
+- Every `webhook_token` accepts an alias, a pasted `https://webhook.site/...` URL, the subdomain form, the inbox address or the DNSHook name; aliases resolve through `GET /token/{alias}` (works live although the docs say otherwise)
+- `configure_webhook` on an aliased token returns `alias_cache_note`: webhook.site serves the previous settings on the alias URL for about two minutes after a change (measured), the UUID URL updates at once
+- `since` / `next_since` on `get_webhook_requests` and `search_requests`: a `sorting` cursor that returns only what arrived after the previous call, without paging or de-duplicating
 - `configure_webhook(alias="")` removes an alias; `get_webhook_info` returns `force_status_url` (`https://webhook.site/{token}/{status}` answers with that status); `search_requests` documents exclusion (`-method:GET`), `_exists_:`, `note:` and geo fields
 
 ### Changed
+
+- The HTTP client expires idle keep-alive connections after 4 s and retries idempotent calls once after a dropped connection (webhook.site closes idle connections after a few seconds)
 
 - Email addresses use the current `{token}@emailhook.site` domain (the old `email.webhook.site` form still delivers)
 - `request_limit` is no longer capped client-side at 10000; the API enforces the plan's ceiling (up to 100000 on Enterprise)

@@ -32,6 +32,7 @@ DEFAULT_MAX_PAGES = 20
 DEFAULT_MAX_ITEMS = 1000
 PAGE_DELAY_SECONDS = 0.3
 RAW_MAX_BYTES = 5_000_000
+KEEPALIVE_EXPIRY_SECONDS = 4.0
 # webhook.site answers 429 with Retry-After (seen: 58 s for the 3/min export
 # endpoint). Waits up to this many seconds are absorbed with one retry; longer
 # ones surface as an error that names the wait, so a tool call never hangs.
@@ -186,6 +187,7 @@ class WebhookHttpClient:
         self.timeout = timeout
         self.api_key = api_key
         self._client: httpx.AsyncClient | None = None
+        self._capture_client: httpx.AsyncClient | None = None
         self.rate_limit_max_wait = _rate_limit_max_wait()
 
     async def __aenter__(self) -> WebhookHttpClient:
@@ -197,10 +199,16 @@ class WebhookHttpClient:
         hooks: dict[str, list[Any]] = {}
         if recorder.active() is not None:
             hooks["response"] = [self._record_response]
-        self._client = httpx.AsyncClient(
-            timeout=self.timeout,
-            headers=headers,
-            event_hooks=hooks,
+        # webhook.site drops idle keep-alive connections after a few seconds
+        # ("Server disconnected without sending a response" when a pooled
+        # connection is reused after a 5 s pause, seen live). Expire ours first.
+        limits = httpx.Limits(keepalive_expiry=KEEPALIVE_EXPIRY_SECONDS)
+        self._client = httpx.AsyncClient(timeout=self.timeout, headers=headers, event_hooks=hooks, limits=limits)
+        # Requests to a token's capture URL are stored by webhook.site, headers
+        # included, so they must never carry the Api-Key header (it ended up in
+        # the request history and in the recordings once). Separate client, no key.
+        self._capture_client = httpx.AsyncClient(
+            timeout=self.timeout, headers=DEFAULT_HEADERS.copy(), event_hooks=hooks, limits=limits
         )
         return self
 
@@ -245,6 +253,9 @@ class WebhookHttpClient:
         if self._client:
             await self._client.aclose()
             self._client = None
+        if self._capture_client:
+            await self._capture_client.aclose()
+            self._capture_client = None
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -549,8 +560,10 @@ class WebhookHttpClient:
         Raises:
             WebhookApiError: On connection errors
         """
+        if self._capture_client is None:
+            raise RuntimeError("Client not initialized. Use 'async with' context manager.")
         try:
-            return await self.client.request(
+            return await self._capture_client.request(
                 method.upper(),
                 url,
                 json=json,

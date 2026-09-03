@@ -258,10 +258,11 @@
       "note": "Single condition; only these 20 operators (regex, nex, null, nnull answer 'Unknown operator' here). Prefer `conditions`, which supports them all. eq is equal to, neq is not equal to, sw starts with, ew ends with, ct contains, nct does not contain, gt/gte/lt/lte compare numbers, ex variable exists, nex variable missing, true/false, null/nnull, num/int/float, json, email, domain, url, regex matches a /delimited/ PCRE pattern (value ignored for ex..url)",
       "verified": {
         "status": "ok",
-        "message": "Condition \"{\"a\":1,\"probe\":true}\" is equal to \"POST\" evaluated to NO: Execution continued.",
+        "message": "Condition \"POST\" is equal to \"POST\" evaluated to YES: Execution continued.",
         "checked_at": "2026-09-03"
       },
       "example": {
+        "input": "$request.method$",
         "operator": "eq",
         "value": "POST",
         "action": "noop"
@@ -429,14 +430,11 @@
       "note": "type whdb queries a Webhook.site Database (no host/credentials needed); the others need your own server.",
       "verified": {
         "status": "runtime_error",
-        "message": "Database error: [2002] php_network_getaddresses: getaddrinfo for example.invalid failed: Name or service not known",
+        "message": "Database error: Undefined array key \"db_id\"",
         "checked_at": "2026-09-03"
       },
       "example": {
-        "type": "mysql",
-        "host": "example.invalid",
-        "database": "probe",
-        "username": "user",
+        "type": "whdb",
         "statement": "select 1"
       }
     },
@@ -1493,7 +1491,7 @@
       "description": "Rabbitmq get",
       "verified": {
         "status": "server_error",
-        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"f563bbf6e8db4c60b1b0d1f7f0921563\", \"code\": 2}}",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"a12ac0fd2a244df19f5a10838d8c2f9c\", \"code\": 2}}",
         "checked_at": "2026-09-03"
       }
     },
@@ -1620,11 +1618,11 @@
       "description": "Send an email from webhook.site (also fires on incoming emails: guard with a condition on $request.type$).",
       "verified": {
         "status": "ok",
-        "message": "Email sent to 29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site with subject \"probe\"",
+        "message": "Email sent to 8e14b418-fecf-4d0f-ba4e-c7904001d459@emailhook.site with subject \"probe\"",
         "checked_at": "2026-09-03"
       },
       "example": {
-        "recipient": "29592567-e90b-4e6a-ad08-0c33a6387f13@email.webhook.site",
+        "recipient": "8e14b418-fecf-4d0f-ba4e-c7904001d459@emailhook.site",
         "subject": "probe"
       }
     },
@@ -1687,7 +1685,7 @@
       "description": "Send an email through your own SMTP server.",
       "verified": {
         "status": "server_error",
-        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"c2f25ebca87646b28f2d532b45e27fa3\"}}",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"54ef0f6fdf8e485ab796642670850d53\"}}",
         "checked_at": "2026-09-03"
       }
     },
@@ -1885,7 +1883,7 @@
       "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
       "verified": {
         "status": "server_error",
-        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"e9c1e00fac064670a4580786dc9b316a\"}}",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"c6ef37e4e3714f39b64fd7ed1ff2f4d0\"}}",
         "checked_at": "2026-09-03"
       }
     },
@@ -1926,7 +1924,7 @@
       "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
       "verified": {
         "status": "server_error",
-        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"9a4edfc457c74dd78e4d43afc8ae5efb\"}}",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"d627391584184168857da43528bfe594\"}}",
         "checked_at": "2026-09-03"
       }
     },
@@ -2010,7 +2008,7 @@
       "note": "Needs a provider connected in the webhook.site Control Panel (provider_id).",
       "verified": {
         "status": "server_error",
-        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"fea0628667a249f3bd304fdc71881aaa\"}}",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"c270fb70c6cc4b9ba1941302f3cee108\"}}",
         "checked_at": "2026-09-03"
       }
     },
@@ -2321,7 +2319,7 @@
       "description": "Fetch requests of another token into $variable_name$ (can repeat over them).",
       "verified": {
         "status": "server_error",
-        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"80ce346b04094f9eb65aaf9aa8b84d45\"}}",
+        "message": "{\"success\": false, \"error\": {\"message\": \"Internal Error. Contact Webhook.site Support.\", \"id\": \"70e522b3b5f442f5a217a30e38985aae\"}}",
         "checked_at": "2026-09-03"
       }
     }

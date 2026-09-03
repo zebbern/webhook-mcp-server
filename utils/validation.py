@@ -184,3 +184,52 @@ def resolve_default_expiry(raw: str | None) -> int | None:
     except ValidationError as exc:
         raise ValueError(f"WEBHOOK_SITE_DEFAULT_EXPIRY: {exc}") from exc
     return value or None
+
+
+ALIAS_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{3,32}$")
+# webhook.site tokens are always the dashed form; 32 bare hex characters is a valid alias.
+UUID_PATTERN = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+_TOKEN_HOSTS = ("webhook.site", "emailhook.site", "dnshook.site", "email.webhook.site")
+
+
+def looks_like_uuid(value: str) -> bool:
+    return isinstance(value, str) and UUID_PATTERN.match(value) is not None
+
+
+def looks_like_alias(value: str) -> bool:
+    """Alias format accepted by the API: 3-32 letters, digits, - or _ (underscores since 2025-05)."""
+    return bool(value) and ALIAS_PATTERN.match(value) is not None and not looks_like_uuid(value)
+
+
+def extract_token_reference(value: str) -> str:
+    """Pull the token UUID or alias out of the forms people paste.
+
+    Accepts the bare value, https://webhook.site/{id}[/path], the subdomain form
+    https://{id}.webhook.site, {id}@emailhook.site (or @email.webhook.site) and
+    {id}.dnshook.site. Anything else is returned unchanged for validation.
+    """
+    if not isinstance(value, str):
+        return value
+    text = value.strip()
+    if "://" in text:
+        rest = text.split("://", 1)[1]
+        host, _, path = rest.partition("/")
+        host = host.split(":")[0].lower()
+        if host in _TOKEN_HOSTS:
+            return path.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
+        for suffix in _TOKEN_HOSTS:
+            if host.endswith("." + suffix):
+                # the token is the label right before the site domain; DNSHook
+                # lookups carry extra labels in front of it
+                return host[: -len(suffix) - 1].rsplit(".", 1)[-1]
+        return text
+    if "@" in text:
+        local, _, domain = text.rpartition("@")
+        if domain.lower().rstrip(">") in _TOKEN_HOSTS:
+            return local.split()[-1].lstrip("<") if local.strip() else local
+        return text
+    lowered = text.lower()
+    for suffix in _TOKEN_HOSTS:
+        if lowered.endswith("." + suffix):
+            return text[: -len(suffix) - 1].rsplit(".", 1)[-1]
+    return text

@@ -54,6 +54,12 @@ class WebhookConfig:
         return payload
 
 
+def with_since(query: str | None, since: int) -> str:
+    """Append a `sorting` cursor to a search query (verified live: sorting:>N returns only newer requests)."""
+    cursor = f"sorting:>{since}"
+    return f"({query}) AND {cursor}" if query else cursor
+
+
 @dataclass
 class SearchFilters:
     """Filters for searching webhook requests.
@@ -66,10 +72,12 @@ class SearchFilters:
         sorting: Sort order ('newest' or 'oldest')
         limit: Maximum results to return per page (max 100)
         page: Page number (1-based)
+        since: Return only requests newer than this `sorting` cursor (microsecond timestamp)
     """
 
     request_type: str | None = None
     query: str | None = None
+    since: int | None = None
     date_from: str | None = None
     date_to: str | None = None
     sorting: str = "newest"
@@ -87,6 +95,8 @@ class SearchFilters:
             query_parts.append(self.query)
         if query_parts:
             params["query"] = " ".join(query_parts)
+        if self.since is not None:
+            params["query"] = with_since(params.get("query"), self.since)
 
         if self.date_from:
             params["date_from"] = self.date_from

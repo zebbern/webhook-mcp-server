@@ -112,13 +112,19 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             token_b = b.get("token") or (await c.call("create_webhook"))["token"]
             created_tokens.append(token_b)
             c.expect(b.get("alias") == alias and b["url"].endswith(alias), "configure_webhook create applied alias", b.get("url", ""))
+            by_alias = await c.call("get_webhook_info", webhook_token=alias)
+            c.expect(by_alias.get("token") == token_b, "webhook_token accepts an alias (resolved through GET /token/{alias})", str(by_alias.get("token")))
+            by_email = await c.call("get_webhook_info", webhook_token=f"{token_b}@emailhook.site")
+            c.expect(by_email.get("token") == token_b, "webhook_token accepts the inbox address", str(by_email.get("token")))
 
             upd = await c.call("configure_webhook", webhook_token=token_b, default_status=203, request_limit=100, timeout=1, description="live tool check")
             info_b = await c.call("get_webhook_info", webhook_token=token_b)
             c.expect(info_b.get("default_status") == 203 and info_b.get("dns", "").endswith(".dnshook.site"), "configure_webhook update + get_webhook_info", f"status={info_b.get('default_status')} limit={info_b.get('request_limit')}")
             c.expect(info_b.get("description") == "live tool check", "configure_webhook description (undocumented field) persists", str(info_b.get("description")))
-            captured = httpx.get(f"{SITE}/{alias}", timeout=30)
-            c.expect(captured.status_code == 203, "alias URL answers with configured status", f"{captured.status_code}")
+            captured = httpx.get(f"{SITE}/{token_b}", timeout=30)
+            c.expect(captured.status_code == 203, "UUID URL answers with the updated status at once", f"{captured.status_code}")
+            via_alias = httpx.get(f"{SITE}/{alias}", timeout=30)
+            c.expect(via_alias.status_code in (201, 203) and "alias_cache_note" in upd, "alias URL may lag a settings change (~2 min platform cache, reported as alias_cache_note)", f"alias url={via_alias.status_code}")
             forced = httpx.post(f"{SITE}/{token_b}/503", content="retry me", timeout=30)
             c.expect(forced.status_code == 503, "capture URL with a status suffix answers that status (force_status_url)", str(forced.status_code))
             cleared = await c.call("configure_webhook", webhook_token=token_b, alias="")
@@ -391,6 +397,21 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             me = (users.get("users") or [{}])[0]
             if me.get("id"):
                 await c.call("manage_users", action="update", user_id=me["id"], name=me.get("name"))
+
+            # --- URL references and the since cursor -------------------------------
+            by_url = await c.call("get_webhook_info", webhook_token=f"{SITE}/{token_a}")
+            c.expect(by_url.get("token") == token_a, "webhook_token accepts a pasted webhook.site URL", str(by_url.get("token")))
+            unknown = await c.call("get_webhook_info", expect_success=False, webhook_token="no-such-alias-mcp")
+            c.expect("No webhook with alias" in unknown.get("message", ""), "unknown alias is a clear validation error", unknown.get("message", "")[:70])
+            page_now = await c.call("get_webhook_requests", webhook_token=token_a, limit=100)
+            cursor = page_now.get("next_since")
+            c.expect(isinstance(cursor, int), "get_webhook_requests returns next_since", str(cursor))
+            httpx.post(f"{SITE}/{token_a}", content="after-cursor", timeout=30)
+            await asyncio.sleep(1.5)
+            newer = await c.call("get_webhook_requests", webhook_token=token_a, since=cursor)
+            c.expect(len(newer.get("requests", [])) == 1 and newer.get("next_since", 0) > cursor, "since cursor returns only what arrived after it", f"{len(newer.get('requests', []))} newer, next_since={newer.get('next_since')}")
+            searched = await c.call("search_requests", webhook_token=token_a, query="method:POST OR method:PUT", since=cursor)
+            c.expect(len(searched.get("requests", [])) == 1, "search_requests combines a query with since", f"{len(searched.get('requests', []))} matches")
 
             # --- deletes ------------------------------------------------------------
             await c.call("delete_request", webhook_token=token_a, request_id=file_req["uuid"])

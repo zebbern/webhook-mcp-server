@@ -29,7 +29,9 @@ from utils.validation import (
     validate_page,
     validate_positive_int,
     validate_request_limit,
-    validate_webhook_token,
+    extract_token_reference,
+    looks_like_alias,
+    looks_like_uuid,
 )
 
 logger = setup_logger(__name__)
@@ -45,7 +47,7 @@ DatabaseAction = Literal["list", "create", "update", "delete", "query"]
 UserAction = Literal["list", "invite", "update", "delete"]
 Token = Annotated[
     str,
-    Field(description="Webhook UUID returned by create_webhook"),
+    Field(description="Webhook UUID or alias from create_webhook / configure_webhook; a webhook.site URL or {token}@emailhook.site address works too"),
 ]
 # Free text that often carries JSON (a response body, a note, a variable value).
 # The MCP SDK pre-parses JSON-looking strings into objects for any field whose
@@ -86,13 +88,53 @@ def _error_payload(exc: Exception) -> dict[str, Any]:
     }
 
 
-async def _execute(action: Callable[[], Any]) -> dict[str, Any]:
+_UNSET: Any = object()
+
+
+async def _resolve_token(ctx: Context[AppContext], value: str | None) -> str | None:
+    """Turn what the caller passed (UUID, alias, URL, email, DNS name) into the token UUID.
+
+    GET /token/{alias} answers with the token (verified live 2026-09-03) even
+    though the docs say aliases are not accepted in API URLs; the sub-resource
+    paths really do 404 on an alias, so everything downstream uses the UUID.
+    """
+    if value is None:
+        return None
+    reference = extract_token_reference(value)
+    if looks_like_uuid(reference):
+        return reference
+    if not looks_like_alias(reference):
+        raise ValidationError(
+            f"Invalid webhook token: expected a UUID, an alias (3-32 letters, digits, - or _), "
+            f"or a webhook.site URL / email address, got: {value[:40]}"
+        )
+    try:
+        data = await _app(ctx).client.get(f"/token/{reference}")
+    except WebhookApiError as exc:
+        if exc.status_code == 404:
+            raise ValidationError(f"No webhook with alias '{reference}' (aliases need the API key of the owning account)") from exc
+        raise
+    uuid = data.get("uuid") if isinstance(data, dict) else None
+    if not uuid:
+        raise ValidationError(f"Could not resolve alias '{reference}' to a token")
+    return uuid
+
+
+async def _execute(
+    action: Callable[..., Any],
+    ctx: Context[AppContext] | None = None,
+    webhook_token: str | None = _UNSET,
+) -> dict[str, Any]:
     active = recorder.active()
     if active is not None:
         # Called from inside each tool coroutine; its frame name is the tool name.
         active.mark(sys._getframe(1).f_code.co_name)
     try:
-        result = action()
+        if webhook_token is _UNSET:
+            result = action()
+        else:
+            # The tool's _op receives the resolved UUID (or None when optional).
+            result = action(await _resolve_token(ctx, webhook_token))
         if inspect.isawaitable(result):
             result = await result
         if isinstance(result, ToolResult):
@@ -181,9 +223,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         plain sign-up inbox use create_webhook.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            if webhook_token is not None:
-                validate_webhook_token(webhook_token)
+        def _op(webhook_token: str | None) -> Awaitable[ToolResult]:
             if default_status is not None:
                 validate_http_status_code(default_status)
             if timeout is not None:
@@ -215,7 +255,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
             )
             return _app(ctx).webhooks.configure(config, webhook_token=webhook_token)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def get_webhook_info(
@@ -231,11 +271,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         DNSHook domain.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).webhooks.get_info(webhook_token)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def get_webhook_email(
@@ -250,11 +289,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         email. After the site sends mail, call wait_for_email.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).webhooks.get_email(webhook_token, validate=validate)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def list_webhooks(
@@ -294,11 +332,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         Use when the user is done with a temp inbox or wants to clean up.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).webhooks.delete(webhook_token)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     # --- requests -------------------------------------------------------------
 
@@ -309,6 +346,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         limit: int = 10,
         request_type: RequestType | None = None,
         page: int = 1,
+        since: int | None = None,
     ) -> dict[str, Any]:
         """List captured HTTP, email, or DNS events for a webhook, one page at a time.
 
@@ -316,15 +354,16 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         omitted; use export_webhook_data for the full dump. For the newest item
         use get_request. To wait for something new use wait_for_request or
         wait_for_email. Filter emails with request_type='email'. Returns
-        pagination (is_last_page, total).
+        pagination (is_last_page, total) and next_since: pass it back as
+        since to get only what arrived after that call (no paging, no
+        duplicates).
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             validate_page(page, limit)
-            return _app(ctx).requests.get_all(webhook_token, limit, request_type, page=page)
+            return _app(ctx).requests.get_all(webhook_token, limit, request_type, page=page, since=since)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def search_requests(
@@ -337,6 +376,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         sorting: Literal["newest", "oldest"] = "newest",
         limit: int = 20,
         page: int = 1,
+        since: int | None = None,
     ) -> dict[str, Any]:
         """Search captured events by method, body text, headers, type, or date.
 
@@ -345,11 +385,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         'headers.user-agent:curl', 'type:web AND method:POST', '-method:GET'
         (exclude), '_exists_:custom_action_errors', 'note:todo*',
         'country_code:DE', 'created_at:[now-1h TO now]'. Dates are
-        'yyyy-MM-dd HH:mm:ss' or expressions like now-7d. Returns pagination.
+        'yyyy-MM-dd HH:mm:ss' or expressions like now-7d. Returns pagination
+        and next_since (pass back as since for only newer matches).
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             validate_page(page, limit)
             filters = SearchFilters(
                 request_type=request_type,
@@ -359,10 +399,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 sorting=sorting,
                 limit=limit,
                 page=page,
+                since=since,
             )
             return _app(ctx).requests.search(webhook_token, filters)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def get_request(
@@ -378,11 +419,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         see history.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).requests.get_request(webhook_token, request_id=request_id, raw=raw)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=WRITE_IDEMPOTENT)
     async def update_request(
@@ -402,8 +442,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         use configure_webhook or a modify_response custom action instead.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             note_text = _text(note)
             body = _text(response_content)
             if note_text is not None:
@@ -421,7 +460,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 response_headers=response_headers,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def download_request_file(
@@ -436,12 +475,11 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         file_id comes from the attachments list on a request or email.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             validate_positive_int(max_bytes, "max_bytes", min_val=1, max_val=50_000_000)
             return _app(ctx).requests.download_file(webhook_token, request_id, file_id, max_bytes=max_bytes)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=DESTRUCTIVE)
     async def delete_request(
@@ -451,11 +489,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Delete one captured HTTP, email, or DNS event by request id."""
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).requests.delete_one(webhook_token, request_id)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=DESTRUCTIVE)
     async def delete_all_requests(
@@ -471,14 +508,13 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         deletes everything older than a week.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             filters = None
             if any(value is not None for value in (date_from, date_to, query)):
                 filters = DeleteFilters(date_from=date_from, date_to=date_to, query=query)
             return _app(ctx).requests.delete_all(webhook_token, filters)
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def export_webhook_data(
@@ -498,8 +534,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         (paid plans, 3 calls per minute). Filters match search_requests.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             validate_positive_int(limit, "limit", min_val=1, max_val=10000)
             return _app(ctx).requests.export_requests(
                 webhook_token,
@@ -511,7 +546,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 sorting=sorting,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     # --- waiting ------------------------------------------------------------
 
@@ -532,8 +567,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         return_existing=true if the request may already be there.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).requests.wait_for_request(
                 webhook_token,
                 timeout_seconds=timeout_seconds,
@@ -541,7 +575,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 return_existing=return_existing,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def wait_for_email(
@@ -562,8 +596,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         yet, create_webhook first.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).requests.wait_for_email(
                 webhook_token,
                 timeout_seconds=timeout_seconds,
@@ -571,7 +604,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 return_existing=return_existing,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=WRITE)
     async def respond_to_next_request(
@@ -593,8 +626,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         configure_webhook instead.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             validate_http_status_code(status)
             body = _text(content) or ""
             return _app(ctx).requests.respond_to_next_request(
@@ -606,7 +638,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 listen_seconds=listen_seconds,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=FOLLOW)
     async def follow_email_link(
@@ -627,15 +659,14 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         wait_for_email.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).requests.follow_email_link(
                 webhook_token,
                 request_id=request_id,
                 url=url,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     # --- account resources --------------------------------------------------
 
@@ -676,7 +707,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         http/send_request at a webhook.site URL (recursion is disabled).
         """
 
-        def _op() -> Awaitable[ToolResult] | ToolResult:
+        def _op(webhook_token: str | None) -> Awaitable[ToolResult] | ToolResult:
             if action == "types":
                 if type:
                     return ToolResult(success=True, message=f"Reference for '{type}'", data=action_types.describe(type))
@@ -701,7 +732,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     return ToolResult(success=True, message="Variable reference", data=reference)
 
                 return _variables()
-            validate_webhook_token(_require(webhook_token, "webhook_token", action))
+            _require(webhook_token, "webhook_token", action)
             svc = _app(ctx).actions
             if action == "list":
                 return svc.list(webhook_token)
@@ -753,7 +784,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 error_notifications=error_notifications,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=FAMILY)
     async def manage_schedules(
@@ -1055,8 +1086,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         hits with check_for_callbacks.
         """
 
-        def _op() -> ToolResult:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> ToolResult:
             return _app(ctx).bounty.generate_oob_payloads(
                 webhook_token,
                 kind,
@@ -1068,7 +1098,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 canary_type=canary_type,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def check_for_callbacks(
@@ -1083,15 +1113,14 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         wait_for_email.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).bounty.check_for_callbacks(
                 webhook_token,
                 since_minutes=since_minutes,
                 identifier=identifier,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     @mcp.tool(annotations=RO)
     async def extract_links_from_request(
@@ -1107,15 +1136,14 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         latest event. wait_for_email already extracts links and codes.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             return _app(ctx).bounty.extract_links_from_request(
                 webhook_token,
                 request_id=request_id,
                 filter_domain=filter_domain,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)
 
     # --- send -----------------------------------------------------------------
 
@@ -1136,8 +1164,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         spaces out multiple payloads.
         """
 
-        def _op() -> Awaitable[ToolResult]:
-            validate_webhook_token(webhook_token)
+        def _op(webhook_token: str) -> Awaitable[ToolResult]:
             bodies = list(payloads or [])
             if data is not None:
                 bodies.insert(0, data)
@@ -1154,4 +1181,4 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 method=method,
             )
 
-        return await _execute(_op)
+        return await _execute(_op, ctx, webhook_token)

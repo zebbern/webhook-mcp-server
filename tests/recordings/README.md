@@ -10,4 +10,4 @@ Real exchanges with webhook.site, captured so offline tests assert on what the A
 
 Re-record whenever a service or tool changes what it sends, or when the nightly live check fails: the replay test compares the current code's output against the recorded live result, so a mismatch means either a regression or an API change that must be looked at for real.
 
-Personal data is replaced at record time (`utils/recorder.py`): real mailboxes become `user@example.com`, public IPs `203.0.113.10`, user names `Recorded User`. Token and request UUIDs are kept; every token in here was deleted at the end of its run.
+Personal data is replaced at record time (`utils/recorder.py`) with same-length stand-ins so truncated previews replay identically: real mailboxes become `userxxx@example.com`-style addresses, the active API key becomes `00000000-0000-4000-8000-0000000000ee`, public IPs `203.0.113.10`, user names `Recorded User`. Token and request UUIDs are kept; every token in here was deleted at the end of its run.

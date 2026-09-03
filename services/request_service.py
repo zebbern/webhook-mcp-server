@@ -15,7 +15,7 @@ from typing import Any, Callable
 
 import httpx
 
-from models.schemas import DeleteFilters, SearchFilters, ToolResult
+from models.schemas import DeleteFilters, SearchFilters, ToolResult, with_since
 from utils.email_extract import (
     combined_request_text,
     extract_auth_links,
@@ -67,6 +67,12 @@ TOKEN_SETTINGS_FOR_PUT = (
     "default_status", "default_content", "default_content_type", "timeout", "cors", "alias",
     "request_limit", "actions", "group_id", "description",
 )
+
+
+def _next_since(data: dict[str, Any], since: int | None) -> int | None:
+    """Cursor for the next incremental call: the newest `sorting` seen, else the one passed in."""
+    values = [req.get("sorting") for req in data.get("data", []) if isinstance(req.get("sorting"), int)]
+    return max(values) if values else since
 
 
 def _pagination(data: dict[str, Any], returned: int) -> dict[str, Any]:
@@ -124,6 +130,7 @@ class RequestService:
         limit: int = DEFAULT_REQUEST_LIMIT,
         request_type: str | None = None,
         page: int = 1,
+        since: int | None = None,
     ) -> ToolResult:
         """Get requests sent to a webhook, one page at a time.
 
@@ -132,13 +139,16 @@ class RequestService:
             limit: Page size (max 100)
             request_type: Filter by type ('web', 'email', 'dns')
             page: Page number, 1-based
+            since: Only requests newer than this `sorting` cursor (see next_since)
 
         Returns:
-            ToolResult with the requests and a pagination summary
+            ToolResult with the requests, a pagination summary and next_since
         """
         params: dict[str, Any] = {"per_page": limit, "page": page}
         if request_type:
             params["query"] = f"type:{request_type}"
+        if since is not None:
+            params["query"] = with_since(params.get("query"), since)
 
         data = await self._client.get(
             f"/token/{webhook_token}/requests",
@@ -154,6 +164,7 @@ class RequestService:
                 "total_requests": len(requests),
                 "requests": requests,
                 "pagination": _pagination(data, len(requests)),
+                "next_since": _next_since(data, since),
             },
         )
     
@@ -186,6 +197,7 @@ class RequestService:
                 "total_found": len(requests),
                 "requests": requests,
                 "pagination": _pagination(data, len(requests)),
+                "next_since": _next_since(data, filters.since),
             },
         )
 
@@ -418,6 +430,8 @@ class RequestService:
             "url": req.get("url", ""),
             "ip": req.get("ip", "unknown"),
             "created_at": req.get("created_at", "unknown"),
+            # Microsecond creation timestamp; pass the largest one back as `since`.
+            "sorting": req.get("sorting"),
         }
         if req.get("html_content"):
             formatted["html_omitted"] = True

@@ -29,6 +29,12 @@ MERGED_TOKEN_FIELDS = (
 )
 
 
+ALIAS_CACHE_NOTE = (
+    "The alias URL can keep answering with the previous settings for up to about 2 minutes "
+    "(webhook.site caches alias lookups); the UUID URL reflects changes immediately."
+)
+
+
 def build_webhook_urls(token: str, alias: str | None = None) -> dict[str, str]:
     """Build all URL variants for a webhook token.
 
@@ -194,10 +200,16 @@ class WebhookService:
         merged.update(payload)
         data = await self._client.put(f"/token/{webhook_token}", json_data=merged)
         info = format_token(data) if data.get("uuid") else {"token": webhook_token}
+        result = {**info, "updated_settings": payload}
+        if data.get("alias"):
+            # Measured live: after any lookup by alias, webhook.site keeps serving
+            # the previous settings on the alias URL for about 120 s; the UUID
+            # URL reflects the change immediately.
+            result["alias_cache_note"] = ALIAS_CACHE_NOTE
         return ToolResult(
             success=True,
             message="Webhook settings updated successfully",
-            data={**info, "updated_settings": payload},
+            data=result,
         )
 
     async def get_info(self, webhook_token: str) -> ToolResult:
@@ -251,9 +263,10 @@ class WebhookService:
         Returns:
             ToolResult with send confirmation
         """
-        url = f"/{webhook_token}"
-
-        response = await self._client.post(url, json_data=data, headers=headers)
+        # Capture URL: sent without the Api-Key header (webhook.site stores the
+        # request headers) and returned as-is, since the configured status is
+        # part of what the caller wants to see.
+        response = await self._client.post_raw(f"{WEBHOOK_SITE_API}/{webhook_token}", json=data, headers=headers)
 
         return ToolResult(
             success=True,

@@ -250,7 +250,9 @@ Use to inspect what already arrived. Bodies are truncated and HTML is
 omitted; use export_webhook_data for the full dump. For the newest item
 use get_request. To wait for something new use wait_for_request or
 wait_for_email. Filter emails with request_type='email'. Returns
-pagination (is_last_page, total).
+pagination (is_last_page, total) and next_since: pass it back as
+since to get only what arrived after that call (no paging, no
+duplicates).
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |
@@ -258,6 +260,7 @@ pagination (is_last_page, total).
 | `limit` | integer |  | `10` |
 | `request_type` | `web` | `email` | `dns` |  |  |
 | `page` | integer |  | `1` |
+| `since` | integer |  |  |
 
 ## `list_webhooks`
 
@@ -494,7 +497,8 @@ query uses webhook.site search syntax: 'method:POST', 'content:verify',
 'headers.user-agent:curl', 'type:web AND method:POST', '-method:GET'
 (exclude), '_exists_:custom_action_errors', 'note:todo*',
 'country_code:DE', 'created_at:[now-1h TO now]'. Dates are
-'yyyy-MM-dd HH:mm:ss' or expressions like now-7d. Returns pagination.
+'yyyy-MM-dd HH:mm:ss' or expressions like now-7d. Returns pagination
+and next_since (pass back as since for only newer matches).
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |
@@ -506,6 +510,7 @@ query uses webhook.site search syntax: 'method:POST', 'content:verify',
 | `sorting` | `newest` | `oldest` |  | `newest` |
 | `limit` | integer |  | `20` |
 | `page` | integer |  | `1` |
+| `since` | integer |  |  |
 
 ## `send_requests`
 

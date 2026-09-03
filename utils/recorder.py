@@ -24,7 +24,24 @@ ENV = "WEBHOOK_MCP_RECORD"
 
 # Real mailboxes only: not token inboxes, and not URL userinfo like https://evil.com@webhook.site/...
 _EMAIL = re.compile(r"(?<![/\w.])[A-Za-z0-9._%+-]+@(?!email\.webhook\.site|emailhook\.site)[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+REDACTED_API_KEY = "00000000-0000-4000-8000-0000000000ee"
 _IPV4 = re.compile(r"\b(?!127\.|10\.|192\.168\.|0\.0\.0\.0)(?:\d{1,3}\.){3}\d{1,3}\b")
+
+
+def _fake_email(match: re.Match[str]) -> str:
+    """Same-length stand-in, so previews truncated by the tools cut at the same place when replayed."""
+    local, domain = match.group(0).rsplit("@", 1)
+    fake_local = ("user" + "x" * len(local))[: len(local)]
+    fake_domain = ("example" + "x" * max(0, len(domain) - 11) + ".com") if len(domain) >= 11 else "example.com"[: len(domain)]
+    return f"{fake_local}@{fake_domain}"
+
+
+_FAKE_IPS = {7: "1.0.0.1", 8: "10.0.0.1", 9: "10.0.0.10", 10: "10.0.0.100", 11: "203.0.113.1", 12: "203.0.113.10",
+             13: "203.0.113.100", 14: "203.10.113.100", 15: "203.100.113.100"}
+
+
+def _fake_ip(match: re.Match[str]) -> str:
+    return _FAKE_IPS.get(len(match.group(0)), "203.0.113.10")
 
 
 def sanitize(value: Any) -> Any:
@@ -41,8 +58,13 @@ def sanitize(value: Any) -> Any:
     if isinstance(value, list):
         return [sanitize(item) for item in value]
     if isinstance(value, str):
-        value = _EMAIL.sub("user@example.com", value)
-        return _IPV4.sub("203.0.113.10", value)
+        value = _EMAIL.sub(_fake_email, value)
+        value = _IPV4.sub(_fake_ip, value)
+        api_key = os.environ.get("WEBHOOK_SITE_API_KEY", "").strip()
+        if api_key and api_key in value:
+            # Belt and braces: the key never belongs in a recording, whatever path it took.
+            value = value.replace(api_key, REDACTED_API_KEY)
+        return value
     return value
 
 
