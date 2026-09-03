@@ -30,7 +30,7 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://webhook.site"
-EXPECTED_TOOLS = 30
+EXPECTED_TOOLS = 31
 
 
 class Check:
@@ -234,6 +234,24 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             opened = await c.call("follow_email_link", expect_success=None, webhook_token=token_a, request_id=email_data.get("uuid"))
             c.expect(opened.get("opened_url") == "https://example.com/verify?token=abc&u=1" and opened.get("title") == "Example Domain", "follow_email_link opened the decoded link", f"{opened.get('status_code')} {opened.get('title')}")
             await c.call("manage_custom_actions", webhook_token=token_a, action="delete", action_id=mail_action.get("action", {}).get("uuid"))
+
+            # --- respond_to_next_request (dynamic response, the whcli forward mechanism) ---
+            async def call_and_capture() -> httpx.Response:
+                await asyncio.sleep(1.5)
+                async with httpx.AsyncClient(timeout=40) as http:
+                    return await http.post(f"{SITE}/{token_a}", json={"needs": "an answer"})
+
+            caller = asyncio.create_task(call_and_capture())
+            answered = await c.call("respond_to_next_request", webhook_token=token_a, status=299, content='{"mocked": true}', headers={"X-Mock": "yes"}, timeout_seconds=30)
+            response = await caller
+            c.expect(answered.get("answered") is True and answered.get("request", {}).get("content", "").startswith('{"needs"'), "respond_to_next_request captured the held request", f"set_response_status={answered.get('set_response_status')} via {answered.get('listened_via')}")
+            c.expect(response.status_code == 299 and response.text == '{"mocked": true}' and response.headers.get("x-mock") == "yes", "the waiting caller received the dynamic response", f"{response.status_code} {response.text[:30]!r}")
+            listen_after = await c.call("get_webhook_info", webhook_token=token_a)
+            c.expect(listen_after.get("listen") == 0, "listen restored after respond_to_next_request", f"listen={listen_after.get('listen')}")
+            with_listen = await c.call("configure_webhook", listen=4, default_status=204)
+            if with_listen.get("token"):
+                created_tokens.append(with_listen["token"])
+                c.expect(with_listen.get("listen") == 4, "configure_webhook create honours listen (POST ignores it, PUT follow-up)", f"listen={with_listen.get('listen')}")
 
             # --- wait_for_request over the socket --------------------------------
             async def fire() -> None:

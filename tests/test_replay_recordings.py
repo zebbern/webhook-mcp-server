@@ -34,7 +34,7 @@ from utils.http_client import WebhookHttpClient
 
 RECORDINGS = Path(__file__).parent / "recordings" / "live"
 # Socket-dependent, leave webhook.site, or describe the local environment rather than the API.
-SKIP = {"wait_for_request", "wait_for_email", "follow_email_link", "server_status"}
+SKIP = {"wait_for_request", "wait_for_email", "respond_to_next_request", "follow_email_link", "server_status"}
 pytestmark = pytest.mark.skipif(not (RECORDINGS / "tools.json").exists(), reason="no live recordings yet")
 
 

@@ -61,6 +61,12 @@ STRONG_AUTH_LINK_SCORE = 3
 RAW_BODY_MAX_BYTES = 262144
 EXPORT_MAX_ITEMS = 10000
 LATEST_RETRY_SECONDS = 1.5
+MAX_LISTEN_SECONDS = 10  # the API's cap on how long a request is held for Set Response
+# Token settings a PUT resets when omitted (same list WebhookService merges).
+TOKEN_SETTINGS_FOR_PUT = (
+    "default_status", "default_content", "default_content_type", "timeout", "cors", "alias",
+    "request_limit", "actions", "group_id", "description",
+)
 
 
 def _pagination(data: dict[str, Any], returned: int) -> dict[str, Any]:
@@ -280,12 +286,15 @@ class RequestService:
                 f"/token/{webhook_token}/request/{request_id}/response",
                 json_data=payload,
             )
-            # The API answers {"status": <n>} and only delivers the response to a
-            # request the webhook.site CLI is holding in listen mode; report as is.
+            # The API answers {"status": 3} when the reply reached a waiting caller and
+            # {"status": 2} when nothing was waiting (verified live).
             outcome["response_api_status"] = result.get("status")
+            outcome["response_delivered"] = result.get("status") == 3
             outcome["response_note"] = (
-                "Accepted. It reaches the caller only if the request is still held by a "
-                "listen-mode token with the webhook.site CLI attached."
+                "Delivered to the waiting caller."
+                if result.get("status") == 3
+                else "Nothing was waiting: a request is only held while the token has listen > 0 and a socket "
+                "listener is subscribed. Use respond_to_next_request for that flow."
             )
 
         failed = "note_error" in outcome
@@ -752,6 +761,100 @@ class RequestService:
             message=message,
             data={**context, **page},
         )
+
+    async def respond_to_next_request(
+        self,
+        webhook_token: str,
+        status: int = 200,
+        content: str = "",
+        headers: dict[str, str] | None = None,
+        timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+        listen_seconds: int = MAX_LISTEN_SECONDS,
+    ) -> ToolResult:
+        """Hold the next request and answer it with a chosen response, the way whcli forward does.
+
+        Verified live: the API holds an incoming request for the token's `listen`
+        seconds while a socket listener is subscribed, and PUT
+        /request/{id}/response delivers the reply to the waiting caller
+        (Set Response answers {"status": 3} when delivered, 2 when nothing was
+        waiting). `listen` is only honoured through PUT, never on POST.
+        """
+        validate_positive_int(timeout_seconds, "timeout_seconds", min_val=MIN_TIMEOUT_SECONDS, max_val=MAX_TIMEOUT_SECONDS)
+        validate_positive_int(listen_seconds, "listen_seconds", min_val=1, max_val=MAX_LISTEN_SECONDS)
+        list_path = f"/token/{webhook_token}/requests"
+        current = await self._client.get(f"/token/{webhook_token}")
+        previous_listen = int(current.get("listen") or 0)
+        seen = {req.get("uuid") for req in (await self._client.get(list_path, params={"per_page": 5, "sorting": "newest"})).get("data", [])}
+
+        async def set_listen(value: int) -> None:
+            merged = {key: current.get(key) for key in TOKEN_SETTINGS_FOR_PUT if current.get(key) is not None}
+            await self._client.put(f"/token/{webhook_token}", json_data={**merged, "listen": value})
+
+        if previous_listen < listen_seconds:
+            await set_listen(listen_seconds)
+        waiter = SocketWaiter(webhook_token, self._client.api_key, factory=self._socket_factory)
+        connected = await waiter.start(timeout=min(SOCKET_CONNECT_TIMEOUT_SECONDS, timeout_seconds))
+        deadline = time.monotonic() + timeout_seconds
+        payload: dict[str, Any] = {
+            "status": status,
+            "content": base64.b64encode(content.encode("utf-8")).decode("ascii"),
+            "headers": headers or {},
+        }
+        try:
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    return ToolResult(
+                        success=False,
+                        message=f"Timeout: no request arrived within {timeout_seconds} seconds",
+                        data={"timeout": True, "request": None, "listened_via": "socket" if connected else "poll"},
+                    )
+                request_id: str | None = None
+                if connected and waiter.connected:
+                    event = await waiter.next(timeout=remaining)
+                    if event is None:
+                        continue
+                    request_id = event.get("uuid") or (event.get("request") or {}).get("uuid")
+                    if not request_id or request_id in seen:
+                        continue
+                else:
+                    await asyncio.sleep(min(1.0, remaining))
+                    data = await self._client.get(list_path, params={"per_page": 5, "sorting": "newest"})
+                    for req in data.get("data", []):
+                        if req.get("uuid") not in seen:
+                            request_id = req.get("uuid")
+                            break
+                    if not request_id:
+                        continue
+                seen.add(request_id)
+                answer = await self._client.put(f"/token/{webhook_token}/request/{request_id}/response", json_data=payload)
+                delivered = answer.get("status") == 3
+                try:
+                    req = await self._get_with_latest_retry(f"/token/{webhook_token}/request/{request_id}", retry=True)
+                except WebhookApiError:
+                    req = {"uuid": request_id}
+                return ToolResult(
+                    success=delivered,
+                    message=(
+                        f"Answered the request with {status}"
+                        if delivered
+                        else "The request arrived but was no longer waiting when the response was set; use a longer listen_seconds"
+                    ),
+                    data={
+                        "request": self._format_request(req),
+                        "answered": delivered,
+                        "set_response_status": answer.get("status"),
+                        "responded_with": {"status": status, "headers": headers or {}, "content": content},
+                        "listened_via": "socket" if connected else "poll",
+                    },
+                )
+        finally:
+            await waiter.close()
+            if previous_listen < listen_seconds:
+                try:
+                    await set_listen(previous_listen)
+                except WebhookApiError:
+                    pass
 
     async def _load_follow_request(
         self,

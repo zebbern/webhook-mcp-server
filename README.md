@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-30%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![MCP](https://img.shields.io/badge/MCP-31%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
@@ -192,7 +192,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ## Tools Reference
 
-30 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan. The full parameter reference, generated from the server itself, is in [docs/TOOLS.md](docs/TOOLS.md).
+31 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan. The full parameter reference, generated from the server itself, is in [docs/TOOLS.md](docs/TOOLS.md).
 
 ### Diagnostics
 
@@ -219,7 +219,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 | `get_webhook_requests`  | List captured events page by page (`page`, `pagination` in the result)                         |
 | `search_requests`       | webhook.site search syntax (`method:POST`, `content:verify`, `type:email AND ...`), dates, pages |
 | `get_request`           | Newest event or a specific `request_id`; `raw=true` adds the untouched body                    |
-| `update_request`        | Attach a note, or call Set Response for a request the webhook.site CLI is holding (`listen` > 0) |
+| `update_request`        | Attach a note, or call Set Response for a request that is still being held (`listen` > 0 and a listener; `respond_to_next_request` does the whole flow) |
 | `download_request_file` | Download an uploaded file or email attachment (base64)                                         |
 | `delete_request`        | Delete a specific request                                                                     |
 | `delete_all_requests`   | Bulk delete, optionally by date expression or search query                                    |
@@ -232,6 +232,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 | `wait_for_request`  | Wait for a **new** HTTP / DNS event (1-120s) over webhook.site's socket, polling as backstop. `return_existing` reuses old traffic |
 | `wait_for_email`    | After sign-up: wait for verify / magic-link / reset mail; returns links, OTP codes, sender, spam / DKIM checks, attachments |
 | `follow_email_link` | Open a captured verify / magic / reset URL and return the page preview (public hosts only unless allowlisted) |
+| `respond_to_next_request` | Hold the next request and answer it with your own status, headers and body (a live mock for one call; the caller waits up to 10 s) |
 
 ### Account Features (API key)
 

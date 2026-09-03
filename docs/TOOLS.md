@@ -2,7 +2,7 @@
 
 Generated from the server's own tool catalogue by `scripts/gen_tool_docs.py`; do not edit by hand. `tests/test_docs_current.py` fails when this file is out of date.
 
-30 tools.
+31 tools.
 
 ## `check_for_callbacks`
 
@@ -455,6 +455,26 @@ member, 300 viewer.
 | `role_id` | integer |  |  |
 | `page` | integer |  | `1` |
 
+## `respond_to_next_request`
+
+Hold the next request that hits the webhook and answer it with your own status, headers and body.
+
+Turns the URL into a live mock for one request: the caller waits (up to
+listen_seconds, max 10) while this tool sets the reply the moment the
+request arrives over the socket. Use to test a client's retry / error
+handling ("answer the next call with 500") or to fake an API response
+on demand; returns the captured request. For a fixed canned reply use
+configure_webhook instead.
+
+| Parameter | Type | Required | Default |
+| --- | --- | --- | --- |
+| `webhook_token` | string | yes |  |
+| `status` | integer |  | `200` |
+| `content` | string or object or array of any |  | `` |
+| `headers` | object |  |  |
+| `timeout_seconds` | integer |  | `60` |
+| `listen_seconds` | integer |  | `10` |
+
 ## `search_requests`
 
 *read-only*
@@ -514,10 +534,10 @@ features. Lists problems in plain words.
 
 Attach a note to a captured request, or set its dynamic response.
 
-response_* call the Set Response API; it only reaches the caller when the
-request is still held by a listen > 0 token with the webhook.site CLI
-attached. For canned replies use configure_webhook or a modify_response
-custom action instead.
+response_* call the Set Response API; it only reaches the caller while
+the request is still held (token listen > 0 with a socket listener; see
+respond_to_next_request, which does the whole thing). For canned replies
+use configure_webhook or a modify_response custom action instead.
 
 | Parameter | Type | Required | Default |
 | --- | --- | --- | --- |

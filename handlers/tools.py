@@ -393,10 +393,10 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
     ) -> dict[str, Any]:
         """Attach a note to a captured request, or set its dynamic response.
 
-        response_* call the Set Response API; it only reaches the caller when the
-        request is still held by a listen > 0 token with the webhook.site CLI
-        attached. For canned replies use configure_webhook or a modify_response
-        custom action instead.
+        response_* call the Set Response API; it only reaches the caller while
+        the request is still held (token listen > 0 with a socket listener; see
+        respond_to_next_request, which does the whole thing). For canned replies
+        use configure_webhook or a modify_response custom action instead.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -566,6 +566,41 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 timeout_seconds=timeout_seconds,
                 extract_links=extract_links,
                 return_existing=return_existing,
+            )
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=WRITE)
+    async def respond_to_next_request(
+        webhook_token: Token,
+        ctx: Context[AppContext],
+        status: int = 200,
+        content: JsonText = "",
+        headers: dict[str, str] | None = None,
+        timeout_seconds: int = 60,
+        listen_seconds: int = 10,
+    ) -> dict[str, Any]:
+        """Hold the next request that hits the webhook and answer it with your own status, headers and body.
+
+        Turns the URL into a live mock for one request: the caller waits (up to
+        listen_seconds, max 10) while this tool sets the reply the moment the
+        request arrives over the socket. Use to test a client's retry / error
+        handling ("answer the next call with 500") or to fake an API response
+        on demand; returns the captured request. For a fixed canned reply use
+        configure_webhook instead.
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            validate_webhook_token(webhook_token)
+            validate_http_status_code(status)
+            body = _text(content) or ""
+            return _app(ctx).requests.respond_to_next_request(
+                webhook_token,
+                status=status,
+                content=body,
+                headers=headers,
+                timeout_seconds=timeout_seconds,
+                listen_seconds=listen_seconds,
             )
 
         return await _execute(_op)

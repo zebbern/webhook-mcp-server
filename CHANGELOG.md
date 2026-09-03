@@ -33,6 +33,7 @@ Full coverage of the documented webhook.site API. With `WEBHOOK_SITE_API_KEY` se
 - `configure_webhook` on an existing token no longer wipes the other settings: `PUT /token/{id}` replaces them, so a 2.x `update_webhook(cors=true)` silently reset the canned status, body and timeout. The current settings are merged in first
 - Verified against the live API rather than the docs: notes and Set Response live on `/request/{id}` (singular); updates of actions, schedules, templates, global variables, databases and users send the full record because the API replaces it (a value-only variable update would have wiped its name); `run-now` answers with a redirect; `check_for_callbacks` matches the identifier anywhere in the captured request, not only in the body
 - `scripts/live_tool_check.py` drives the real server over stdio and exercises all 28 tools against the live API
+- `respond_to_next_request`: hold the next request and answer it with a chosen status, headers and body, the mechanism `whcli forward` uses (token `listen` set by PUT, socket listener, Set Response on the event). Verified live: the waiting caller received the reply in 0.2 s. `listen` is silently ignored by `POST /token`, so `configure_webhook` now applies it with a follow-up PUT
 - Found by mapping the web app rather than the docs: `manage_queues` (Queue Profiles at `/queues`, with `queue_id` on custom actions), the `description` field on `configure_webhook`, and the live `GET /variables` names merged into the variables reference. Error log, providers, domains, API keys, notifications, roles and the form builder need a browser session and are not exposed
 - `docs/TOOLS.md`, generated from the server's own catalogue (`scripts/gen_tool_docs.py`); CI fails when it or the README tool tables drift
 - Real-socket tests for `follow_email_link` against a local web server and a local HTTP proxy (allowlist, `HTTP_PROXY`, `NO_PROXY`), no mocks involved
@@ -40,7 +41,7 @@ Full coverage of the documented webhook.site API. With `WEBHOOK_SITE_API_KEY` se
 - Rate limits: a 429 with a short `Retry-After` is waited out and retried once (`WEBHOOK_MCP_RATE_LIMIT_MAX_WAIT`, default 15 s); longer waits are reported with the exact wait instead of hanging. A socket dropped mid-wait switches the wait tools to fast polling
 - Recorded-truth tests: `scripts/live_tool_check.py --record` captures every real HTTP exchange and tool result; `tests/test_replay_recordings.py` replays them through the real service code offline and expects the recorded results, so offline CI asserts on what webhook.site actually returned
 - Built-in Custom Action reference: `manage_custom_actions(action="types")` lists 63 action types (two of them, `mock` and `validate_json`, exist live but are missing from the API docs) with parameters, live-verified status and a working example; `action="variables"` lists the `$request.*$` variables checked live. Required parameters are validated before the API is called, including three the docs call optional but the API insists on. Regenerate with `scripts/gen_action_types.py` and re-verify with `scripts/verify_action_types.py`
-- Catalog token budget raised to 9000 for the 28-tool catalog
+- Catalog token budget raised to 10000 for the 31-tool catalog
 - New dependency: `python-socketio[asyncio_client]`
 
 ### Fixed

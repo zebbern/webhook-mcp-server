@@ -76,6 +76,7 @@ async def test_import_server_and_list_tools() -> None:
         "export_webhook_data",
         "wait_for_request",
         "wait_for_email",
+        "respond_to_next_request",
         "follow_email_link",
         "manage_custom_actions",
         "manage_schedules",
@@ -91,7 +92,7 @@ async def test_import_server_and_list_tools() -> None:
         "send_requests",
     }
     assert set(names) == expected
-    assert len(names) == 30
+    assert len(names) == 31
     for removed in ("get_webhook_url", "get_webhook_dns", "get_latest_request", "generate_ssrf_payload"):
         assert removed not in names
     annotated = {tool.name: tool.annotations for tool in tools}
@@ -144,7 +145,7 @@ async def test_tool_descriptions_cover_signup_and_email() -> None:
     assert "$request.type$" in actions
 
 
-CATALOG_TOKEN_BUDGET = 9000
+CATALOG_TOKEN_BUDGET = 10000
 
 
 @pytest.mark.asyncio

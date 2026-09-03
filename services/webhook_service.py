@@ -171,6 +171,9 @@ class WebhookService:
             payload = self._create_payload(payload)
             response = await self._client.post("/token", json_data=payload or None)
             data = response.json()
+            if payload.get("listen") and not data.get("listen"):
+                # POST /token ignores `listen` (stays 0, seen live); only PUT sets it.
+                data = await self._client.put(f"/token/{data['uuid']}", json_data={**payload, "listen": payload["listen"]})
             info = format_token(data)
             return ToolResult(
                 success=True,

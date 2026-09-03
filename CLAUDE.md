@@ -23,6 +23,7 @@ MCP server for webhook.site. 28 tools in `handlers/tools.py`, services in `servi
 - Users with a key pay for their plan; do not remove capability for security. Use MCP tool annotations, not gates. The one hard line is `follow_email_link`, which only opens public hosts unless `FOLLOW_EMAIL_LINK_ALLOW_HOSTS` allows more.
 - Free-text tool fields that may carry JSON must be typed `JsonText` (the MCP SDK pre-parses JSON-looking strings).
 - The API replaces records on PUT. Every update merges into the saved record first.
+- `POST /token` ignores `listen`; only PUT sets it. Set Response (`PUT /request/{id}/response`) returns `{"status": 3}` when it reached a waiting caller and `2` when nothing was waiting; a request is only held while `listen > 0` and a socket listener is subscribed (see `respond_to_next_request` and the open-source `whcli`).
 - Keep the catalog under the token budget in `tests/test_unit.py` and keep every description honest about what the tool actually does (see `update_request`'s Set Response note).
 
 ## Docs
