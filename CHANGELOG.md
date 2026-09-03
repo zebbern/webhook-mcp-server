@@ -36,6 +36,7 @@ Full coverage of the documented webhook.site API. With `WEBHOOK_SITE_API_KEY` se
 
 - The HTTP client expires idle keep-alive connections after 4 s and retries idempotent calls once after a dropped connection (webhook.site closes idle connections after a few seconds)
 
+- Documentation consolidated under `docs/`: generated tool reference and README tables, verified webhook.site notes, testing and releasing guides; the stale publishing guide and manual test scripts are gone
 - Email addresses use the current `{token}@emailhook.site` domain (the old `email.webhook.site` form still delivers)
 - `request_limit` is no longer capped client-side at 10000; the API enforces the plan's ceiling (up to 100000 on Enterprise)
 - Tool merges (no capability removed): `create_webhook_with_config` + `update_webhook` -> `configure_webhook`; `get_webhook_url` + `get_webhook_dns` -> fields of `get_webhook_info`; `get_latest_request` -> `get_request`; `send_to_webhook` + `send_multiple_requests` -> `send_requests`; `generate_ssrf_payload` + `generate_xss_callback` + `generate_canary_token` -> `generate_oob_payloads`

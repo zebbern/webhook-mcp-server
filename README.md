@@ -19,11 +19,10 @@ Security helper tools (SSRF, XSS, canary tokens) are for **authorized testing on
 - [Tools Reference](#tools-reference)
 - [Examples](#examples)
 - [Each Webhook Token Provides](#each-webhook-token-provides)
-- [Architecture](#architecture)
+- [Documentation](#documentation)
 - [Development](#development)
-- [Contributing](#contributing)
 - [Requirements](#requirements)
-- [Changelog](#changelog)
+- [Contributing](#contributing)
 - [Credits](#credits)
 - [Links](#links)
 
@@ -41,7 +40,7 @@ uvx webhook-mcp-server==3.0.0
 pip install webhook-mcp-server==3.0.0
 ```
 
-Use `3.0.0` or newer. `2.1.3` does not start on MCP 2.0; 3.0 renames a few tools (see Upgrading from 2.x).
+Use `3.0.0` or newer. `2.1.3` does not start on MCP 2.0; 3.0 renames a few tools (see [Upgrading from 2.x](#upgrading-from-2x)).
 
 ### VS Code / GitHub Copilot
 
@@ -95,7 +94,7 @@ All settings are environment variables on the server process. Put them in the `e
 
 | Variable | Purpose |
 | -------- | ------- |
-| `WEBHOOK_SITE_API_KEY` | Your webhook.site API key. Makes new URLs permanent (your plan's quota) and unlocks `list_webhooks`, Custom Actions, Schedules, Global Variables, Groups, Templates, Databases, Users and CSV export |
+| `WEBHOOK_SITE_API_KEY` | Your webhook.site API key. Makes new URLs permanent (your plan's quota) and unlocks `list_webhooks`, Custom Actions, Schedules, Global Variables, Groups, Queue Profiles, Templates, Databases, Users and CSV export |
 | `WEBHOOK_SITE_DEFAULT_EXPIRY` | Seconds until new URLs expire when the call does not pass `expiry`. Unset means permanent on a paid account (7 days for anonymous URLs) |
 | `WEBHOOK_MCP_RATE_LIMIT_MAX_WAIT` | When webhook.site answers 429 with a `Retry-After` up to this many seconds (default 15), the call waits and retries once; longer waits are reported as an error naming the wait |
 | `FOLLOW_EMAIL_LINK_ALLOW_HOSTS` | `follow_email_link` only opens links to public internet hosts, and connects to the address it checked (no DNS rebinding). To test a sign-up flow on your own machine or intranet, list what to allow: `localhost,127.0.0.1,*.corp.example,10.0.0.0/8` |
@@ -144,6 +143,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 "Create a webhook that returns a 404 error with a custom message"
 "Make a webhook with CORS enabled that waits 5 seconds before responding"
 "Send 10 different test requests to a webhook and show me all the captured data"
+"Hold the next request and answer it with a 402 and this JSON body"
 ```
 
 <img width="555" height="555" alt="API" src="https://github.com/user-attachments/assets/d8f2c46b-fb40-4e57-8957-0edef8e94db6" />
@@ -168,12 +168,12 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 <img width="555" height="555" alt="Data" src="https://github.com/user-attachments/assets/51cd0032-d92b-46e7-9f0c-6cee96b6e4f3" />
 
-### Creative/Practical:
+### Automate with your account:
 
 ```
-"Create a webhook that pretends to be a Stripe payment API"
-"Make a fake login endpoint that captures credentials (for pentesting)"
-"Set up an email inbox that auto-extracts verification codes"
+"Add a Custom Action that forwards every request to my staging API"
+"Schedule a health check of https://example.com every 5 minutes and alert on a bad status"
+"Write a WebhookScript that answers with the request's JSON field 'id'"
 ```
 
 <img width="555" height="555" alt="Practical" src="https://github.com/user-attachments/assets/a15bcbc4-087a-40bb-a1e5-a42475bd1301" />
@@ -192,68 +192,74 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ## Tools Reference
 
-31 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan. The full parameter reference, generated from the server itself, is in [docs/TOOLS.md](docs/TOOLS.md). Every `webhook_token` accepts the UUID, an alias, a pasted `https://webhook.site/...` URL or the inbox address.
+Everything works without an account on anonymous 7-day URLs. With `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools unlock the features of your plan. Every `webhook_token` accepts the UUID, an alias, a pasted `https://webhook.site/...` URL or the inbox address. Full parameters for each tool: [docs/TOOLS.md](docs/TOOLS.md).
 
-### Diagnostics
+<!-- tools:start -->
 
-| Tool            | Description                                                                                          |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| `server_status` | API key present, account reachable and authenticated, plan hint, real-time socket, env config, problems |
+31 tools, generated from the server by `scripts/gen_tool_docs.py`.
 
-### Webhooks
+#### Diagnostics
 
-| Tool                | Description                                                                                       |
-| ------------------- | ------------------------------------------------------------------------------------------------- |
-| `create_webhook`    | Start here: disposable URL, temp email, and DNS for sign-up or callbacks                          |
-| `configure_webhook` | Create with, or update to, custom status / body / content type / timeout / CORS, alias (`""` removes it), expiry, `request_limit`, `listen`, actions on/off, `clone_from`, `group_id`, `description`; DNSHook answers via a JSON `default_content` |
-| `get_webhook_info`  | Settings, expiry, request count and every address (`url`, `subdomain_url`, `force_status_url` for `https://webhook.site/{token}/{status}`, `api_url`, `email`, `dns`) |
-| `get_webhook_email` | Temp inbox `{token}@emailhook.site` for sign-up / verify / magic-link / reset                  |
-| `list_webhooks`     | List the account's URLs with aliases, request counts and `latest_request_at` (API key)             |
-| `delete_webhook`    | Delete a webhook and all its data                                                                 |
+| Tool | What it does |
+| --- | --- |
+| `server_status` | Check this server's setup: API key, account reachability, plan, real-time socket, env config. |
 
-### Requests
+#### Webhooks
 
-| Tool                    | Description                                                                                  |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `send_requests`         | Send one body (`data`) or many (`payloads`) to the URL, any HTTP method, optional delay        |
-| `get_webhook_requests`  | List captured events page by page (`page`, `pagination` in the result)                         |
-| `search_requests`       | `since` cursor plus webhook.site search syntax (`method:POST`, `content:verify`, `-method:GET`, `_exists_:note`, `country_code:DE`, `type:email AND ...`), dates, pages |
-| `get_request`           | Newest event or a specific `request_id`; `raw=true` adds the untouched body                    |
-| `update_request`        | Attach a note, or call Set Response for a request that is still being held (`listen` > 0 and a listener; `respond_to_next_request` does the whole flow) |
-| `download_request_file` | Download an uploaded file or email attachment (base64)                                         |
-| `delete_request`        | Delete a specific request                                                                     |
-| `delete_all_requests`   | Bulk delete, optionally by date expression or search query                                    |
-| `export_webhook_data`   | Full dump with HTML and untruncated bodies: paged JSON, or the account's CSV export            |
+| Tool | What it does |
+| --- | --- |
+| `create_webhook` | Create a disposable inbox to sign up on a website: HTTP URL, temp email, DNS. |
+| `configure_webhook` | Create a webhook with custom settings, or update one (pass webhook_token). |
+| `get_webhook_info` | Show a webhook's settings, expiry, request count and every address. |
+| `get_webhook_email` | Return the temp inbox to sign up, verify, magic-link, or reset a password. |
+| `list_webhooks` | List the webhooks (URLs / inboxes) in the account. Needs WEBHOOK_SITE_API_KEY. |
+| `delete_webhook` | Permanently delete a webhook and every captured request/email. |
 
-### Real-Time Waiting
+#### Requests
 
-| Tool                | Description                                                                                         |
-| ------------------- | --------------------------------------------------------------------------------------------------- |
-| `wait_for_request`  | Wait for a **new** HTTP / DNS event (1-120s) over webhook.site's socket, polling as backstop. `return_existing` reuses old traffic |
-| `wait_for_email`    | After sign-up: wait for verify / magic-link / reset mail; returns links, OTP codes, sender, spam / DKIM checks, attachments |
-| `follow_email_link` | Open a captured verify / magic / reset URL and return the page preview (public hosts only unless allowlisted) |
-| `respond_to_next_request` | Hold the next request and answer it with your own status, headers and body (a live mock for one call; the caller waits up to 10 s) |
+| Tool | What it does |
+| --- | --- |
+| `send_requests` | Send one JSON body (data) or several (payloads) to the webhook URL to test capture. |
+| `get_webhook_requests` | List captured HTTP, email, or DNS events for a webhook, one page at a time. |
+| `search_requests` | Search captured events by method, body text, headers, type, or date. |
+| `get_request` | Return one captured event: the newest by default, or request_id. |
+| `update_request` | Attach a note to a captured request, or set its dynamic response. |
+| `download_request_file` | Download an uploaded file or email attachment (base64) by its file_id. |
+| `delete_request` | Delete one captured HTTP, email, or DNS event by request id. |
+| `delete_all_requests` | Clear captured events on a webhook, optionally by date or search query. |
+| `export_webhook_data` | Full dump of captured events with HTML and untruncated bodies, as JSON or CSV. |
 
-### Account Features (API key)
+#### Real-time
 
-| Tool                      | Description                                                                                        |
-| ------------------------- | -------------------------------------------------------------------------------------------------- |
-| `manage_custom_actions`   | list / create / update / delete / test / execute the Custom Actions a token runs on each request or email; `types`, `variables` and `script_reference` return the built-in references (63 action types and 138 WebhookScript functions, each verified against the live API, plus every `$request.*$` variable) and required parameters are checked before the call |
-| `manage_schedules`        | list / get / create / update / delete / run / logs for Schedules that call a URL on an interval or cron |
-| `manage_global_variables` | list / create / update / delete Global Variables usable as `$name$` in actions and schedules          |
-| `manage_groups`           | list / create / update / delete Groups that organise URLs                                            |
-| `manage_queues`           | list / create / update / delete Queue Profiles that throttle queued Custom Actions (found by mapping the app; not in the API docs) |
-| `manage_templates`        | list / create / update / delete reusable Custom Action Templates                                     |
-| `manage_databases`        | list / create / update / delete Databases and run SQL queries                                        |
-| `manage_users`            | list / invite / update / delete team users (Enterprise)                                              |
+| Tool | What it does |
+| --- | --- |
+| `wait_for_request` | Wait until a new HTTP (or DNS) callback hits the webhook (1-120s). |
+| `wait_for_email` | Wait for a sign-up, verify, magic-link, or password-reset email (1-120s). |
+| `respond_to_next_request` | Hold the next request that hits the webhook and answer it with your own status, headers and body. |
+| `follow_email_link` | Open the verify / magic-link / reset URL from a captured sign-up email. |
 
-### Bug Bounty / Security
+#### Account features (API key)
 
-| Tool                         | Description                                                                 |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| `generate_oob_payloads`      | SSRF URLs, XSS callbacks, or canary URL / DNS / email tokens (`kind=`)       |
-| `check_for_callbacks`        | Quick check for OOB callbacks                                               |
-| `extract_links_from_request` | Pull confirm / reset / magic-link URLs and OTP from a captured email or body |
+| Tool | What it does |
+| --- | --- |
+| `manage_custom_actions` | Manage the Custom Actions webhook.site runs on every request or email a token receives. |
+| `manage_schedules` | Manage Schedules: webhook.site calls request_url on an interval (needs API key). |
+| `manage_global_variables` | Manage Global Variables shared by all URLs, usable as $name$ in Custom Actions and Schedules. |
+| `manage_groups` | Manage Groups that organise the account's webhooks (needs API key). |
+| `manage_queues` | Manage Queue Profiles that throttle queued Custom Actions (needs API key). |
+| `manage_templates` | Manage Templates: reusable sets of Custom Actions plus predefined variables (needs API key). |
+| `manage_databases` | Manage webhook.site Databases and run SQL against them (needs API key). |
+| `manage_users` | Manage team users on an Enterprise account (needs an administrator API key). |
+
+#### Security testing
+
+| Tool | What it does |
+| --- | --- |
+| `generate_oob_payloads` | Build authorized out-of-band payloads that ping this webhook: SSRF URLs, XSS callbacks, or canary tokens. |
+| `check_for_callbacks` | See if SSRF, XSS, or canary callbacks arrived in the last N minutes. |
+| `extract_links_from_request` | Pull confirm, reset, magic-link, and other URLs from a captured email or HTTP body. |
+
+<!-- tools:end -->
 
 ### Upgrading from 2.x
 
@@ -303,10 +309,20 @@ If you already have a token, `get_webhook_email` returns the same inbox.
 }
 ```
 
+### Poll for new events without paging
+
+```json
+// get_webhook_requests(webhook_token, since=<next_since from the previous call>)
+{
+  "requests": [ ... only what arrived after the cursor ... ],
+  "next_since": 1788472548944304
+}
+```
+
 ### SSRF Testing Payload
 
 ```json
-// Response from generate_ssrf_payload
+// Response from generate_oob_payloads(kind="ssrf")
 {
   "payloads": {
     "http": "https://webhook.site/token?id=ssrf-test",
@@ -321,64 +337,41 @@ If you already have a token, `get_webhook_email` returns the same inbox.
 
 ## Each Webhook Token Provides
 
-| Endpoint      | Format                         | Use Case                    |
-| ------------- | ------------------------------ | --------------------------- |
-| **HTTP URL**  | `https://webhook.site/{token}` | Capture HTTP/HTTPS requests |
-| **Subdomain** | `https://{token}.webhook.site` | Alternative URL format      |
-| **Email**     | `{token}@emailhook.site`   | Capture incoming emails     |
-| **DNS**       | `{token}.dnshook.site`         | Capture DNS lookups         |
+| Endpoint          | Format                                  | Use Case                                        |
+| ----------------- | --------------------------------------- | ----------------------------------------------- |
+| **HTTP URL**      | `https://webhook.site/{token}`          | Capture HTTP/HTTPS requests (any sub-path too)  |
+| **Subdomain**     | `https://{token}.webhook.site`          | Alternative URL format                          |
+| **Forced status** | `https://webhook.site/{token}/{status}` | Answer with that status, for retry-logic tests  |
+| **Email**         | `{token}@emailhook.site`                | Capture incoming emails                         |
+| **DNS**           | `{token}.dnshook.site`                  | Capture DNS lookups (every subdomain)           |
 
 ---
 
-## Architecture
+## Documentation
 
-```
-webhook-mcp-server/
-├── server.py              # MCPServer entry point + lifespan
-├── handlers/              # Typed @mcp.tool() registrations
-├── services/              # Business logic
-│   ├── webhook_service.py # Webhook CRUD
-│   ├── request_service.py # Request management
-│   └── bugbounty_service.py # Security payloads
-├── models/                # Config / filter / result types
-└── utils/                 # HTTP client, logging, validation
-```
-
-### Key Features
-
-- **Async Architecture** - Non-blocking I/O for optimal performance
-- **Retry Logic** - Exponential backoff for transient failures
-- **Input Validation** - UUID validation, parameter sanitization
-- **Structured Logging** - JSON logs for debugging and monitoring
-- **Type Safety** - Full type hints throughout
+| Page | Contents |
+| ---- | -------- |
+| [docs/TOOLS.md](docs/TOOLS.md) | Every tool with parameters and hints, generated from the server |
+| [docs/webhook-site-notes.md](docs/webhook-site-notes.md) | What webhook.site actually does, verified live, including where the official docs are wrong |
+| [docs/testing.md](docs/testing.md) | The four test layers, recordings, verification scripts, model evals, account safety |
+| [docs/releasing.md](docs/releasing.md) | Version bumps, tagging, the publish workflow |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
 
 ---
 
 ## Development
 
-### Setup
-
 ```bash
 git clone https://github.com/zebbern/webhook-mcp-server.git
 cd webhook-mcp-server
 pip install -e ".[dev]"
+pytest -m "not live and not live_auth"     # offline suite incl. replay of recorded live exchanges
+python server.py                            # run the server on stdio
 ```
 
-### Run Tests
+The offline suite replays real recorded webhook.site exchanges; the live tool check and the `live` / `live_auth` tiers hit the real API. Details in [docs/testing.md](docs/testing.md).
 
-```bash
-# Offline unit tests (default for CI)
-pytest -m "not live" -v
-
-# Live webhook.site tests
-pytest -m live -v
-```
-
-### Run Locally
-
-```bash
-python server.py
-```
+Layout: `server.py` (entry point and lifespan), `handlers/tools.py` (tool registrations), `services/` (one module per API area), `utils/` (HTTP client, real-time socket, URL safety, references), `scripts/` (live check, generators, verifiers), `evals/` (model-in-the-loop prompts).
 
 ---
 
@@ -391,39 +384,14 @@ python server.py
 
 ---
 
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for version history.
-
----
-
 ## Contributing
 
-Contributions are welcome! Here's how you can help:
-
-1. **Report bugs** - Open an issue describing the problem
-2. **Suggest features** - Open an issue with your idea
-3. **Submit PRs** - Fork the repo and submit a pull request
-
-### Development Setup
-
-```bash
-git clone https://github.com/zebbern/webhook-mcp-server.git
-cd webhook-mcp-server
-pip install -e ".[dev]"
-pytest -m "not live" -v
-```
-
-### Guidelines
-
-- Follow existing code style
-- Add tests for new features
-- Update documentation as needed
-- Keep PRs focused on a single change
+Bug reports and PRs are welcome. Keep a PR to one change, add a test whose expectation was checked against the real API (see [docs/testing.md](docs/testing.md)), and run `python scripts/gen_tool_docs.py` after touching a tool.
 
 ---
 
 ## Credits
+
 - [Simon Fredsted (Founder of webhook.site)](https://github.com/fredsted)
 - [Official webhook.site open source repo](https://github.com/webhooksite/webhook.site)
 
@@ -435,7 +403,6 @@ This project is not affiliated with or endorsed by webhook.site
 - 🐙 [GitHub Repository](https://github.com/zebbern/webhook-mcp-server)
 - 🌐 [webhook.site](https://webhook.site) - The service this MCP wraps
 - 📖 [Model Context Protocol](https://modelcontextprotocol.io/) - MCP specification
-
 
 ---
 

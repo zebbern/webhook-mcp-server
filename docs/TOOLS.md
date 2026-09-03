@@ -2,7 +2,7 @@
 
 Generated from the server's own tool catalogue by `scripts/gen_tool_docs.py`; do not edit by hand. `tests/test_docs_current.py` fails when this file is out of date.
 
-31 tools.
+31 tools. Every `webhook_token` accepts the UUID, an alias, a pasted `https://webhook.site/...` URL, the subdomain form, the inbox address or the DNSHook name.
 
 ## `check_for_callbacks`
 
