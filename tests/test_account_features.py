@@ -478,6 +478,34 @@ async def test_check_for_callbacks_matches_identifier_anywhere_in_the_request() 
     assert miss.data["detected"] is False
 
 
+@pytest.mark.asyncio
+@respx.mock
+async def test_queue_profiles_and_description_verified_live() -> None:
+    # Shapes seen live 2026-09-03: POST/PUT need every field; GET /queues/{id} 404s so updates read the list.
+    created = respx.post(f"{WEBHOOK_SITE_API}/queues").mock(
+        return_value=httpx.Response(200, json={"name": "q", "delay": 0, "amount": 10, "duration": 60, "expiry": 3600, "group_id": None, "id": 7})
+    )
+    respx.get(f"{WEBHOOK_SITE_API}/queues").mock(
+        return_value=httpx.Response(200, json=_page([{"id": 7, "name": "q", "amount": 10, "duration": 60, "expiry": 3600, "delay": 0, "group_id": None}], 1, 1))
+    )
+    updated = respx.put(f"{WEBHOOK_SITE_API}/queues/7").mock(return_value=httpx.Response(200, json={"id": 7, "amount": 5}))
+    respx.delete(f"{WEBHOOK_SITE_API}/queues/7").mock(return_value=httpx.Response(204))
+    respx.get(f"{WEBHOOK_SITE_API}/variables").mock(return_value=httpx.Response(200, json={"request.uuid": "x", "request.method": "POST"}))
+    action = respx.post(f"{BASE}/actions").mock(return_value=httpx.Response(201, json={"uuid": "a1", "queue": True, "queue_id": 7}))
+    async with WebhookHttpClient(api_key="k") as client:
+        svc = AccountService(client)
+        assert (await svc.create_queue("q", 10, 60, 3600)).data["queue"]["id"] == 7
+        assert (await svc.update_queue(7, amount=5)).success is True
+        assert (await svc.list_queues()).data["queues"][0]["name"] == "q"
+        assert (await svc.delete_queue(7)).success is True
+        assert await svc.live_variables() == ["request.method", "request.uuid"]
+        await ActionsService(client).create(TOKEN, type="log", parameters={"text": "x"}, order=1, queue=True, queue_id=7)
+    assert json.loads(created.calls[0].request.content) == {"name": "q", "amount": 10, "duration": 60, "expiry": 3600, "delay": 0}
+    assert json.loads(updated.calls[0].request.content) == {"name": "q", "amount": 5, "duration": 60, "expiry": 3600, "delay": 0}
+    assert json.loads(action.calls[0].request.content)["queue_id"] == 7
+    assert WebhookConfig(description="label").to_payload() == {"description": "label"}
+
+
 def test_generate_oob_payloads_dispatches() -> None:
     svc = BugBountyService(client=None)  # type: ignore[arg-type]
     assert "callback_payloads" in svc.generate_oob_payloads(TOKEN, "ssrf").data

@@ -10,7 +10,7 @@ from typing import Any
 
 from models.schemas import ToolResult
 from services.webhook_service import format_token
-from utils.http_client import WebhookHttpClient
+from utils.http_client import WebhookApiError, WebhookHttpClient
 
 
 def _compact(payload: dict[str, Any]) -> dict[str, Any]:
@@ -171,6 +171,58 @@ class AccountService:
 
     async def delete_variable(self, variable_id: int) -> ToolResult:
         return await self._delete(f"/global-variables/{variable_id}", "Variable", variable_id)
+
+    # --- queue profiles (undocumented; shape verified live 2026-09-03) --------
+    # POST/PUT need name, amount (jobs), duration (seconds per window), expiry
+    # (job lifetime seconds), delay (initial delay seconds). GET /queues/{id} 404s,
+    # so single lookups go through the list.
+
+    async def list_queues(self, page: int = 1, max_items: int = 200) -> ToolResult:
+        return await self._list("/queues", "queues", {"page": page, "per_page": 100}, max_items=max_items)
+
+    async def create_queue(
+        self,
+        name: str,
+        amount: int,
+        duration: int,
+        expiry: int,
+        delay: int = 0,
+        group_id: int | None = None,
+    ) -> ToolResult:
+        return await self._create(
+            "/queues",
+            "Queue",
+            {"name": name, "amount": amount, "duration": duration, "expiry": expiry, "delay": delay, "group_id": group_id},
+        )
+
+    async def update_queue(
+        self,
+        queue_id: int,
+        name: str | None = None,
+        amount: int | None = None,
+        duration: int | None = None,
+        expiry: int | None = None,
+        delay: int | None = None,
+        group_id: int | None = None,
+    ) -> ToolResult:
+        current = await self._find("/queues", queue_id)
+        payload = self._merge(
+            current,
+            ("name", "amount", "duration", "expiry", "delay", "group_id"),
+            name=name, amount=amount, duration=duration, expiry=expiry, delay=delay, group_id=group_id,
+        )
+        return await self._update(f"/queues/{queue_id}", "Queue", payload)
+
+    async def delete_queue(self, queue_id: int) -> ToolResult:
+        return await self._delete(f"/queues/{queue_id}", "Queue", queue_id)
+
+    async def live_variables(self) -> list[str]:
+        """Names of the base variables the API currently defines (GET /variables; undocumented)."""
+        try:
+            data = await self._client.get("/variables")
+        except WebhookApiError:
+            return []
+        return sorted(data.keys()) if isinstance(data, dict) else []
 
     # --- users ------------------------------------------------------------
 

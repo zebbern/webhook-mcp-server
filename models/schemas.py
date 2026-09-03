@@ -29,6 +29,7 @@ class WebhookConfig:
         actions: Whether Custom Actions run on each request
         clone_from: Token UUID or alias to copy settings and actions from
         group_id: Group to add the token to
+        description: Free-text label shown in the Control Panel (not in the API docs; verified live)
     """
 
     default_status: int | None = None
@@ -43,6 +44,7 @@ class WebhookConfig:
     actions: bool | None = None
     clone_from: str | None = None
     group_id: int | None = None
+    description: str | None = None
 
     def to_payload(self) -> dict[str, Any]:
         """Convert to API payload, excluding None values."""

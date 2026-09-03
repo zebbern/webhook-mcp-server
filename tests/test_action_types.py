@@ -68,8 +68,11 @@ async def test_manage_custom_actions_serves_reference_without_a_token() -> None:
     import server
     from models.app_context import AppContext
 
+    from unittest.mock import AsyncMock
+
     fields = ("client", "webhooks", "requests", "bounty", "account", "actions", "schedules", "databases")
     app = AppContext(**{name: MagicMock(name=name) for name in fields})
+    app.account.live_variables = AsyncMock(return_value=["request.method", "request.uuid"])
     ctx = type("Ctx", (), {"request_context": type("RC", (), {"lifespan_context": app})()})()
     fn = server.mcp._tool_manager.get_tool("manage_custom_actions").fn  # type: ignore[attr-defined]
 
@@ -79,6 +82,7 @@ async def test_manage_custom_actions_serves_reference_without_a_token() -> None:
     assert one["params"]["content"]["required"] is False and one["verified"]["status"] == "ok"
     variables = await fn(action="variables", ctx=ctx)
     assert any(v["name"] == "request.method" for v in variables["base_variables"])
+    assert variables["live_base_variable_names"] == ["request.method", "request.uuid"]
 
     bad = await fn(action="create", ctx=ctx, webhook_token=TOKEN, type="http", parameters={})
     assert bad["success"] is False and "needs parameters: url" in bad["message"]

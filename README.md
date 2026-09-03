@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/webhook-mcp-server.svg)](https://pypi.org/project/webhook-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-29%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![MCP](https://img.shields.io/badge/MCP-30%20tools-brightgreen.svg)](https://modelcontextprotocol.io/)
 
 A Model Context Protocol (MCP) server for [webhook.site](https://webhook.site) - instantly capture HTTP requests, emails, and DNS lookups. Perfect for testing webhooks, debugging API callbacks, security testing, and bug bounty hunting.
 
@@ -192,7 +192,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 
 ## Tools Reference
 
-29 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan.
+30 tools. Everything works without an account for anonymous 7-day URLs; with `WEBHOOK_SITE_API_KEY` set, URLs are permanent and the account tools below unlock the features of your plan.
 
 ### Diagnostics
 
@@ -241,6 +241,7 @@ If a verification link succeeds and then redirects somewhere that is not allowed
 | `manage_schedules`        | list / get / create / update / delete / run / logs for Schedules that call a URL on an interval or cron |
 | `manage_global_variables` | list / create / update / delete Global Variables usable as `$name$` in actions and schedules          |
 | `manage_groups`           | list / create / update / delete Groups that organise URLs                                            |
+| `manage_queues`           | list / create / update / delete Queue Profiles that throttle queued Custom Actions (found by mapping the app; not in the API docs) |
 | `manage_templates`        | list / create / update / delete reusable Custom Action Templates                                     |
 | `manage_databases`        | list / create / update / delete Databases and run SQL queries                                        |
 | `manage_users`            | list / invite / update / delete team users (Enterprise)                                              |

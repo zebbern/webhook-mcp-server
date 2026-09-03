@@ -165,16 +165,19 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         actions: bool | None = None,
         clone_from: str | None = None,
         group_id: int | None = None,
+        description: str | None = None,
     ) -> dict[str, Any]:
         """Create a webhook with custom settings, or update one (pass webhook_token).
 
         Use when the endpoint should pretend to be an API (status, body, content
         type, delay up to 30s, CORS), needs an alias, expiry (seconds), a
         request_limit (0 stores nothing), listen (seconds to wait for
-        update_request response), actions on/off, clone_from another token, or
-        a group_id. default_content can be a JSON array of DNS records
-        ([{"type":"a","value":"..."}]) to answer DNSHook lookups. For a plain
-        sign-up inbox use create_webhook.
+        update_request response), actions on/off, clone_from another token, a
+        group_id, or a description (label shown in the Control Panel).
+        default_content can be a JSON array of DNS records
+        ([{"type":"a","value":"..."}]) to answer DNSHook lookups. Updates keep
+        every setting you do not mention. For a plain sign-up inbox use
+        create_webhook.
         """
 
         def _op() -> Awaitable[ToolResult]:
@@ -207,6 +210,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                 actions=actions,
                 clone_from=clone_from,
                 group_id=group_id,
+                description=description,
             )
             return _app(ctx).webhooks.configure(config, webhook_token=webhook_token)
 
@@ -611,6 +615,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         queue: bool | None = None,
         delay: int | None = None,
         condition: str | None = None,
+        queue_id: int | None = None,
         error_notifications: bool = False,
     ) -> dict[str, Any]:
         """Manage the Custom Actions webhook.site runs on every request or email a token receives.
@@ -621,8 +626,9 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
         delete | test | execute. create/update take type (modify_response,
         http, script, javascript, send_email, extract_jsonpath, condition,
         rate_limit, log, set_variable, mock, ...) with parameters, order, and
-        optionally queue/delay/condition (id of a conditions action). test
-        dry-runs the given action against request_id; execute re-runs all
+        optionally queue/delay/condition (id of a conditions action) and
+        queue_id (a Queue Profile from manage_queues to throttle queued runs).
+        test dry-runs the given action against request_id; execute re-runs all
         saved actions on request_id. Actions also fire on incoming emails, so
         guard email-sending actions with a condition on $request.type$. Never
         point http/send_request at a webhook.site URL (recursion is disabled).
@@ -639,7 +645,13 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     data={"types": catalogue},
                 )
             if action == "variables":
-                return ToolResult(success=True, message="Variable reference", data=action_types.variables_reference())
+
+                async def _variables() -> ToolResult:
+                    reference = action_types.variables_reference()
+                    reference["live_base_variable_names"] = await _app(ctx).account.live_variables()
+                    return ToolResult(success=True, message="Variable reference", data=reference)
+
+                return _variables()
             validate_webhook_token(_require(webhook_token, "webhook_token", action))
             svc = _app(ctx).actions
             if action == "list":
@@ -658,6 +670,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     queue=queue,
                     delay=delay,
                     condition=condition,
+                    queue_id=queue_id,
                 )
             if action == "update":
                 return svc.update(
@@ -670,6 +683,7 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
                     queue=queue,
                     delay=delay,
                     condition=condition,
+                    queue_id=queue_id,
                 )
             if action == "delete":
                 return svc.delete(webhook_token, _require(action_id, "action_id", action))
@@ -812,6 +826,53 @@ def register_tools(mcp: MCPServer[AppContext]) -> None:
             if action == "update":
                 return svc.update_group(gid, _require(name, "name", action))
             return svc.delete_group(gid)
+
+        return await _execute(_op)
+
+    @mcp.tool(annotations=FAMILY)
+    async def manage_queues(
+        action: CrudAction,
+        ctx: Context[AppContext],
+        queue_id: int | None = None,
+        name: str | None = None,
+        amount: int | None = None,
+        duration: int | None = None,
+        expiry: int | None = None,
+        delay: int | None = None,
+        group_id: int | None = None,
+        page: int = 1,
+    ) -> dict[str, Any]:
+        """Manage Queue Profiles that throttle queued Custom Actions (needs API key).
+
+        action: list | create | update | delete. A profile allows `amount` jobs
+        every `duration` seconds, drops jobs not run within `expiry` seconds,
+        and waits `delay` seconds before the first run. Attach it to an action
+        with manage_custom_actions(queue=true, queue_id=...).
+        """
+
+        def _op() -> Awaitable[ToolResult]:
+            svc = _app(ctx).account
+            for value, label in ((amount, "amount"), (duration, "duration"), (expiry, "expiry")):
+                if value is not None:
+                    validate_positive_int(value, label, min_val=1)
+            if delay is not None:
+                validate_positive_int(delay, "delay", min_val=0)
+            if action == "list":
+                validate_page(page)
+                return svc.list_queues(page=page)
+            if action == "create":
+                return svc.create_queue(
+                    _require(name, "name", action),
+                    _require(amount, "amount", action),
+                    _require(duration, "duration", action),
+                    _require(expiry, "expiry", action),
+                    delay=delay or 0,
+                    group_id=group_id,
+                )
+            qid = _require_id(queue_id, "queue_id", action)
+            if action == "update":
+                return svc.update_queue(qid, name=name, amount=amount, duration=duration, expiry=expiry, delay=delay, group_id=group_id)
+            return svc.delete_queue(qid)
 
         return await _execute(_op)
 

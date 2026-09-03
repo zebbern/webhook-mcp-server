@@ -81,6 +81,7 @@ async def test_import_server_and_list_tools() -> None:
         "manage_schedules",
         "manage_global_variables",
         "manage_groups",
+        "manage_queues",
         "manage_templates",
         "manage_databases",
         "manage_users",
@@ -90,7 +91,7 @@ async def test_import_server_and_list_tools() -> None:
         "send_requests",
     }
     assert set(names) == expected
-    assert len(names) == 29
+    assert len(names) == 30
     for removed in ("get_webhook_url", "get_webhook_dns", "get_latest_request", "generate_ssrf_payload"):
         assert removed not in names
     annotated = {tool.name: tool.annotations for tool in tools}

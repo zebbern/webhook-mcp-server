@@ -30,7 +30,7 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://webhook.site"
-EXPECTED_TOOLS = 29
+EXPECTED_TOOLS = 30
 
 
 class Check:
@@ -113,9 +113,10 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             created_tokens.append(token_b)
             c.expect(b.get("alias") == alias and b["url"].endswith(alias), "configure_webhook create applied alias", b.get("url", ""))
 
-            upd = await c.call("configure_webhook", webhook_token=token_b, default_status=203, request_limit=100, timeout=1)
+            upd = await c.call("configure_webhook", webhook_token=token_b, default_status=203, request_limit=100, timeout=1, description="live tool check")
             info_b = await c.call("get_webhook_info", webhook_token=token_b)
             c.expect(info_b.get("default_status") == 203 and info_b.get("dns", "").endswith(".dnshook.site"), "configure_webhook update + get_webhook_info", f"status={info_b.get('default_status')} limit={info_b.get('request_limit')}")
+            c.expect(info_b.get("description") == "live tool check", "configure_webhook description (undocumented field) persists", str(info_b.get("description")))
             captured = httpx.get(f"{SITE}/{alias}", timeout=30)
             c.expect(captured.status_code == 203, "alias URL answers with configured status", f"{captured.status_code}")
 
@@ -189,14 +190,26 @@ async def run(api_key: str, record_dir: Path | None = None) -> int:
             c.expect(len(types.get("types", [])) >= 63, "manage_custom_actions types catalogue", f"{len(types.get('types', []))} types")
             one = await c.call("manage_custom_actions", action="types", type="send_email")
             c.expect(one.get("params", {}).get("recipient", {}).get("required") is True, "manage_custom_actions types detail", str(one.get("verified", {}).get("status")))
-            await c.call("manage_custom_actions", action="variables")
+            variables = await c.call("manage_custom_actions", action="variables")
+            c.expect("request.method" in variables.get("live_base_variable_names", []), "variables reference includes the live GET /variables names", str(len(variables.get("live_base_variable_names", []))))
+            queue = await c.call("manage_queues", action="create", name=f"mcp-check-{token_a[:6]}", amount=10, duration=60, expiry=3600)
+            queue_id = queue.get("queue", {}).get("id")
+            if queue_id:
+                cleanup.append(("manage_queues", {"action": "delete", "queue_id": queue_id}))
+                await c.call("manage_queues", action="update", queue_id=queue_id, amount=5)
+                queues = await c.call("manage_queues", action="list")
+                mine = next((q for q in queues.get("queues", []) if q.get("id") == queue_id), {})
+                c.expect(mine.get("amount") == 5 and mine.get("duration") == 60, "manage_queues update merged the profile", str({k: mine.get(k) for k in ("amount", "duration", "expiry")}))
+                queued = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="log", order=9, parameters={"text": "queued"}, queue=True, queue_id=queue_id)
+                c.expect(queued.get("action", {}).get("queue_id") == queue_id, "custom action attached to a queue profile", str(queued.get("action", {}).get("queue_id")))
             rejected = await c.call("manage_custom_actions", expect_success=False, webhook_token=token_a, action="create", type="http", parameters={})
             c.expect("url" in rejected.get("message", ""), "manage_custom_actions validates required params before calling the API", rejected.get("message", "")[:80])
             guard = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="condition", order=1, parameters={"input": "$request.type$", "operator": "neq", "value": "web", "action": "stop"})
             log_action = await c.call("manage_custom_actions", webhook_token=token_a, action="create", type="log", order=2, parameters={"text": "seen $request.method$"})
             log_id = log_action.get("action", {}).get("uuid")
             actions = await c.call("manage_custom_actions", webhook_token=token_a, action="list")
-            c.expect(len(actions.get("actions", [])) == 2, "manage_custom_actions list", f"{len(actions.get('actions', []))} actions")
+            # guard + log + the queued log action attached to the queue profile above
+            c.expect(len(actions.get("actions", [])) == 3, "manage_custom_actions list", f"{len(actions.get('actions', []))} actions")
             tested = await c.call("manage_custom_actions", webhook_token=token_a, action="test", type="script", parameters={"script": "echo('live check')"}, request_id=file_req["uuid"])
             c.expect("live check" in json.dumps(tested.get("result", {})), "manage_custom_actions test ran the script", "")
             await c.call("manage_custom_actions", webhook_token=token_a, action="update", action_id=log_id, parameters={"text": "updated $request.method$"})

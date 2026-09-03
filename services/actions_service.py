@@ -16,6 +16,7 @@ def _action_payload(
     queue: bool | None,
     delay: int | None,
     condition: str | None,
+    queue_id: int | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "type": type,
@@ -25,6 +26,7 @@ def _action_payload(
         "queue": queue,
         "delay": delay,
         "condition": condition,
+        "queue_id": queue_id,  # Queue Profile to throttle queued runs (verified live)
     }
     return {key: value for key, value in payload.items() if value is not None}
 
@@ -54,8 +56,9 @@ class ActionsService:
         queue: bool | None = None,
         delay: int | None = None,
         condition: str | None = None,
+        queue_id: int | None = None,
     ) -> ToolResult:
-        payload = _action_payload(type, order, parameters or {}, disabled, queue, delay, condition)
+        payload = _action_payload(type, order, parameters or {}, disabled, queue, delay, condition, queue_id)
         response = await self._client.post(f"/token/{webhook_token}/actions", json_data=payload)
         action = response.json()
         return ToolResult(
@@ -75,6 +78,7 @@ class ActionsService:
         queue: bool | None = None,
         delay: int | None = None,
         condition: str | None = None,
+        queue_id: int | None = None,
     ) -> ToolResult:
         # The API replaces the whole action on PUT (a partial body is a 422), so
         # merge the requested changes into the saved action first.
@@ -87,6 +91,7 @@ class ActionsService:
             queue if queue is not None else current.get("queue"),
             delay if delay is not None else current.get("delay"),
             condition if condition is not None else current.get("condition"),
+            queue_id if queue_id is not None else current.get("queue_id"),
         )
         action = await self._client.put(f"/token/{webhook_token}/actions/{action_id}", json_data=payload)
         return ToolResult(success=True, message="Custom action updated", data={"action": action})
