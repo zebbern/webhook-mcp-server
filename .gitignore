@@ -46,6 +46,17 @@ Thumbs.db
 # Project specific
 *.log
 .env
-.env.local
+.env.*
 plan/
+
+# Local tooling and AI-assistant files (personal, not part of the project)
+CLAUDE.md
+AGENTS.md
+.claude/
 .cursor/
+.mcp.json
+*.local.json
+
+# Caches
+.ruff_cache/
+.mypy_cache/
